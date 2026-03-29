@@ -1,0 +1,196 @@
+{% extends "dashboard/_app_shell.html" %}
+
+{% block title %}Services | InfinityCard{% endblock %}
+
+{% block page_header %}
+<h1 class="app-page-title">Services</h1>
+<p class="app-page-subtitle">Manage the services you offer — these appear on your public profile.</p>
+{% endblock %}
+
+{% block content %}
+
+<!-- ═══ ADD / EDIT SERVICE FORM ═══ -->
+<div class="svc-form-card">
+    <div class="svc-form-header">
+        <div class="svc-form-icon">
+            {% if edit_service %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+            {% else %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            {% endif %}
+        </div>
+        <div>
+            <h3 class="svc-form-title">{% if edit_service %}Edit Service{% else %}Add New Service{% endif %}</h3>
+            <p class="svc-form-sub">{% if edit_service %}Update the details below{% else %}Fill in the details to add a service{% endif %}</p>
+        </div>
+    </div>
+
+    <form method="post" class="app-form" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="{% if edit_service %}edit{% else %}add{% endif %}">
+        {% if edit_service %}
+        <input type="hidden" name="service_id" value="{{ edit_service.pk }}">
+        {% endif %}
+
+        {% if form.errors %}
+        <div class="svc-errors">
+            {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="svc-field-group">
+            <div class="svc-field">
+                <label class="svc-label" for="id_title">Service Title <span class="svc-req">*</span></label>
+                <input type="text" name="title" id="id_title" value="{{ form.initial.title|default:'' }}" placeholder="e.g. Plumbing Services" class="svc-input" required maxlength="120">
+            </div>
+            <div class="svc-field">
+                <label class="svc-label" for="id_price">Price <span style="font-weight:400;color:#94A3B8">(optional)</span></label>
+                <input type="text" name="price" id="id_price" value="{{ form.initial.price|default:'' }}" placeholder="e.g. $50/hr, From $200" class="svc-input" maxlength="50">
+                <span class="svc-hint">Leave blank if you prefer not to show pricing</span>
+            </div>
+        </div>
+
+        <div class="svc-field">
+            <label class="svc-label" for="id_description">Description</label>
+            <textarea name="description" id="id_description" rows="3" placeholder="Briefly describe this service..." class="svc-input svc-textarea" maxlength="500">{{ form.initial.description|default:'' }}</textarea>
+        </div>
+
+        <div class="svc-field">
+            <label class="svc-label" for="id_order">Display Order</label>
+            <input type="number" name="order" id="id_order" value="{{ form.initial.order|default:'0' }}" min="0" class="svc-input svc-input-sm" style="width:100px">
+            <span class="svc-hint">Lower numbers appear first</span>
+        </div>
+
+        <div class="svc-form-actions">
+            <button type="submit" class="btn btn-primary">
+                {% if edit_service %}
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Update Service
+                {% else %}
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                Add Service
+                {% endif %}
+            </button>
+            {% if edit_service %}
+            <a href="{% url 'profiles:services' %}" class="btn btn-outline">Cancel</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- ═══ SERVICES LIST ═══ -->
+{% if services %}
+<div class="svc-list-header">
+    <h3 class="svc-list-title">Your Services</h3>
+    <span class="svc-list-count">{{ services|length }} service{{ services|length|pluralize }}</span>
+</div>
+
+<div class="svc-list">
+    {% for svc in services %}
+    <div class="svc-card">
+        <div class="svc-card-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="svc-card-body">
+            <h4 class="svc-card-title">{{ svc.title }}</h4>
+            {% if svc.description %}<p class="svc-card-desc">{{ svc.description|truncatewords:25 }}</p>{% endif %}
+            {% if svc.price %}<span class="svc-card-price">{{ svc.price }}</span>{% endif %}
+        </div>
+        <div class="svc-card-actions">
+            <a href="{% url 'profiles:services' %}?edit={{ svc.pk }}" class="svc-action-btn svc-action-edit" title="Edit">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+            </a>
+            <form method="post" style="display:inline" onsubmit="return confirm('Delete this service?')">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="service_id" value="{{ svc.pk }}">
+                <button type="submit" class="svc-action-btn svc-action-delete" title="Delete">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="svc-empty">
+    <div class="svc-empty-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+    </div>
+    <h3 class="svc-empty-title">No services yet</h3>
+    <p class="svc-empty-desc">Add your first service above — it will appear on your public profile when the Services toggle is enabled.</p>
+</div>
+{% endif %}
+
+<!-- ═══ TIP CARD ═══ -->
+<div class="svc-tip">
+    <div class="svc-tip-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>
+    </div>
+    <div>
+        <strong>Pro tip:</strong> Make sure the <em>Services</em> toggle is enabled in your
+        <a href="{% url 'profiles:settings' %}">Profile Settings</a> for services to appear on your public profile.
+    </div>
+</div>
+
+<style>
+/* ─── Services Management Styles ─── */
+.svc-form-card{background:#fff;border:1px solid #E2E8F0;border-radius:16px;padding:28px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.svc-form-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid #F1F5F9}
+.svc-form-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#3B82F6,#2563EB);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.svc-form-icon svg{width:22px;height:22px;color:#fff}
+.svc-form-title{font-size:16px;font-weight:700;color:#1E293B;margin:0}
+.svc-form-sub{font-size:13px;color:#64748B;margin:2px 0 0}
+.svc-field-group{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.svc-field-group{grid-template-columns:1fr}}
+.svc-field{margin-bottom:16px}
+.svc-label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
+.svc-req{color:#EF4444}
+.svc-input{width:100%;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;color:#1E293B;background:#FAFBFC;transition:border-color .15s,box-shadow .15s;outline:none;font-family:inherit}
+.svc-input:focus{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,.12);background:#fff}
+.svc-textarea{resize:vertical;min-height:80px}
+.svc-input-sm{width:auto}
+.svc-hint{display:block;font-size:11px;color:#94A3B8;margin-top:4px}
+.svc-errors{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#DC2626}
+.svc-form-actions{display:flex;gap:10px;margin-top:8px;padding-top:18px;border-top:1px solid #F1F5F9}
+.svc-form-actions .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:.15s}
+.svc-form-actions .btn-primary{background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff;box-shadow:0 2px 8px rgba(59,130,246,.25)}
+.svc-form-actions .btn-primary:hover{box-shadow:0 4px 12px rgba(59,130,246,.35)}
+.svc-form-actions .btn-outline{background:#fff;color:#475569;border:1.5px solid #E2E8F0}
+.svc-form-actions .btn-outline:hover{border-color:#94A3B8}
+
+.svc-list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.svc-list-title{font-size:15px;font-weight:700;color:#1E293B;margin:0}
+.svc-list-count{font-size:12px;color:#64748B;background:#F1F5F9;padding:3px 10px;border-radius:20px;font-weight:600}
+.svc-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.svc-card{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:16px 18px;transition:box-shadow .15s,border-color .15s}
+.svc-card:hover{border-color:#CBD5E1;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.svc-card-icon{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#F1F5F9,#E2E8F0);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.svc-card-icon svg{width:20px;height:20px;color:#475569}
+.svc-card-body{flex:1;min-width:0}
+.svc-card-title{font-size:14px;font-weight:700;color:#1E293B;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svc-card-desc{font-size:12px;color:#64748B;margin:3px 0 0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.svc-card-price{display:inline-block;margin-top:5px;font-size:12px;font-weight:700;color:#059669;background:#ECFDF5;padding:2px 8px;border-radius:6px}
+.svc-card-actions{display:flex;gap:6px;flex-shrink:0}
+.svc-action-btn{width:34px;height:34px;border-radius:8px;border:1.5px solid #E2E8F0;background:#FAFBFC;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;padding:0}
+.svc-action-btn svg{width:15px;height:15px}
+.svc-action-edit{color:#3B82F6}.svc-action-edit:hover{background:#EFF6FF;border-color:#3B82F6}
+.svc-action-delete{color:#EF4444}.svc-action-delete:hover{background:#FEF2F2;border-color:#EF4444}
+
+.svc-empty{text-align:center;padding:48px 24px;background:#FAFBFC;border:1.5px dashed #E2E8F0;border-radius:16px;margin-bottom:24px}
+.svc-empty-icon{width:64px;height:64px;border-radius:16px;background:#F1F5F9;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px}
+.svc-empty-icon svg{width:32px;height:32px;color:#94A3B8}
+.svc-empty-title{font-size:16px;font-weight:700;color:#1E293B;margin:0 0 6px}
+.svc-empty-desc{font-size:13px;color:#64748B;max-width:360px;margin:0 auto;line-height:1.5}
+
+.svc-tip{display:flex;align-items:flex-start;gap:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:14px 18px;font-size:13px;color:#92400E;line-height:1.5;margin-bottom:24px}
+.svc-tip-icon{flex-shrink:0;margin-top:1px}
+.svc-tip-icon svg{width:18px;height:18px;color:#F59E0B}
+.svc-tip a{color:#D97706;font-weight:600;text-decoration:underline}
+</style>
+
+{% endblock %}

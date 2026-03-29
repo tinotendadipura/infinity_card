@@ -1,0 +1,255 @@
+{% extends "dashboard/_app_shell.html" %}
+{% load static %}
+
+{% block title %}Upload Proof of Payment | InfinityCard{% endblock %}
+
+{% block page_header %}
+<h1 class="app-page-title">Upload Proof of Payment</h1>
+<p class="app-page-subtitle">Order #{{ order.pk }} — {{ order.card_product.name }}</p>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.pop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 900px; margin: 0 auto; }
+.pop-details { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; }
+.pop-details h3 { font-size: 15px; font-weight: 700; color: #1E293B; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
+.pop-details h3 svg { width: 18px; height: 18px; }
+.pop-bank-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; }
+.pop-bank-row:last-child { border-bottom: none; }
+.pop-bank-label { color: #64748B; font-weight: 500; }
+.pop-bank-value { color: #1E293B; font-weight: 700; font-family: 'SF Mono', monospace; }
+.pop-amount-highlight {
+    background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
+    border: 1.5px solid #C7D2FE; border-radius: 12px;
+    padding: 16px; margin-top: 16px; text-align: center;
+}
+.pop-amount-highlight .label { font-size: 11px; font-weight: 600; color: #6366F1; text-transform: uppercase; letter-spacing: 0.5px; }
+.pop-amount-highlight .amount { font-size: 28px; font-weight: 800; color: #1E293B; margin-top: 4px; }
+.pop-form { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; }
+.pop-form h3 { font-size: 15px; font-weight: 700; color: #1E293B; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
+.pop-form h3 svg { width: 18px; height: 18px; }
+.pop-field { margin-bottom: 14px; }
+.pop-field label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
+.pop-field label .req { color: #EF4444; }
+.pop-field input, .pop-field textarea {
+    width: 100%; padding: 10px 14px; font-size: 14px;
+    border: 1.5px solid #E2E8F0; border-radius: 10px;
+    color: #0F172A; background: #fff; outline: none;
+    transition: border-color 0.15s; box-sizing: border-box;
+    font-family: inherit;
+}
+.pop-field input:focus, .pop-field textarea:focus { border-color: #6366F1; }
+.pop-field textarea { resize: vertical; min-height: 60px; }
+.pop-upload-zone {
+    border: 2px dashed #D1D5DB; border-radius: 12px;
+    padding: 24px; text-align: center; cursor: pointer;
+    transition: all 0.2s; background: #FAFBFC;
+    position: relative;
+}
+.pop-upload-zone:hover { border-color: #A5B4FC; background: #F5F3FF; }
+.pop-upload-zone.has-file { border-color: #10B981; background: #F0FDF4; }
+.pop-upload-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+}
+.pop-upload-zone svg { width: 32px; height: 32px; color: #94A3B8; margin-bottom: 8px; }
+.pop-upload-zone .uz-text { font-size: 13px; color: #64748B; font-weight: 500; }
+.pop-upload-zone .uz-hint { font-size: 11px; color: #94A3B8; margin-top: 4px; }
+.pop-upload-zone .uz-filename { font-size: 13px; color: #059669; font-weight: 600; margin-top: 8px; }
+.pop-submit {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px; border-radius: 10px;
+    font-size: 14px; font-weight: 700; color: #fff;
+    background: #4F46E5; border: none; cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s; margin-top: 8px;
+}
+.pop-submit:hover { background: #4338CA; transform: translateY(-1px); }
+.pop-existing {
+    background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 20px; max-width: 900px; margin-left: auto; margin-right: auto;
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13px; color: #92400E;
+}
+.pop-existing svg { width: 18px; height: 18px; color: #F59E0B; flex-shrink: 0; margin-top: 1px; }
+.pop-note {
+    background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;
+    padding: 14px 16px; margin-top: 16px;
+    font-size: 12px; color: #64748B; line-height: 1.6;
+}
+.pop-note strong { color: #1E293B; }
+.pop-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: #64748B;
+    text-decoration: none; margin-bottom: 16px; max-width: 900px;
+    margin-left: auto; margin-right: auto; display: flex;
+}
+.pop-back:hover { color: #1E293B; }
+.pop-back svg { width: 16px; height: 16px; }
+@media (max-width: 768px) {
+    .pop-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'cards:shop' %}" class="pop-back">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+    Back to Card Shop
+</a>
+
+{% if existing_pop %}
+<div class="pop-existing">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+    <div>
+        <strong>You already have a proof of payment pending review</strong> (submitted {{ existing_pop.created_at|timesince }} ago).
+        You can upload a new one if needed — our team will review the latest submission.
+    </div>
+</div>
+{% endif %}
+
+<div class="pop-grid">
+    <!-- Left: Payment Details -->
+    <div>
+        <div class="pop-details">
+            {% if order.payment_method == 'bank_transfer' %}
+            <h3>
+                <svg fill="none" viewBox="0 0 24 24" stroke="#4F46E5" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"/></svg>
+                Bank Transfer Details
+            </h3>
+            {% for acc in bank_accounts %}
+            {% if not forloop.first %}<hr style="border:none;border-top:1px dashed #e5e7eb;margin:16px 0;">{% endif %}
+            {% if bank_accounts.count > 1 %}<div style="font-size:12px;font-weight:600;color:#6366F1;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">{% if acc.is_primary %}Primary Account{% else %}Account {{ forloop.counter }}{% endif %}</div>{% endif %}
+            <div class="pop-bank-row">
+                <span class="pop-bank-label">Bank</span>
+                <span class="pop-bank-value">{{ acc.bank_name }}</span>
+            </div>
+            <div class="pop-bank-row">
+                <span class="pop-bank-label">Account Name</span>
+                <span class="pop-bank-value">{{ acc.account_name }}</span>
+            </div>
+            <div class="pop-bank-row">
+                <span class="pop-bank-label">Account Number</span>
+                <span class="pop-bank-value">{{ acc.account_number }}</span>
+            </div>
+            {% if acc.branch %}
+            <div class="pop-bank-row">
+                <span class="pop-bank-label">Branch</span>
+                <span class="pop-bank-value">{{ acc.branch }}</span>
+            </div>
+            {% endif %}
+            {% if acc.branch_code %}
+            <div class="pop-bank-row">
+                <span class="pop-bank-label">Branch Code</span>
+                <span class="pop-bank-value">{{ acc.branch_code }}</span>
+            </div>
+            {% endif %}
+            {% if acc.swift_code %}
+            <div class="pop-bank-row">
+                <span class="pop-bank-label">SWIFT Code</span>
+                <span class="pop-bank-value">{{ acc.swift_code }}</span>
+            </div>
+            {% endif %}
+            <div class="pop-bank-row">
+                <span class="pop-bank-label">Currency</span>
+                <span class="pop-bank-value">{{ acc.currency }}</span>
+            </div>
+            {% empty %}
+            <div class="pop-bank-row">
+                <span class="pop-bank-value" style="color:#ef4444;">No bank accounts configured. Please contact support.</span>
+            </div>
+            {% endfor %}
+            {% elif order.payment_method == 'ecocash' %}
+            <h3>
+                <svg fill="none" viewBox="0 0 24 24" stroke="#059669" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>
+                EcoCash Payment Details
+            </h3>
+            <div class="pop-bank-row">
+                <span class="pop-bank-label">Merchant Name</span>
+                <span class="pop-bank-value">{{ ecocash_details.merchant_name }}</span>
+            </div>
+            <div class="pop-bank-row">
+                <span class="pop-bank-label">Merchant Number</span>
+                <span class="pop-bank-value">{{ ecocash_details.merchant_number }}</span>
+            </div>
+            <div class="pop-bank-row">
+                <span class="pop-bank-label">Merchant Code</span>
+                <span class="pop-bank-value">{{ ecocash_details.merchant_code }}</span>
+            </div>
+            {% endif %}
+
+            <div class="pop-amount-highlight">
+                <div class="label">Amount to Pay</div>
+                <div class="amount">${{ order.amount }}</div>
+            </div>
+
+            <div class="pop-note">
+                <strong>Reference:</strong> Use <strong>INF-{{ order.pk }}</strong> as your payment reference.<br>
+                <strong>Order:</strong> {{ order.card_product.name }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Upload Form -->
+    <div>
+        <form method="post" enctype="multipart/form-data" class="pop-form">
+            {% csrf_token %}
+            <h3>
+                <svg fill="none" viewBox="0 0 24 24" stroke="#4F46E5" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                Upload Proof of Payment
+            </h3>
+
+            <div class="pop-field">
+                <label>Payment Screenshot / Photo <span class="req">*</span></label>
+                <div class="pop-upload-zone" id="uploadZone">
+                    <input type="file" name="document" accept="image/*,.pdf" id="popFile" required>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                    <div class="uz-text">Click or drag to upload</div>
+                    <div class="uz-hint">PNG, JPG, or PDF — max 5MB</div>
+                    <div class="uz-filename" id="fileName" style="display:none"></div>
+                </div>
+            </div>
+
+            <div class="pop-field">
+                <label>Reference / Transaction Number</label>
+                <input type="text" name="reference_number" placeholder="e.g. TXN-123456 or bank ref number">
+            </div>
+
+            <div class="pop-field">
+                <label>Amount Paid <span class="req">*</span></label>
+                <input type="number" name="amount_paid" step="0.01" value="{{ order.amount }}" required>
+            </div>
+
+            <div class="pop-field">
+                <label>Payment Date <span class="req">*</span></label>
+                <input type="date" name="payment_date" value="{% now 'Y-m-d' %}" required>
+            </div>
+
+            <div class="pop-field">
+                <label>Additional Notes</label>
+                <textarea name="notes" placeholder="Any additional details..."></textarea>
+            </div>
+
+            <button type="submit" class="pop-submit">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                Submit Proof of Payment
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('popFile').addEventListener('change', function() {
+    var zone = document.getElementById('uploadZone');
+    var nameEl = document.getElementById('fileName');
+    if (this.files.length) {
+        zone.classList.add('has-file');
+        nameEl.textContent = this.files[0].name;
+        nameEl.style.display = 'block';
+    } else {
+        zone.classList.remove('has-file');
+        nameEl.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

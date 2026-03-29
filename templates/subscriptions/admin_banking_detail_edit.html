@@ -1,0 +1,106 @@
+{% extends 'subscriptions/admin_base.html' %}
+
+{% block title %}Edit {{ account.bank_name }} - Admin{% endblock %}
+
+{% block nav_banking_details %}sa-nav-active{% endblock %}
+
+{% block admin_content %}
+<div class="sa-header">
+    <div>
+        <h1 class="sa-title">Edit Bank Account</h1>
+        <p class="sa-subtitle">Update banking details for {{ account.bank_name }}</p>
+    </div>
+    <a href="{% url 'subscriptions:admin_banking_details' %}" class="bd-back-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+        Back to Banking Details
+    </a>
+</div>
+
+<div class="sa-content">
+    <div class="bd-form-card">
+        <form method="post">
+            {% csrf_token %}
+            <div class="bd-form-grid">
+                <div class="bd-field">
+                    <label class="bd-label">Bank Name *</label>
+                    <input type="text" name="bank_name" required class="bd-input" value="{{ account.bank_name }}">
+                </div>
+                <div class="bd-field">
+                    <label class="bd-label">Account Name *</label>
+                    <input type="text" name="account_name" required class="bd-input" value="{{ account.account_name }}">
+                </div>
+                <div class="bd-field">
+                    <label class="bd-label">Account Number *</label>
+                    <input type="text" name="account_number" required class="bd-input" value="{{ account.account_number }}">
+                </div>
+                <div class="bd-field">
+                    <label class="bd-label">Currency</label>
+                    <input type="text" name="currency" class="bd-input" value="{{ account.currency }}">
+                </div>
+                <div class="bd-field">
+                    <label class="bd-label">Branch</label>
+                    <input type="text" name="branch" class="bd-input" value="{{ account.branch }}">
+                </div>
+                <div class="bd-field">
+                    <label class="bd-label">Branch Code</label>
+                    <input type="text" name="branch_code" class="bd-input" value="{{ account.branch_code }}">
+                </div>
+                <div class="bd-field">
+                    <label class="bd-label">SWIFT Code</label>
+                    <input type="text" name="swift_code" class="bd-input" value="{{ account.swift_code }}">
+                </div>
+                <div class="bd-field">
+                    <label class="bd-label">Notes (internal)</label>
+                    <input type="text" name="notes" class="bd-input" value="{{ account.notes }}">
+                </div>
+            </div>
+            <div class="bd-checks">
+                <label class="bd-check-label"><input type="checkbox" name="is_active" {% if account.is_active %}checked{% endif %}> Active (visible to customers)</label>
+                <label class="bd-check-label"><input type="checkbox" name="is_primary" {% if account.is_primary %}checked{% endif %}> Primary account (shown first)</label>
+            </div>
+            <div class="bd-form-actions">
+                <a href="{% url 'subscriptions:admin_banking_details' %}" class="bd-btn-cancel">Cancel</a>
+                <button type="submit" class="bd-btn-save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.bd-back-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+    border-radius: 8px; border: 1px solid #d1d5db; background: #fff;
+    color: #374151; font-size: 13px; font-weight: 500; text-decoration: none; transition: all .2s;
+}
+.bd-back-btn:hover { background: #f9fafb; color: #111827; text-decoration: none; }
+
+.bd-form-card { background: #fff; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; }
+.bd-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .bd-form-grid { grid-template-columns: 1fr; } }
+.bd-field { display: flex; flex-direction: column; gap: 4px; }
+.bd-label { font-size: 13px; font-weight: 600; color: #374151; }
+.bd-input {
+    padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px;
+    font-size: 14px; color: #111827; transition: border-color .2s;
+}
+.bd-input:focus { outline: none; border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
+.bd-checks {
+    display: flex; gap: 24px; margin: 16px 0 0; padding-top: 16px; border-top: 1px solid #f3f4f6;
+}
+.bd-check-label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #374151; cursor: pointer; }
+.bd-form-actions {
+    display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #f3f4f6;
+}
+.bd-btn-cancel {
+    padding: 10px 20px; border-radius: 8px; border: 1px solid #d1d5db;
+    background: #fff; color: #374151; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center;
+}
+.bd-btn-cancel:hover { background: #f9fafb; text-decoration: none; color: #374151; }
+.bd-btn-save {
+    padding: 10px 20px; border-radius: 8px; border: none;
+    background: #6366F1; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.bd-btn-save:hover { background: #4F46E5; }
+</style>
+{% endblock %}

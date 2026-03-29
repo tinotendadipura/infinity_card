@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}InfinityCard{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/" class="logo">InfinityCard</a>
+            <nav class="site-nav" id="siteNav">
+                <a href="{% url 'core:features' %}">Features</a>
+                <a href="{% url 'subscriptions:plans' %}">Pricing</a>
+                <a href="{% url 'core:about' %}">About</a>
+                <a href="{% url 'core:contact' %}">Contact</a>
+                {% if user.is_authenticated %}
+                    {% if user.account_type == 'business' %}
+                    <a href="{% url 'companies:dashboard' %}">Dashboard</a>
+                    {% elif user.account_type == 'personal' %}
+                    <a href="{% url 'profiles:dashboard' %}">Dashboard</a>
+                    {% else %}
+                    <a href="{% url 'accounts:choose_account_type' %}">Get Started</a>
+                    {% endif %}
+                    <a href="{% url 'accounts:logout' %}">Log out</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}">Log in</a>
+                    <a href="{% url 'accounts:signup' %}" class="nav-cta">Sign up free</a>
+                {% endif %}
+            </nav>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <main class="site-main">
+        {% if messages %}
+        <div class="container" style="padding-top:1rem;">
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="/" class="logo">InfinityCard</a>
+                    <p>One card. One tap. Infinite identity. The modern way to share who you are.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="{% url 'core:features' %}">Features</a>
+                    <a href="{% url 'subscriptions:plans' %}">Pricing</a>
+                    <a href="{% url 'core:faq' %}">FAQ</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <a href="{% url 'core:about' %}">About</a>
+                    <a href="{% url 'core:contact' %}">Contact</a>
+                    <a href="{% url 'core:privacy' %}">Privacy</a>
+                    <a href="{% url 'core:terms' %}">Terms</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Get Started</h4>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'profiles:dashboard' %}">Dashboard</a>
+                    <a href="{% url 'subscriptions:billing' %}">Billing</a>
+                    {% else %}
+                    <a href="{% url 'accounts:signup' %}">Sign Up</a>
+                    <a href="{% url 'accounts:login' %}">Log In</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 InfinityCard. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    document.getElementById('navToggle').addEventListener('click', function() {
+        document.getElementById('siteNav').classList.toggle('open');
+    });
+    </script>
+</body>
+</html>

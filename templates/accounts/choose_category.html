@@ -1,0 +1,279 @@
+{% extends "pages/home/base.html" %}
+{% load static %}
+{% block title %}Choose Your Profile Type | InfinityCard{% endblock %}
+
+{% block content %}
+<style>
+/* ── Beams background hero ── */
+.cc-hero{background:#0a0a0a;position:relative;overflow:hidden;padding-top:120px;padding-bottom:60px;min-height:100vh;
+  display:flex;align-items:center;justify-content:center}
+.cc-beams-canvas{position:absolute;inset:0;pointer-events:none;z-index:0}
+.cc-beams-overlay{position:absolute;inset:0;background:rgba(10,10,10,.05);backdrop-filter:blur(50px);
+  pointer-events:none;z-index:1;animation:cc-pulse 10s ease-in-out infinite}
+@keyframes cc-pulse{0%,100%{opacity:.05}50%{opacity:.15}}
+.cc-wrap {
+    position:relative;z-index:10;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+    text-align: center;
+}
+/* Fade-up entrance */
+.cc-wrap > *{opacity:0;transform:translateY(20px);animation:cc-fadeup .8s ease forwards}
+.cc-wrap > *:nth-child(1){animation-delay:.1s}
+.cc-wrap > *:nth-child(2){animation-delay:.2s}
+.cc-wrap > *:nth-child(3){animation-delay:.3s}
+.cc-wrap > form{animation-delay:.4s}
+@keyframes cc-fadeup{to{opacity:1;transform:translateY(0)}}
+.cc-step {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; border-radius: 20px;
+    background: rgba(16,185,129,.15); color: #34D399;
+    border:1px solid rgba(16,185,129,.2);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    backdrop-filter:blur(8px);
+}
+.cc-title {
+    font-size: 28px; font-weight: 800; color: #fff;
+    margin: 0 0 8px;
+}
+.cc-sub {
+    font-size: 15px; color: rgba(255,255,255,.6); margin: 0 0 36px;
+    max-width: 520px; margin-left: auto; margin-right: auto;
+    line-height: 1.6;
+}
+.cc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    text-align: left;
+}
+@media (max-width: 480px) { .cc-grid { grid-template-columns: 1fr 1fr; } }
+
+.cc-card {
+    position: relative;
+    background: rgba(255,255,255,.06);
+    border: 2px solid rgba(255,255,255,.1);
+    border-radius: 16px;
+    padding: 20px 16px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: flex-start;
+    backdrop-filter:blur(8px);
+}
+.cc-card:hover {
+    border-color: rgba(165,180,252,.4);
+    box-shadow: 0 4px 20px rgba(99,102,241,0.12);
+    transform: translateY(-2px);
+    background: rgba(255,255,255,.08);
+}
+.cc-card.selected {
+    border-color: #818CF8;
+    background: rgba(255,255,255,.1);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.2), 0 6px 24px rgba(99,102,241,0.15);
+}
+.cc-card-check {
+    position: absolute; top: 12px; right: 12px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.2);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+}
+.cc-card.selected .cc-card-check {
+    background: #6366F1; border-color: #6366F1;
+}
+.cc-card-check svg {
+    width: 12px; height: 12px; color: #fff; opacity: 0;
+    transition: opacity 0.15s;
+}
+.cc-card.selected .cc-card-check svg { opacity: 1; }
+
+.cc-card-ico {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+}
+.cc-card-ico svg { width: 22px; height: 22px; }
+
+/* Default icon fallback */
+.cc-card-ico { background: rgba(148,163,184,.15); }
+.cc-card-ico svg { color: #94A3B8; }
+
+.cc-card-name {
+    font-size: 14px; font-weight: 700; color: #fff;
+    margin: 0 0 4px;
+}
+.cc-card-desc {
+    font-size: 11px; color: rgba(255,255,255,.5); line-height: 1.5;
+    margin: 0;
+}
+
+.cc-submit {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 40px; border-radius: 14px;
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    color: #fff; border: none;
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    cursor: pointer; margin-top: 32px;
+    box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+    transition: all 0.15s;
+    opacity: 0.5; pointer-events: none;
+}
+.cc-submit.enabled {
+    opacity: 1; pointer-events: all;
+}
+.cc-submit.enabled:hover {
+    box-shadow: 0 6px 24px rgba(99,102,241,0.4);
+    transform: translateY(-1px);
+}
+.cc-submit svg { width: 18px; height: 18px; }
+</style>
+
+<section class="cc-hero">
+<canvas class="cc-beams-canvas" id="ccBeamsCanvas"></canvas>
+<div class="cc-beams-overlay"></div>
+<div class="cc-wrap">
+    <div class="cc-step">Step 2 of 2</div>
+    <h1 class="cc-title">What kind of profile do you want?</h1>
+    <p class="cc-sub">Pick the profile type that best fits you. This determines the layout and features of your digital card.</p>
+
+    <form method="post" id="ccForm">
+        {% csrf_token %}
+        <input type="hidden" name="category" id="ccHidden" value="">
+
+        <div class="cc-grid">
+            {% for cat in categories %}
+            <div class="cc-card" data-slug="{{ cat.slug }}">
+                <div class="cc-card-check">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                </div>
+                <div class="cc-card-ico"{% if cat.icon_bg %} style="background:{{ cat.icon_bg }}"{% endif %}>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"{% if cat.icon_color %} style="color:{{ cat.icon_color }}"{% endif %}>{% if cat.icon %}{{ cat.icon|safe }}{% else %}<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>{% endif %}</svg>
+                </div>
+                <div class="cc-card-name">{{ cat.name }}</div>
+                <div class="cc-card-desc">{{ cat.description }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="cc-submit" id="ccSubmit">
+            Get Started
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </button>
+    </form>
+</div>
+</section>
+
+<script>
+(function(){
+    /* ── Card selection logic ── */
+    var cards = document.querySelectorAll('.cc-card');
+    var hidden = document.getElementById('ccHidden');
+    var btn = document.getElementById('ccSubmit');
+
+    cards.forEach(function(card){
+        card.addEventListener('click', function(){
+            cards.forEach(function(c){ c.classList.remove('selected'); });
+            card.classList.add('selected');
+            hidden.value = card.getAttribute('data-slug');
+            btn.classList.add('enabled');
+        });
+    });
+
+    /* ── Beams background animation (ported from React BeamsBackground) ── */
+    var canvas = document.getElementById('ccBeamsCanvas');
+    if(!canvas) return;
+    var ctx = canvas.getContext('2d');
+    if(!ctx) return;
+
+    var BEAM_COUNT = 30;
+    var beams = [];
+    var animId = 0;
+
+    function createBeam(w, h){
+        var angle = -35 + Math.random() * 10;
+        return {
+            x: Math.random() * w * 1.5 - w * 0.25,
+            y: Math.random() * h * 1.5 - h * 0.25,
+            width: 30 + Math.random() * 60,
+            length: h * 2.5,
+            angle: angle,
+            speed: 0.6 + Math.random() * 1.2,
+            opacity: 0.12 + Math.random() * 0.16,
+            hue: 190 + Math.random() * 70,
+            pulse: Math.random() * Math.PI * 2,
+            pulseSpeed: 0.02 + Math.random() * 0.03
+        };
+    }
+
+    function resetBeam(beam, index){
+        var col = index % 3;
+        var spacing = canvas.width / 3;
+        beam.y = canvas.height + 100;
+        beam.x = col * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
+        beam.width = 100 + Math.random() * 100;
+        beam.speed = 0.5 + Math.random() * 0.4;
+        beam.hue = 190 + (index * 70) / beams.length;
+        beam.opacity = 0.2 + Math.random() * 0.1;
+        return beam;
+    }
+
+    function resize(){
+        var dpr = window.devicePixelRatio || 1;
+        var hero = canvas.parentElement;
+        var w = hero.offsetWidth;
+        var h = hero.offsetHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.scale(dpr, dpr);
+        beams = [];
+        for(var i = 0; i < BEAM_COUNT; i++) beams.push(createBeam(w, h));
+    }
+
+    function drawBeam(beam){
+        ctx.save();
+        ctx.translate(beam.x, beam.y);
+        ctx.rotate(beam.angle * Math.PI / 180);
+        var po = beam.opacity * (0.8 + Math.sin(beam.pulse) * 0.2);
+        var g = ctx.createLinearGradient(0, 0, 0, beam.length);
+        g.addColorStop(0,   'hsla(' + beam.hue + ',85%,65%,0)');
+        g.addColorStop(0.1, 'hsla(' + beam.hue + ',85%,65%,' + (po * 0.5) + ')');
+        g.addColorStop(0.4, 'hsla(' + beam.hue + ',85%,65%,' + po + ')');
+        g.addColorStop(0.6, 'hsla(' + beam.hue + ',85%,65%,' + po + ')');
+        g.addColorStop(0.9, 'hsla(' + beam.hue + ',85%,65%,' + (po * 0.5) + ')');
+        g.addColorStop(1,   'hsla(' + beam.hue + ',85%,65%,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
+        ctx.restore();
+    }
+
+    function animate(){
+        var hero = canvas.parentElement;
+        var w = hero.offsetWidth;
+        var h = hero.offsetHeight;
+        ctx.clearRect(0, 0, w, h);
+        ctx.filter = 'blur(35px)';
+        for(var i = 0; i < beams.length; i++){
+            var b = beams[i];
+            b.y -= b.speed;
+            b.pulse += b.pulseSpeed;
+            if(b.y + b.length < -100) resetBeam(b, i);
+            drawBeam(b);
+        }
+        animId = requestAnimationFrame(animate);
+    }
+
+    resize();
+    animate();
+    window.addEventListener('resize', function(){
+        cancelAnimationFrame(animId);
+        resize();
+        animate();
+    });
+})();
+</script>
+{% endblock %}

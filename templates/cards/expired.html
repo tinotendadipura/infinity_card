@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Subscription Expired | InfinityCard{% endblock %}
+
+{% block content %}
+<div class="inactive-page">
+    <h1>This profile is currently unavailable</h1>
+    <p>The subscription for <strong>{{ profile.display_name }}</strong> has expired or is inactive.</p>
+    <p>If you are the profile owner, please renew your subscription from your <a href="/dashboard/">dashboard</a>.</p>
+    <p><a href="/">Visit InfinityCard</a></p>
+</div>
+{% endblock %}

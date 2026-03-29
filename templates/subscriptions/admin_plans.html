@@ -1,0 +1,62 @@
+{% extends "subscriptions/admin_base.html" %}
+{% block title %}Plans{% endblock %}
+{% block nav_plans %}active{% endblock %}
+{% block page_title %}Plans &amp; Pricing{% endblock %}
+
+{% block extra_css %}
+<style>
+.sa-plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.sa-plan-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:24px;transition:box-shadow 0.15s}
+.sa-plan-card:hover{box-shadow:0 4px 24px rgba(0,0,0,0.06)}
+.sa-plan-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.sa-plan-name{font-size:18px;font-weight:700;color:#0F172A}
+.sa-plan-price{font-size:14px;color:#64748B}
+.sa-plan-subs{display:flex;align-items:center;gap:6px;font-size:13px;color:#4F46E5;font-weight:600;margin-bottom:16px}
+.sa-plan-subs svg{width:16px;height:16px}
+.sa-plan-yearly{font-size:12px;color:#64748B;margin-bottom:12px;line-height:1.5}
+.sa-plan-form{display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid #F1F5F9}
+.sa-plan-form label{font-size:12px;font-weight:600;color:#64748B}
+.sa-plan-form input{width:60px;padding:5px 8px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;text-align:center;color:#1E293B}
+.sa-plan-form input:focus{outline:none;border-color:#4F46E5}
+</style>
+{% endblock %}
+
+{% block admin_content %}
+
+<div class="sa-plans-grid">
+    {% for plan in plan_stats %}
+    <div class="sa-plan-card">
+        <div class="sa-plan-head">
+            <div>
+                <div class="sa-plan-name">{{ plan.name }}</div>
+                <div class="sa-plan-price">${{ plan.price }}/month</div>
+            </div>
+            {% if plan.badge_label %}
+            <span class="sa-badge sa-badge-purple">{{ plan.badge_label }}</span>
+            {% endif %}
+        </div>
+        <div class="sa-plan-subs">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128H5.636a8.954 8.954 0 01-1.4-.104M12 6.75a3 3 0 11-6 0 3 3 0 016 0zm8.25 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+            {{ plan.subscriber_count }} active subscriber{{ plan.subscriber_count|pluralize }}
+        </div>
+        <div class="sa-plan-yearly">
+            Yearly: ${{ plan.yearly_price }}/yr (${{ plan.yearly_monthly_price }}/mo)<br>
+            Current discount: {{ plan.yearly_discount_percent }}%
+        </div>
+        <form method="post" action="{% url 'subscriptions:admin_update_discount' %}">
+            {% csrf_token %}
+            <input type="hidden" name="plan_id" value="{{ plan.pk }}">
+            <div class="sa-plan-form">
+                <label>Yearly Discount</label>
+                <input type="number" name="discount" value="{{ plan.yearly_discount_percent }}" min="0" max="90">
+                <span style="font-size:12px;color:#94A3B8">%</span>
+                <button type="submit" class="sa-btn sa-btn-primary sa-btn-sm">Save</button>
+            </div>
+        </form>
+    </div>
+    {% empty %}
+    <div class="sa-empty">No plans configured yet</div>
+    {% endfor %}
+</div>
+
+{% endblock %}

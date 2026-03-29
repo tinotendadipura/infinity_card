@@ -1,0 +1,817 @@
+{% extends "companies/company_base.html" %}
+{% block title %}Billing & Plans — {{ company.name }}{% endblock %}
+{% block nav_billing %}active{% endblock %}
+{% block page_title %}Billing & Plans{% endblock %}
+
+{% block company_head %}
+<style>
+/* ── Billing Styles ── */
+.bl-current {
+    background: #fff; border-radius: 16px; border: 1.5px solid #E2E8F0;
+    padding: 24px; margin-bottom: 24px;
+}
+.bl-current-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.bl-current-label { font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; }
+.bl-current-name { font-size: 22px; font-weight: 800; color: #1E293B; margin-top: 2px; }
+.bl-current-name small { font-size: 14px; }
+.bl-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px;
+}
+.bl-status.active { background: #ECFDF5; color: #059669; }
+.bl-status.cancelled { background: #FFF7ED; color: #D97706; }
+.bl-status.suspended { background: #FFF7ED; color: #D97706; }
+.bl-status.expired { background: #FEF2F2; color: #DC2626; }
+.bl-status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.bl-current-price-row { display: flex; align-items: baseline; gap: 16px; margin-bottom: 12px; }
+.bl-current-price { font-size: 28px; font-weight: 800; color: #4F46E5; }
+.bl-current-period { font-size: 14px; font-weight: 600; color: #94A3B8; }
+.bl-current-remaining {
+    font-size: 12px; color: #64748B; display: flex; align-items: center; gap: 4px;
+}
+.bl-current-remaining.expired { color: #DC2626; }
+.bl-current-progress { margin-bottom: 16px; }
+.bl-progress-bar { height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden; }
+.bl-progress-fill { height: 100%; background: linear-gradient(90deg, #6366F1, #818CF8); border-radius: 3px; transition: width 0.3s; }
+.bl-current-actions { display: flex; gap: 10px; }
+
+.bl-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700;
+    text-decoration: none; border: 1.5px solid transparent; cursor: pointer;
+    transition: all 0.15s;
+}
+.bl-btn-primary { background: #4F46E5; color: #fff; border-color: #4F46E5; }
+.bl-btn-primary:hover { background: #4338CA; }
+.bl-btn-outline { background: #fff; color: #4F46E5; border-color: #E2E8F0; }
+.bl-btn-outline:hover { border-color: #4F46E5; background: #EEF2FF; }
+.bl-btn-ghost-danger { background: none; color: #DC2626; border: 1.5px solid #FCA5A5; }
+.bl-btn-ghost-danger:hover { background: #FEF2F2; }
+.bl-btn-current { background: #F1F5F9; color: #94A3B8; cursor: default; }
+.bl-btn-paypal { background: #0070BA; color: #fff; border-color: #0070BA; }
+.bl-btn-paypal:hover { background: #005EA6; }
+
+/* ── Empty ── */
+.bl-empty { text-align: center; padding: 40px 24px; background: #fff; border-radius: 16px; border: 1.5px solid #E2E8F0; margin-bottom: 24px; }
+.bl-empty-icon { margin-bottom: 12px; color: #CBD5E1; }
+.bl-empty-title { font-size: 16px; font-weight: 800; color: #1E293B; margin-bottom: 4px; }
+.bl-empty-desc { font-size: 13px; color: #94A3B8; }
+
+/* ── Plans Grid ── */
+.bl-plans-header { margin-bottom: 12px; }
+.bl-plans-title { font-size: 18px; font-weight: 800; color: #1E293B; }
+.bl-plans-subtitle { font-size: 13px; color: #94A3B8; margin-top: 2px; }
+.bl-plans-toggle {
+    display: inline-flex; gap: 4px; margin-bottom: 24px;
+    background: #E2E8F0; border-radius: 14px; padding: 5px;
+    border: 2px solid #CBD5E1;
+}
+.bl-toggle-btn {
+    padding: 10px 28px; border-radius: 10px; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 800; color: #64748B; background: transparent;
+    transition: all 0.2s; letter-spacing: -0.01em;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.bl-toggle-btn:hover { color: #1E293B; background: rgba(255,255,255,0.5); }
+.bl-toggle-btn.active {
+    background: #4F46E5; color: #fff;
+    box-shadow: 0 2px 8px rgba(79,70,229,0.3);
+}
+.bl-toggle-btn.active:hover { background: #4338CA; }
+.bl-toggle-btn.active .bl-toggle-save { color: #C7D2FE; }
+.bl-toggle-save {
+    font-size: 10px; font-weight: 700; color: #059669;
+    background: #ECFDF5; padding: 2px 7px; border-radius: 6px;
+}
+
+.bl-plan-yearly-total {
+    font-size: 11px; color: #6366F1; font-weight: 600;
+    margin-top: -4px; margin-bottom: 8px; padding: 4px 0;
+}
+.bl-plan-yearly-total strong { font-weight: 800; }
+
+.bl-plans-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
+.bl-plan {
+    background: #fff; border-radius: 16px; border: 1.5px solid #E2E8F0;
+    padding: 24px; position: relative; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.bl-plan:hover { border-color: #C7D2FE; box-shadow: 0 4px 16px rgba(99,102,241,0.08); }
+.bl-plan-featured { border-color: #818CF8; box-shadow: 0 4px 20px rgba(99,102,241,0.12); }
+.bl-plan-active { border-color: #34D399; }
+.bl-plan-badge {
+    position: absolute; top: -10px; right: 16px;
+    background: linear-gradient(135deg, #6366F1, #818CF8); color: #fff;
+    font-size: 10px; font-weight: 800; padding: 3px 12px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+.bl-plan-head { margin-bottom: 16px; }
+.bl-plan-name { font-size: 16px; font-weight: 800; color: #1E293B; }
+.bl-plan-desc { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+.bl-plan-price { margin-bottom: 16px; }
+.bl-plan-currency { font-size: 16px; font-weight: 800; color: #1E293B; vertical-align: top; }
+.bl-plan-amount { font-size: 32px; font-weight: 800; color: #1E293B; }
+.bl-plan-period { font-size: 13px; color: #94A3B8; font-weight: 600; }
+
+.bl-plan-features { margin-bottom: 20px; }
+.bl-feature {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 600; color: #475569; padding: 4px 0;
+}
+.bl-feature svg { color: #059669; flex-shrink: 0; }
+.bl-feature.disabled { color: #CBD5E1; }
+.bl-feature.disabled svg { color: #CBD5E1; }
+
+.bl-plan-cta { margin-top: auto; }
+.bl-plan-cta .bl-btn { width: 100%; justify-content: center; }
+
+/* ── History ── */
+.bl-history { background: #fff; border-radius: 16px; border: 1.5px solid #E2E8F0; overflow: hidden; margin-bottom: 24px; }
+.bl-history-header { padding: 18px 20px; border-bottom: 1px solid #F1F5F9; }
+.bl-history-title { font-size: 14px; font-weight: 800; color: #1E293B; display: flex; align-items: center; gap: 8px; }
+.bl-history-list { }
+.bl-history-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 20px; border-bottom: 1px solid #F8FAFC;
+}
+.bl-history-row:last-child { border-bottom: none; }
+.bl-history-icon {
+    width: 32px; height: 32px; border-radius: 10px; background: #EEF2FF;
+    display: flex; align-items: center; justify-content: center; color: #6366F1; flex-shrink: 0;
+}
+.bl-history-info { flex: 1; }
+.bl-history-name { font-size: 13px; font-weight: 700; color: #1E293B; }
+.bl-history-meta { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+.bl-history-amount { font-size: 13px; font-weight: 700; color: #1E293B; }
+.bl-history-amount.refund { color: #DC2626; }
+
+/* ── Per-card pricing info ── */
+.bl-card-info {
+    background: linear-gradient(135deg, #EEF2FF, #E0E7FF); border: 1.5px solid #C7D2FE;
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+}
+.bl-card-info-icon {
+    width: 36px; height: 36px; border-radius: 10px; background: #fff;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #6366F1;
+}
+.bl-card-info-text { font-size: 13px; font-weight: 600; color: #3730A3; line-height: 1.4; }
+.bl-card-info-text strong { font-weight: 800; }
+
+/* ── Payment Modal ── */
+.bl-modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.5);
+    z-index: 9999; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+.bl-modal-overlay.open { display: flex; }
+.bl-modal {
+    background: #fff; border-radius: 20px; max-width: 480px; width: 92%;
+    max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: blModalIn 0.2s ease-out;
+}
+@keyframes blModalIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: none; } }
+.bl-modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 16px; border-bottom: 1px solid #F1F5F9;
+}
+.bl-modal-title { font-size: 17px; font-weight: 800; color: #1E293B; }
+.bl-modal-close {
+    width: 32px; height: 32px; border-radius: 10px; border: none; cursor: pointer;
+    background: #F1F5F9; color: #64748B; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+}
+.bl-modal-close:hover { background: #E2E8F0; color: #1E293B; }
+.bl-modal-body { padding: 20px 24px 24px; }
+
+.bl-modal-summary {
+    background: #F8FAFC; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;
+}
+.bl-modal-summary-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; color: #64748B; padding: 3px 0;
+}
+.bl-modal-summary-row.total {
+    border-top: 1.5px solid #E2E8F0; margin-top: 6px; padding-top: 8px;
+    font-size: 15px; font-weight: 800; color: #1E293B;
+}
+
+/* ── Payment method tabs in modal ── */
+.bl-pay-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+.bl-pay-tab {
+    flex: 1; padding: 10px 8px; border-radius: 10px; border: 1.5px solid #E2E8F0;
+    background: #fff; cursor: pointer; text-align: center;
+    font-size: 11px; font-weight: 700; color: #64748B;
+    transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.bl-pay-tab:hover { border-color: #C7D2FE; }
+.bl-pay-tab.active { border-color: #6366F1; background: #EEF2FF; color: #4F46E5; }
+.bl-pay-tab svg { width: 20px; height: 20px; }
+
+.bl-pay-panel { display: none; }
+.bl-pay-panel.active { display: block; }
+
+.bl-pay-bank-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    background: #F8FAFC; border-radius: 10px; padding: 12px; margin-bottom: 12px;
+    font-size: 12px;
+}
+.bl-pay-bank-label { font-weight: 600; color: #94A3B8; }
+.bl-pay-bank-value { font-weight: 700; color: #1E293B; text-align: right; }
+
+.bl-pay-ecocash-input {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+}
+.bl-pay-ecocash-prefix {
+    display: flex; align-items: center; gap: 5px;
+    padding: 10px 12px; background: #F8FAFC; border: 1.5px solid #E2E8F0;
+    border-radius: 10px; font-size: 13px; font-weight: 700; color: #64748B; white-space: nowrap;
+}
+.bl-pay-ecocash-phone {
+    flex: 1; padding: 10px 14px; font-size: 14px; font-weight: 700;
+    border: 1.5px solid #E2E8F0; border-radius: 10px; color: #0F172A; outline: none;
+    transition: border-color 0.15s; letter-spacing: 0.5px;
+}
+.bl-pay-ecocash-phone:focus { border-color: #059669; }
+
+.bl-pay-submit {
+    width: 100%; padding: 12px; border-radius: 12px; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 800; color: #fff; display: flex; align-items: center;
+    justify-content: center; gap: 8px; transition: all 0.15s;
+}
+.bl-pay-submit.paypal { background: #0070BA; }
+.bl-pay-submit.paypal:hover { background: #005EA6; }
+.bl-pay-submit.bank { background: #4F46E5; }
+.bl-pay-submit.bank:hover { background: #4338CA; }
+.bl-pay-submit.ecocash { background: #059669; }
+.bl-pay-submit.ecocash:hover { background: #047857; }
+
+.bl-pay-note {
+    text-align: center; font-size: 11px; color: #94A3B8; margin-top: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+
+@media (max-width: 768px) {
+    .bl-plans-grid { grid-template-columns: 1fr; }
+    .bl-current-price-row { flex-direction: column; gap: 4px; }
+    .bl-modal { width: 96%; }
+    .bl-pay-tabs { flex-direction: column; }
+}
+</style>
+{% endblock %}
+
+{% block company_content %}
+
+<!-- Declined Cash Payment Notifications -->
+{% for order in declined_cash_orders %}
+<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:14px;padding:20px 24px;margin-bottom:16px;display:flex;align-items:flex-start;gap:14px">
+    <div style="width:40px;height:40px;border-radius:12px;background:#DC2626;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+    </div>
+    <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;color:#991B1B;margin-bottom:4px">Cash Payment Declined — Order #{{ order.pk }}</div>
+        <p style="font-size:13px;color:#7F1D1D;line-height:1.5;margin:0 0 8px">
+            Your cash payment of <strong>${{ order.total_amount }}</strong> for <strong>{{ order.quantity }}x {{ order.card_product.name }}</strong> was declined.
+        </p>
+        {% if order.rejection_reason %}
+        <div style="background:#fff;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;font-size:12px;color:#991B1B;line-height:1.5">
+            <strong>Reason:</strong> {{ order.rejection_reason }}
+        </div>
+        {% endif %}
+        <p style="font-size:12px;color:#9CA3AF;margin:8px 0 0">You can place a new order once the issue is resolved. <a href="{% url 'companies:order_cards' %}" style="color:#6366F1;font-weight:600;text-decoration:none">Order Again</a></p>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Pending Cash Payment Notifications -->
+{% for order in pending_cash_orders %}
+<div style="background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:14px;padding:20px 24px;margin-bottom:16px;display:flex;align-items:flex-start;gap:14px">
+    <div style="width:40px;height:40px;border-radius:12px;background:#D97706;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;color:#92400E;margin-bottom:4px">Cash Payment Pending — Order #{{ order.pk }}</div>
+        <p style="font-size:13px;color:#78350F;line-height:1.5;margin:0">
+            Your cash payment of <strong>${{ order.total_amount }}</strong> for <strong>{{ order.quantity }}x {{ order.card_product.name }}</strong> is awaiting admin approval. You will be notified once it is reviewed.
+        </p>
+    </div>
+</div>
+{% endfor %}
+
+<!-- ─── Current Plan Overview ─── -->
+{% if subscription %}
+<div class="bl-current">
+    <div class="bl-current-top">
+        <div>
+            <div class="bl-current-label">Current Plan</div>
+            <div class="bl-current-name">{{ subscription.plan.name }} <small style="font-weight:500;color:#94A3B8;">({{ subscription.get_billing_period_display }})</small></div>
+        </div>
+        <div>
+            <span class="bl-status {% if subscription.status == 'cancelled' %}cancelled{% elif subscription.is_active %}active{% elif subscription.status == 'suspended' %}suspended{% else %}expired{% endif %}">
+                <span class="bl-status-dot"></span>
+                {{ subscription.get_status_display }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Price & Remaining -->
+    <div class="bl-current-price-row">
+        <div class="bl-current-price">{% if subscription.billing_period == 'yearly' %}${{ subscription.plan.yearly_price }}<span class="bl-current-period">/yr per card</span>{% else %}${{ subscription.plan.price }}<span class="bl-current-period">/mo per card</span>{% endif %}</div>
+        {% if subscription.status == 'cancelled' and subscription.days_remaining > 0 %}
+        <div class="bl-current-remaining" style="color:#D97706;">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Cancelled &mdash; {{ subscription.days_remaining }} days of access left
+        </div>
+        {% elif subscription.is_active %}
+        <div class="bl-current-remaining">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {{ subscription.days_remaining }} days remaining
+        </div>
+        {% elif subscription.status == 'suspended' %}
+        <div class="bl-current-remaining" style="color:#D97706;">Awaiting payment confirmation</div>
+        {% else %}
+        <div class="bl-current-remaining expired">Expired {{ subscription.expires_at|date:"M d, Y" }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Info badges: cards, payment method -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;background:#F1F5F9;border-radius:8px;font-size:11px;font-weight:700;color:#64748B;">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+            {{ subscription.num_cards }} card{{ subscription.num_cards|pluralize }}
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;background:#F1F5F9;border-radius:8px;font-size:11px;font-weight:700;color:#64748B;">
+            {% if subscription.payment_method == 'paypal' %}
+            <svg fill="none" viewBox="0 0 24 24" width="12" height="12"><path fill="currentColor" d="M19.554 9.488c.121.563.106 1.246-.04 2.063-.582 2.816-2.577 4.376-5.582 4.376h-.376a.68.68 0 00-.67.574l-.558 3.506a.68.68 0 01-.67.574H9.148a.406.406 0 01-.4-.467l.544-3.435a.68.68 0 01.67-.574h.45c2.742 0 4.888-1.113 5.516-4.333.262-1.343.126-2.465-.568-3.255z"/></svg>
+            PayPal
+            {% elif subscription.payment_method == 'bank_transfer' %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18"/></svg>
+            Bank Transfer
+            {% elif subscription.payment_method == 'ecocash' %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>
+            EcoCash{% if subscription.ecocash_phone %} ({{ subscription.ecocash_phone }}){% endif %}
+            {% endif %}
+        </span>
+    </div>
+
+    <!-- Subscription dates detail -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;background:#F8FAFC;border-radius:10px;padding:12px 14px;font-size:12px;">
+        <div>
+            <div style="font-weight:600;color:#94A3B8;font-size:10px;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:2px;">Subscribed</div>
+            <div style="font-weight:700;color:#1E293B;">{{ subscription.started_at|date:"M d, Y" }}</div>
+        </div>
+        <div>
+            <div style="font-weight:600;color:#94A3B8;font-size:10px;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:2px;">{% if subscription.status == 'cancelled' %}Access Ends{% elif subscription.is_active %}Expires{% elif subscription.status == 'suspended' %}Activates after payment{% else %}Expired{% endif %}</div>
+            <div style="font-weight:700;color:{% if subscription.status == 'cancelled' %}#D97706{% elif subscription.is_active %}#1E293B{% elif subscription.status == 'suspended' %}#D97706{% else %}#EF4444{% endif %};">{{ subscription.expires_at|date:"M d, Y" }}</div>
+        </div>
+        <div>
+            <div style="font-weight:600;color:#94A3B8;font-size:10px;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:2px;">Billing Cycle</div>
+            <div style="font-weight:700;color:#1E293B;">{{ subscription.get_billing_period_display }}</div>
+        </div>
+        <div>
+            <div style="font-weight:600;color:#94A3B8;font-size:10px;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:2px;">Total Billed</div>
+            <div style="font-weight:700;color:#1E293B;">{% if subscription.billing_period == 'yearly' %}${{ subscription.plan.yearly_price }}{% else %}${{ subscription.plan.price }}{% endif %} &times; {{ subscription.num_cards }} = ${{ total_billed }}</div>
+        </div>
+    </div>
+
+    {% if subscription.is_active %}
+    <div class="bl-current-progress">
+        <div class="bl-progress-bar">
+            <div class="bl-progress-fill" style="width: {% if subscription.billing_period == 'yearly' %}{% widthratio subscription.days_remaining 365 100 %}{% else %}{% widthratio subscription.days_remaining 30 100 %}{% endif %}%"></div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="bl-current-actions">
+        {% if subscription.status == 'active' and subscription.is_active %}
+        <form method="post" action="{% url 'companies:cancel_subscription' %}" style="display:contents;">
+            {% csrf_token %}
+            <button type="submit" class="bl-btn bl-btn-ghost-danger" onclick="return confirm('Cancel your company subscription? You can still use it until the period ends.')">Cancel Subscription</button>
+        </form>
+        {% else %}
+        <button type="button" class="bl-btn bl-btn-primary bl-renew-btn"
+                data-plan-slug="{{ subscription.plan.slug }}"
+                data-plan-name="{{ subscription.plan.name }}"
+                data-price-monthly="{{ subscription.plan.price }}"
+                data-price-yearly-mo="{{ subscription.plan.yearly_monthly_price }}"
+                data-price-yearly="{{ subscription.plan.yearly_price }}"
+                data-subscribe-url="{% url 'companies:subscribe' subscription.plan.slug %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="15" height="15"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/></svg>
+            Renew Subscription
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="bl-empty">
+    <div class="bl-empty-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" width="40" height="40"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+    </div>
+    <div class="bl-empty-title">No active plan</div>
+    <div class="bl-empty-desc">Pick a plan below to unlock features for {{ company.name }}.</div>
+</div>
+{% endif %}
+
+<!-- ─── Plans Grid ─── -->
+<div class="bl-card-info">
+    <div class="bl-card-info-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+    </div>
+    <div class="bl-card-info-text">
+        Your company has <strong>{{ card_count }} NFC card{{ card_count|pluralize }}</strong>. Plans are billed <strong>per card</strong> — each plan price is multiplied by your card count.
+    </div>
+</div>
+
+<div class="bl-plans-header">
+    <div class="bl-plans-title">{% if subscription %}Switch Plan{% else %}Choose a Plan{% endif %}</div>
+    <div class="bl-plans-subtitle">Per-card pricing. No hidden fees. Cancel anytime.</div>
+</div>
+
+<div class="bl-plans-toggle" id="billingToggle">
+    <button class="bl-toggle-btn active" data-period="monthly" onclick="switchPeriod('monthly')">Monthly</button>
+    <button class="bl-toggle-btn" data-period="yearly" onclick="switchPeriod('yearly')">
+        Yearly <span class="bl-toggle-save">Save up to 20%</span>
+    </button>
+</div>
+
+<div class="bl-plans-grid">
+    {% for plan in plans %}
+    <div class="bl-plan {% if plan.is_highlighted %}bl-plan-featured{% endif %} {% if subscription and plan.slug == subscription.plan.slug %}bl-plan-active{% endif %}">
+        {% if plan.badge_label %}
+        <div class="bl-plan-badge">{{ plan.badge_label }}</div>
+        {% endif %}
+        <div class="bl-plan-head">
+            <div class="bl-plan-name">{{ plan.name }}</div>
+            {% if plan.description %}
+            <div class="bl-plan-desc">{{ plan.description }}</div>
+            {% else %}
+            <div class="bl-plan-desc">{{ plan.name }} plan for your company</div>
+            {% endif %}
+        </div>
+        <div class="bl-plan-price">
+            <span class="bl-plan-currency">$</span>
+            <span class="bl-plan-amount" data-monthly="{{ plan.price }}" data-yearly="{{ plan.yearly_monthly_price }}">{{ plan.price }}</span>
+            <span class="bl-plan-period">/mo</span>
+        </div>
+        <div class="bl-plan-yearly-total" data-yearly-total="{{ plan.yearly_price }}" style="display:none;">
+            Billed as <strong>${{ plan.yearly_price }}/yr</strong> per card
+        </div>
+        <div class="bl-plan-features">
+            {% if plan.features.max_images %}
+            <div class="bl-feature">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Up to {{ plan.features.max_images }} images
+            </div>
+            {% endif %}
+            {% if plan.features.analytics %}
+            <div class="bl-feature">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Tap analytics &amp; insights
+            </div>
+            {% else %}
+            <div class="bl-feature disabled">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                No tap analytics
+            </div>
+            {% endif %}
+            {% if plan.features.custom_theme %}
+            <div class="bl-feature">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Custom theme colors
+            </div>
+            {% endif %}
+            <div class="bl-feature">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                NFC card linking
+            </div>
+            {% if plan.slug == 'pro' %}
+            <div class="bl-feature">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Priority support
+            </div>
+            {% endif %}
+        </div>
+        <div class="bl-plan-cta">
+            {% if subscription and plan.slug == subscription.plan.slug %}
+            <span class="bl-btn bl-btn-current">Current Plan</span>
+            {% else %}
+            <button type="button" class="bl-btn {% if plan.is_highlighted %}bl-btn-primary{% else %}bl-btn-outline{% endif %} bl-choose-plan-btn"
+                    data-plan-slug="{{ plan.slug }}"
+                    data-plan-name="{{ plan.name }}"
+                    data-price-monthly="{{ plan.price }}"
+                    data-price-yearly-mo="{{ plan.yearly_monthly_price }}"
+                    data-price-yearly="{{ plan.yearly_price }}"
+                    data-subscribe-url="{% url 'companies:subscribe' plan.slug %}">
+                {% if subscription %}Switch to {{ plan.name }}{% else %}Get Started{% endif %}
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ─── Billing History ─── -->
+{% if billing_events %}
+<div class="bl-history">
+    <div class="bl-history-header">
+        <div class="bl-history-title">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+            Billing History
+        </div>
+    </div>
+    <div class="bl-history-list">
+        {% for event in billing_events %}
+        <div class="bl-history-row">
+            <div class="bl-history-icon">
+                {% if event.event_type == 'subscribe' %}
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                {% elif event.event_type == 'upgrade' %}
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/></svg>
+                {% elif event.event_type == 'downgrade' %}
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"/></svg>
+                {% elif event.event_type == 'renew' %}
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/></svg>
+                {% elif event.event_type == 'cancel' %}
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                {% endif %}
+            </div>
+            <div class="bl-history-info">
+                <div class="bl-history-name">{{ event.get_event_type_display }}</div>
+                <div class="bl-history-meta">{{ event.plan.name|default:"—" }} · {{ event.created_at|date:"M d, Y" }}</div>
+            </div>
+            <div class="bl-history-amount {% if event.event_type == 'cancel' %}refund{% endif %}">
+                {% if event.amount %}${{ event.amount }}{% else %}—{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ─── Payment Method Modal ─── -->
+<div class="bl-modal-overlay" id="payModal">
+    <div class="bl-modal">
+        <div class="bl-modal-header">
+            <div class="bl-modal-title" id="modalTitle">Choose Payment Method</div>
+            <button class="bl-modal-close" onclick="closePayModal()">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="bl-modal-body">
+            <!-- Summary -->
+            <div class="bl-modal-summary">
+                <div class="bl-modal-summary-row">
+                    <span>Plan</span>
+                    <span id="modalPlanName">—</span>
+                </div>
+                <div class="bl-modal-summary-row">
+                    <span>Price per card</span>
+                    <span id="modalPerCard">—</span>
+                </div>
+                <div class="bl-modal-summary-row">
+                    <span>NFC cards</span>
+                    <span>× {{ card_count }}</span>
+                </div>
+                <div class="bl-modal-summary-row total">
+                    <span>Total</span>
+                    <span id="modalTotal">—</span>
+                </div>
+            </div>
+
+            <!-- Payment Tabs -->
+            <div class="bl-pay-tabs">
+                {% if 'paypal' in enabled_payment_methods %}
+                <div class="bl-pay-tab active" data-method="paypal" onclick="switchPayMethod('paypal')">
+                    <svg fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M19.554 9.488c.121.563.106 1.246-.04 2.063-.582 2.816-2.577 4.376-5.582 4.376h-.376a.68.68 0 00-.67.574l-.558 3.506a.68.68 0 01-.67.574H9.148a.406.406 0 01-.4-.467l.544-3.435a.68.68 0 01.67-.574h.45c2.742 0 4.888-1.113 5.516-4.333.262-1.343.126-2.465-.568-3.255a2.76 2.76 0 00-.813-.635z"/><path fill="currentColor" d="M10.7 8.562a.68.68 0 01.67-.574h4.168c.494 0 .955.032 1.377.098.12.019.238.041.352.067a4.6 4.6 0 01.803.283c.298-1.903-.002-3.2-.976-4.354C16.1 2.852 14.218 2.25 11.745 2.25H6.504a.68.68 0 00-.67.574L3.69 18.17a.563.563 0 00.556.65h4.05l1.017-6.436.387-2.454v-.002l1-1.366z"/></svg>
+                    PayPal
+                </div>
+                {% endif %}
+                {% if 'bank_transfer' in enabled_payment_methods %}
+                <div class="bl-pay-tab{% if 'paypal' not in enabled_payment_methods %} active{% endif %}" data-method="bank_transfer" onclick="switchPayMethod('bank_transfer')">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"/></svg>
+                    Bank Transfer
+                </div>
+                {% endif %}
+                {% if 'ecocash' in enabled_payment_methods %}
+                <div class="bl-pay-tab{% if 'paypal' not in enabled_payment_methods and 'bank_transfer' not in enabled_payment_methods %} active{% endif %}" data-method="ecocash" onclick="switchPayMethod('ecocash')">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>
+                    EcoCash
+                </div>
+                {% endif %}
+                {% if 'cash' in enabled_payment_methods %}
+                <div class="bl-pay-tab{% if 'paypal' not in enabled_payment_methods and 'bank_transfer' not in enabled_payment_methods and 'ecocash' not in enabled_payment_methods %} active{% endif %}" data-method="cash" onclick="switchPayMethod('cash')">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg>
+                    Cash Payment
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- PayPal Panel -->
+            {% if 'paypal' in enabled_payment_methods %}
+            <div class="bl-pay-panel active" data-panel="paypal">
+                <button type="button" class="bl-pay-submit paypal" onclick="submitSubscription('paypal')">
+                    <svg fill="none" viewBox="0 0 24 24" width="18" height="18"><path fill="#fff" d="M19.554 9.488c.121.563.106 1.246-.04 2.063-.582 2.816-2.577 4.376-5.582 4.376h-.376a.68.68 0 00-.67.574l-.558 3.506a.68.68 0 01-.67.574H9.148a.406.406 0 01-.4-.467l.544-3.435a.68.68 0 01.67-.574h.45c2.742 0 4.888-1.113 5.516-4.333.262-1.343.126-2.465-.568-3.255a2.76 2.76 0 00-.813-.635z"/><path fill="#fff" d="M10.7 8.562a.68.68 0 01.67-.574h4.168c.494 0 .955.032 1.377.098.12.019.238.041.352.067a4.6 4.6 0 01.803.283c.298-1.903-.002-3.2-.976-4.354C16.1 2.852 14.218 2.25 11.745 2.25H6.504a.68.68 0 00-.67.574L3.69 18.17a.563.563 0 00.556.65h4.05l1.017-6.436.387-2.454v-.002l1-1.366z"/></svg>
+                    Pay with PayPal
+                </button>
+                <div class="bl-pay-note">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                    Secure payment via PayPal
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Bank Transfer Panel -->
+            {% if 'bank_transfer' in enabled_payment_methods %}
+            <div class="bl-pay-panel{% if 'paypal' not in enabled_payment_methods %} active{% endif %}" data-panel="bank_transfer">
+                <div style="font-size:12px;font-weight:600;color:#64748B;margin-bottom:8px;">Transfer to our bank account:</div>
+                {% for acc in bank_accounts %}
+                {% if not forloop.first %}<hr style="border:none;border-top:1px dashed #e5e7eb;margin:10px 0;">{% endif %}
+                <div class="bl-pay-bank-grid">
+                    {% if bank_accounts.count > 1 %}<span class="bl-pay-bank-label" style="color:#6366F1;font-weight:700;">{% if acc.is_primary %}Primary{% else %}Account {{ forloop.counter }}{% endif %}</span><span class="bl-pay-bank-value"></span>{% endif %}
+                    <span class="bl-pay-bank-label">Bank</span>
+                    <span class="bl-pay-bank-value">{{ acc.bank_name }}</span>
+                    <span class="bl-pay-bank-label">Account</span>
+                    <span class="bl-pay-bank-value">{{ acc.account_number }}</span>
+                    <span class="bl-pay-bank-label">Name</span>
+                    <span class="bl-pay-bank-value">{{ acc.account_name }}</span>
+                    {% if acc.branch %}
+                    <span class="bl-pay-bank-label">Branch</span>
+                    <span class="bl-pay-bank-value">{{ acc.branch }}</span>
+                    {% endif %}
+                    {% if acc.swift_code %}
+                    <span class="bl-pay-bank-label">SWIFT</span>
+                    <span class="bl-pay-bank-value">{{ acc.swift_code }}</span>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div style="color:#ef4444;font-size:13px;">No bank accounts configured. Please contact support.</div>
+                {% endfor %}
+                <button type="button" class="bl-pay-submit bank" onclick="submitSubscription('bank_transfer')">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18"/></svg>
+                    Continue with Bank Transfer
+                </button>
+                <div class="bl-pay-note">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    You'll need to upload proof of payment. Activated within 24 hours.
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- EcoCash Panel -->
+            {% if 'ecocash' in enabled_payment_methods %}
+            <div class="bl-pay-panel{% if 'paypal' not in enabled_payment_methods and 'bank_transfer' not in enabled_payment_methods %} active{% endif %}" data-panel="ecocash">
+                <div style="font-size:12px;font-weight:600;color:#64748B;margin-bottom:8px;">Enter your EcoCash mobile number:</div>
+                <div class="bl-pay-ecocash-input">
+                    <div class="bl-pay-ecocash-prefix">
+                        <span style="font-size:15px;">&#x1F1FF;&#x1F1FC;</span> +263
+                    </div>
+                    <input type="tel" id="modalEcocashPhone" class="bl-pay-ecocash-phone" placeholder="7X XXX XXXX" pattern="0?7[1-9][0-9]{7}">
+                </div>
+                <button type="button" class="bl-pay-submit ecocash" onclick="submitSubscription('ecocash')">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>
+                    Pay with EcoCash
+                </button>
+                <div class="bl-pay-note" style="color:#059669;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                    A prompt will be sent to your phone to authorize
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Cash Payment Panel -->
+            {% if 'cash' in enabled_payment_methods %}
+            <div class="bl-pay-panel{% if 'paypal' not in enabled_payment_methods and 'bank_transfer' not in enabled_payment_methods and 'ecocash' not in enabled_payment_methods %} active{% endif %}" data-panel="cash">
+                <div style="font-size:12px;font-weight:600;color:#64748B;margin-bottom:8px;">Pay with cash on delivery or in-person:</div>
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;margin-bottom:16px;">
+                    <div style="display:flex;align-items:start;gap:12px;">
+                        <svg style="width:20px;height:20px;color:#6366F1;flex-shrink:0;margin-top:2px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div style="font-size:12px;color:#64748B;line-height:1.5;">
+                            Your subscription will be marked as <strong>pending</strong> until you complete the cash payment. Once payment is received, an admin will approve your subscription and it will be activated.
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="bl-pay-submit" style="background:linear-gradient(135deg,#10b981,#059669);" onclick="submitSubscription('cash')">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg>
+                    Continue with Cash Payment
+                </button>
+                <div class="bl-pay-note" style="color:#D97706;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Requires admin approval after payment is received. Activated within 24 hours.
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block company_scripts %}
+<script>
+var currentPeriod = 'monthly';
+var cardCount = {{ card_count }};
+var selectedPlan = null;
+
+function switchPeriod(period) {
+    currentPeriod = period;
+    document.querySelectorAll('.bl-toggle-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-period') === period);
+    });
+    document.querySelectorAll('.bl-plan-amount').forEach(function(el) {
+        var price = period === 'yearly' ? el.getAttribute('data-yearly') : el.getAttribute('data-monthly');
+        el.textContent = price;
+    });
+    document.querySelectorAll('.bl-plan-period').forEach(function(el) {
+        el.textContent = period === 'yearly' ? '/mo (billed yearly)' : '/mo';
+    });
+    document.querySelectorAll('.bl-plan-yearly-total').forEach(function(el) {
+        el.style.display = period === 'yearly' ? 'block' : 'none';
+    });
+}
+
+/* ── Modal ── */
+function openPayModal(btn) {
+    selectedPlan = {
+        slug: btn.getAttribute('data-plan-slug'),
+        name: btn.getAttribute('data-plan-name'),
+        priceMonthly: parseFloat(btn.getAttribute('data-price-monthly')),
+        priceYearlyMo: parseFloat(btn.getAttribute('data-price-yearly-mo')),
+        priceYearly: parseFloat(btn.getAttribute('data-price-yearly')),
+        subscribeUrl: btn.getAttribute('data-subscribe-url'),
+    };
+    updateModalSummary();
+    document.getElementById('payModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePayModal() {
+    document.getElementById('payModal').classList.remove('open');
+    document.body.style.overflow = '';
+    selectedPlan = null;
+}
+
+function updateModalSummary() {
+    if (!selectedPlan) return;
+    var perCard, periodLabel, total;
+    if (currentPeriod === 'yearly') {
+        perCard = selectedPlan.priceYearly;
+        periodLabel = '/yr';
+    } else {
+        perCard = selectedPlan.priceMonthly;
+        periodLabel = '/mo';
+    }
+    total = (perCard * cardCount).toFixed(2);
+    document.getElementById('modalTitle').textContent = 'Subscribe to ' + selectedPlan.name;
+    document.getElementById('modalPlanName').textContent = selectedPlan.name + ' (' + currentPeriod + ')';
+    document.getElementById('modalPerCard').textContent = '$' + perCard.toFixed(2) + periodLabel;
+    document.getElementById('modalTotal').textContent = '$' + total + periodLabel;
+}
+
+/* ── Payment method tabs ── */
+function switchPayMethod(method) {
+    document.querySelectorAll('.bl-pay-tab').forEach(function(t) {
+        t.classList.toggle('active', t.getAttribute('data-method') === method);
+    });
+    document.querySelectorAll('.bl-pay-panel').forEach(function(p) {
+        p.classList.toggle('active', p.getAttribute('data-panel') === method);
+    });
+}
+
+/* ── Submit ── */
+function submitSubscription(paymentMethod) {
+    if (!selectedPlan) return;
+    var url = selectedPlan.subscribeUrl + '?period=' + currentPeriod + '&payment_method=' + paymentMethod;
+    if (paymentMethod === 'ecocash') {
+        var phone = document.getElementById('modalEcocashPhone').value.replace(/[\s\-\(\)]/g, '');
+        if (!phone.match(/^0?7[1-9]\d{7}$/)) {
+            document.getElementById('modalEcocashPhone').style.borderColor = '#EF4444';
+            document.getElementById('modalEcocashPhone').focus();
+            alert('Please enter a valid EcoCash phone number (e.g. 0771 234 567)');
+            return;
+        }
+        url += '&ecocash_phone=' + encodeURIComponent(phone);
+    }
+    window.location.href = url;
+}
+
+/* ── Plan buttons ── */
+document.querySelectorAll('.bl-choose-plan-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() { openPayModal(btn); });
+});
+
+/* ── Renew button (same modal, pre-filled with current plan) ── */
+var renewBtn = document.querySelector('.bl-renew-btn');
+if (renewBtn) {
+    renewBtn.addEventListener('click', function() { openPayModal(renewBtn); });
+}
+
+/* ── Close modal on overlay click ── */
+document.getElementById('payModal').addEventListener('click', function(e) {
+    if (e.target === this) closePayModal();
+});
+
+/* ── Close modal on Escape ── */
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePayModal();
+});
+</script>
+{% endblock %}

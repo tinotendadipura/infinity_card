@@ -1,0 +1,434 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Company Dashboard{% endblock %}</title>
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
+    background: #F1F5F9; color: #1E293B; min-height: 100vh;
+    display: flex;
+}
+
+/* ── Sidebar ── */
+.cp-sidebar {
+    width: 260px; min-height: 100vh;
+    background: #fff; border-right: 1px solid #E2E8F0;
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; z-index: 50;
+    transition: transform 0.25s;
+}
+.cp-sidebar-brand {
+    padding: 16px 18px; border-bottom: 1px solid #F1F5F9;
+    display: flex; align-items: center; gap: 14px;
+    text-decoration: none;
+}
+.cp-sidebar-logo {
+    width: 50px; height: 50px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.cp-sidebar-logo img { width: 100%; height: 100%; object-fit: contain; }
+.cp-sidebar-brand-name { font-size: 14px; font-weight: 800; color: #1E293B; line-height: 1.2; }
+.cp-sidebar-brand-sub { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+
+.cp-sidebar-nav { 
+    padding: 12px; 
+    flex: 1; 
+    overflow-y: auto; 
+    overflow-x: hidden;
+    max-height: calc(100vh - 200px);
+}
+.cp-sidebar-section { margin-bottom: 20px; }
+.cp-sidebar-label {
+    font-size: 10px; font-weight: 700; color: #94A3B8;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 0 12px; margin-bottom: 6px;
+}
+.cp-nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 10px;
+    font-size: 13px; font-weight: 600; color: #64748B;
+    text-decoration: none; transition: all 0.15s;
+    margin-bottom: 2px;
+}
+.cp-nav-item:hover { background: #F8FAFC; color: #1E293B; }
+.cp-nav-item.active {
+    background: linear-gradient(135deg, #EEF2FF, #E8E0FF);
+    color: #4F46E5;
+}
+.cp-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.cp-nav-badge {
+    margin-left: auto; font-size: 10px; font-weight: 700;
+    background: #EEF2FF; color: #4F46E5;
+    padding: 1px 8px; border-radius: 10px;
+}
+
+.cp-sidebar-footer {
+    padding: 16px 20px; border-top: 1px solid #F1F5F9;
+    display: flex; align-items: center; gap: 10px;
+}
+.cp-sidebar-avatar {
+    width: 32px; height: 32px; border-radius: 10px;
+    background: linear-gradient(135deg, #C7D2FE, #A5B4FC);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; color: #4F46E5;
+}
+.cp-sidebar-user { font-size: 12px; font-weight: 600; color: #1E293B; }
+.cp-sidebar-email { font-size: 10px; color: #94A3B8; }
+.cp-sidebar-logout {
+    margin-left: auto; color: #94A3B8; text-decoration: none;
+    display: flex; align-items: center;
+}
+.cp-sidebar-logout:hover { color: #EF4444; }
+.cp-sidebar-logout svg { width: 18px; height: 18px; }
+
+/* ── Main Content ── */
+.cp-main {
+    margin-left: 260px; flex: 1; min-height: 100vh;
+    display: flex; flex-direction: column;
+}
+.cp-topbar {
+    background: #fff; border-bottom: 1px solid #E2E8F0;
+    padding: 16px 32px;
+    display: flex; align-items: center; gap: 16px;
+}
+.cp-topbar-toggle {
+    display: none; background: none; border: none; cursor: pointer;
+    padding: 4px; color: #64748B;
+}
+.cp-topbar-toggle svg { width: 22px; height: 22px; }
+.cp-topbar h1 { font-size: 20px; font-weight: 800; color: #1E293B; margin: 0; }
+.cp-topbar-sub { font-size: 12px; color: #94A3B8; margin-left: 4px; }
+.cp-topbar-actions { margin-left: auto; display: flex; gap: 8px; }
+
+.cp-content { padding: 28px 32px; flex: 1; }
+
+/* ── Cards / Sections ── */
+.cp-card {
+    background: #fff; border: 1px solid #E2E8F0;
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 20px;
+}
+.cp-card-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #F1F5F9;
+}
+.cp-card-head-right { margin-left: auto; }
+.cp-card-ico {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.cp-card-title { font-size: 15px; font-weight: 700; color: #1E293B; }
+.cp-card-sub { font-size: 12px; color: #64748B; margin-top: 1px; }
+.cp-card-body { padding: 20px; }
+
+/* ── Stat Grid ── */
+.cp-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px; margin-bottom: 24px;
+}
+.cp-stat {
+    background: #fff; border: 1px solid #E2E8F0;
+    border-radius: 14px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.cp-stat-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.cp-stat-ico {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+}
+.cp-stat-ico svg { width: 20px; height: 20px; }
+.cp-stat-label { font-size: 12px; font-weight: 600; color: #64748B; }
+.cp-stat-num { font-size: 28px; font-weight: 800; color: #1E293B; line-height: 1; }
+.cp-stat-change { font-size: 11px; font-weight: 600; margin-top: 4px; }
+.cp-stat-change--up { color: #059669; }
+.cp-stat-change--neutral { color: #94A3B8; }
+
+/* ── Table ── */
+.cp-table { width: 100%; border-collapse: collapse; }
+.cp-table th {
+    text-align: left; font-size: 11px; font-weight: 700;
+    color: #64748B; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 10px 16px; border-bottom: 1.5px solid #F1F5F9;
+    background: #FAFBFE;
+}
+.cp-table td {
+    padding: 12px 16px; font-size: 13px; color: #1E293B;
+    border-bottom: 1px solid #F8FAFC; vertical-align: middle;
+}
+.cp-table tr:last-child td { border-bottom: none; }
+.cp-table tr:hover td { background: #FAFBFC; }
+
+/* ── Badges ── */
+.cp-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.2px;
+}
+.cp-badge--admin { background: #EEF2FF; color: #4F46E5; }
+.cp-badge--employee { background: #F0FDF4; color: #059669; }
+.cp-badge--pending { background: #FFF7ED; color: #D97706; }
+.cp-badge--joined { background: #ECFDF5; color: #059669; }
+.cp-badge--paid { background: #ECFDF5; color: #059669; }
+.cp-badge--processing { background: #EFF6FF; color: #2563EB; }
+.cp-badge--shipped { background: #F0F9FF; color: #0891B2; }
+.cp-badge--delivered { background: #ECFDF5; color: #059669; }
+.cp-badge--cancelled { background: #FEF2F2; color: #DC2626; }
+.cp-badge--assigned { background: #EEF2FF; color: #4F46E5; }
+.cp-badge--active { background: #ECFDF5; color: #059669; }
+.cp-badge--unassigned { background: #F1F5F9; color: #64748B; }
+.cp-badge--deactivated { background: #FEF2F2; color: #DC2626; }
+.cp-badge-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor; flex-shrink: 0;
+}
+
+/* ── Buttons ── */
+.cp-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: 10px;
+    font-size: 13px; font-weight: 700;
+    text-decoration: none; cursor: pointer;
+    border: none; font-family: inherit;
+    transition: all 0.15s;
+}
+.cp-btn--sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+.cp-btn--primary {
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+}
+.cp-btn--primary:hover { box-shadow: 0 4px 16px rgba(99,102,241,0.35); transform: translateY(-1px); }
+.cp-btn--secondary { background: #fff; border: 1.5px solid #E2E8F0; color: #475569; }
+.cp-btn--secondary:hover { background: #F8FAFC; border-color: #CBD5E1; }
+.cp-btn--success { background: #059669; color: #fff; }
+.cp-btn--success:hover { background: #047857; }
+.cp-btn--danger { background: #FEF2F2; border: 1.5px solid #FECACA; color: #DC2626; }
+.cp-btn--danger:hover { background: #FEE2E2; }
+.cp-btn--ghost { background: transparent; color: #64748B; padding: 6px 10px; }
+.cp-btn--ghost:hover { background: #F1F5F9; color: #1E293B; }
+.cp-btn svg { width: 16px; height: 16px; }
+
+/* ── Form fields ── */
+.cp-form-group { margin-bottom: 16px; }
+.cp-form-group label {
+    display: block; font-size: 12px; font-weight: 700;
+    color: #475569; margin-bottom: 6px;
+}
+.cp-form-group input,
+.cp-form-group select,
+.cp-form-group textarea {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid #E2E8F0; border-radius: 10px;
+    font-size: 14px; font-family: inherit;
+    color: #1E293B; background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.cp-form-group input:focus,
+.cp-form-group select:focus,
+.cp-form-group textarea:focus {
+    outline: none; border-color: #6366F1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.08);
+}
+.cp-form-error { font-size: 11px; color: #EF4444; margin-top: 4px; }
+.cp-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── Empty state ── */
+.cp-empty { text-align: center; padding: 48px 20px; }
+.cp-empty-ico {
+    width: 64px; height: 64px; border-radius: 18px;
+    background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+}
+.cp-empty-ico svg { width: 28px; height: 28px; color: #6366F1; }
+.cp-empty h3 { font-size: 16px; font-weight: 700; color: #1E293B; margin-bottom: 4px; }
+.cp-empty p { font-size: 13px; color: #64748B; margin: 0 0 16px; }
+
+/* ── Product cards grid ── */
+.cp-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.cp-product {
+    background: #fff; border: 1.5px solid #E2E8F0;
+    border-radius: 16px; overflow: hidden;
+    transition: all 0.2s; cursor: pointer;
+}
+.cp-product:hover { border-color: #6366F1; box-shadow: 0 4px 20px rgba(99,102,241,0.12); transform: translateY(-2px); }
+.cp-product-img {
+    height: 160px; background: linear-gradient(135deg, #F8FAFC, #EEF2FF);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.cp-product-img img { max-height: 140px; object-fit: contain; }
+.cp-product-body { padding: 16px; }
+.cp-product-name { font-size: 15px; font-weight: 700; color: #1E293B; }
+.cp-product-material { font-size: 12px; color: #64748B; margin-top: 2px; }
+.cp-product-price { font-size: 20px; font-weight: 800; color: #4F46E5; margin-top: 8px; }
+.cp-product-price span { font-size: 12px; font-weight: 600; color: #94A3B8; }
+
+/* ── Actions row ── */
+.cp-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ── Page header ── */
+.cp-page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.cp-page-header h2 { font-size: 18px; font-weight: 800; color: #1E293B; margin: 0; }
+.cp-page-header-right { margin-left: auto; display: flex; gap: 8px; }
+
+/* ── Messages ── */
+.cp-messages { margin-bottom: 16px; }
+.cp-msg {
+    padding: 12px 16px; border-radius: 10px;
+    font-size: 13px; font-weight: 600; margin-bottom: 8px;
+}
+.cp-msg--success { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+.cp-msg--error { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+.cp-msg--info { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .cp-sidebar { transform: translateX(-100%); }
+    .cp-sidebar.open { transform: translateX(0); }
+    .cp-main { margin-left: 0; }
+    .cp-topbar-toggle { display: block; }
+    .cp-content { padding: 20px 16px; }
+    .cp-topbar { padding: 14px 16px; }
+    .cp-stats { grid-template-columns: 1fr 1fr; }
+    .cp-products { grid-template-columns: 1fr; }
+    .cp-form-row { grid-template-columns: 1fr; }
+    .cp-sidebar-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.3); z-index: 40;
+    }
+    .cp-sidebar.open + .cp-sidebar-overlay { display: block; }
+}
+</style>
+{% block company_head %}{% endblock %}
+</head>
+<body>
+<!-- Sidebar -->
+<aside class="cp-sidebar" id="cpSidebar">
+    <a href="{% url 'companies:dashboard' %}" class="cp-sidebar-brand">
+        <div class="cp-sidebar-logo">
+            <img src="{% static 'images/logo_colour.png' %}" alt="InfinityCard">
+        </div>
+        <div>
+            <div class="cp-sidebar-brand-name">{{ company.name }}</div>
+            <div class="cp-sidebar-brand-sub">Business Dashboard</div>
+        </div>
+    </a>
+
+    <nav class="cp-sidebar-nav">
+        <div class="cp-sidebar-section">
+            <div class="cp-sidebar-label">Main</div>
+            <a href="{% url 'companies:dashboard' %}" class="cp-nav-item {% block nav_dashboard %}{% endblock %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+                Overview
+            </a>
+        </div>
+
+        <div class="cp-sidebar-section">
+            <div class="cp-sidebar-label">Cards</div>
+            <a href="{% url 'companies:order_cards' %}" class="cp-nav-item {% block nav_order_cards %}{% endblock %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+                Order Cards
+            </a>
+            <a href="{% url 'companies:orders' %}" class="cp-nav-item {% block nav_orders %}{% endblock %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+                My Orders
+            </a>
+            <a href="{% url 'companies:card_assignments' %}" class="cp-nav-item {% block nav_assignments %}{% endblock %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 004.5 9.75v7.5a2.25 2.25 0 002.25 2.25h7.5a2.25 2.25 0 002.25-2.25v-7.5a2.25 2.25 0 00-2.25-2.25h-.75m0-3l-3-3m0 0l-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 012.25 2.25v7.5a2.25 2.25 0 01-2.25 2.25h-7.5a2.25 2.25 0 01-2.25-2.25v-.75"/></svg>
+                Card Assignments
+            </a>
+        </div>
+
+        <div class="cp-sidebar-section">
+            <div class="cp-sidebar-label">Team</div>
+            <a href="{% url 'companies:employees' %}" class="cp-nav-item {% block nav_employees %}{% endblock %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                Employees
+            </a>
+            <a href="{% url 'companies:invite' %}" class="cp-nav-item {% block nav_invite %}{% endblock %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg>
+                Invite People
+            </a>
+        </div>
+
+        <div class="cp-sidebar-section">
+            <div class="cp-sidebar-label">Account</div>
+            <a href="{% url 'companies:user_profile' %}" class="cp-nav-item {% block nav_user_profile %}{% endblock %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                My Profile
+            </a>
+            <a href="{% url 'companies:change_password' %}" class="cp-nav-item {% block nav_change_password %}{% endblock %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                Change Password
+            </a>
+            <a href="{% url 'companies:billing' %}" class="cp-nav-item {% block nav_billing %}{% endblock %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+                Billing & Plans
+            </a>
+            <a href="{% url 'companies:settings' %}" class="cp-nav-item {% block nav_settings %}{% endblock %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Company Settings
+            </a>
+        </div>
+    </nav>
+
+    <div class="cp-sidebar-footer">
+        <div class="cp-sidebar-avatar">{{ user.email|first|upper }}</div>
+        <div>
+            <div class="cp-sidebar-user">{{ user.email }}</div>
+            <div class="cp-sidebar-email">Company Admin</div>
+        </div>
+        <a href="{% url 'accounts:logout' %}" class="cp-sidebar-logout" title="Log out">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
+        </a>
+    </div>
+</aside>
+<div class="cp-sidebar-overlay" id="cpOverlay"></div>
+
+<!-- Main Content -->
+<div class="cp-main">
+    <div class="cp-topbar">
+        <button class="cp-topbar-toggle" id="cpToggle" aria-label="Toggle sidebar">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+        </button>
+        <div>
+            <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+        </div>
+        <div class="cp-topbar-actions">
+            {% block topbar_actions %}{% endblock %}
+        </div>
+    </div>
+
+    <div class="cp-content">
+        {% if messages %}
+        <div class="cp-messages">
+            {% for message in messages %}
+            <div class="cp-msg cp-msg--{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block company_content %}{% endblock %}
+    </div>
+</div>
+
+<script>
+const toggle = document.getElementById('cpToggle');
+const sidebar = document.getElementById('cpSidebar');
+const overlay = document.getElementById('cpOverlay');
+if (toggle) {
+    toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    overlay.addEventListener('click', () => sidebar.classList.remove('open'));
+}
+</script>
+{% block company_scripts %}{% endblock %}
+</body>
+</html>

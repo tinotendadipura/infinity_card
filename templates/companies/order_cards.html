@@ -1,0 +1,49 @@
+{% extends "companies/company_base.html" %}
+{% block title %}Order NFC Cards — {{ company.name }}{% endblock %}
+{% block nav_order_cards %}active{% endblock %}
+{% block page_title %}Order NFC Cards{% endblock %}
+
+{% block company_content %}
+
+<div style="margin-bottom:24px">
+    <p style="font-size:14px;color:#64748B;margin:0">Choose a card type to order for your team. Bulk pricing available.</p>
+</div>
+
+{% if products %}
+<div class="cp-products">
+    {% for product in products %}
+    <a href="{% url 'companies:order_checkout' product.slug %}" class="cp-product" style="text-decoration:none">
+        <div class="cp-product-img">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="#94A3B8" stroke-width="1" width="64" height="64"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+            {% endif %}
+        </div>
+        <div class="cp-product-body">
+            <div class="cp-product-name">{{ product.name }}</div>
+            <div class="cp-product-material">{{ product.get_material_display }}</div>
+            {% if product.description %}
+            <p style="font-size:12px;color:#64748B;margin:6px 0 0;line-height:1.5">{{ product.description|truncatewords:20 }}</p>
+            {% endif %}
+            <div class="cp-product-price">${{ product.price }} <span>per card</span></div>
+            <div style="margin-top:12px">
+                <span class="cp-btn cp-btn--sm cp-btn--primary" style="width:100%;justify-content:center">Order Now</span>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="cp-card">
+    <div class="cp-empty">
+        <div class="cp-empty-ico">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+        </div>
+        <h3>No card products available</h3>
+        <p>Card products will be available soon. Check back later.</p>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

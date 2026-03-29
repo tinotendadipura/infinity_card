@@ -1,0 +1,116 @@
+{% extends "subscriptions/admin_base.html" %}
+{% block title %}Users{% endblock %}
+{% block nav_users %}active{% endblock %}
+{% block page_title %}User Accounts{% endblock %}
+
+{% block admin_content %}
+
+<div class="sa-card">
+    <div class="sa-filter">
+        <form method="get" action="{% url 'subscriptions:admin_users' %}" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%">
+            <input type="text" name="q" value="{{ q }}" placeholder="Search by email, username, name..." class="sa-search" style="flex:1;min-width:200px">
+            <a class="sa-filter-tab {% if not status_filter %}active{% endif %}" href="{% url 'subscriptions:admin_users' %}?q={{ q }}">All</a>
+            <a class="sa-filter-tab {% if status_filter == 'active' %}active{% endif %}" href="{% url 'subscriptions:admin_users' %}?q={{ q }}&status=active">Active</a>
+            <a class="sa-filter-tab {% if status_filter == 'inactive' %}active{% endif %}" href="{% url 'subscriptions:admin_users' %}?q={{ q }}&status=inactive">Inactive</a>
+            <a class="sa-filter-tab {% if type_filter == 'personal' %}active{% endif %}" href="{% url 'subscriptions:admin_users' %}?q={{ q }}&status={{ status_filter }}&type=personal">Personal</a>
+            <a class="sa-filter-tab {% if type_filter == 'business' %}active{% endif %}" href="{% url 'subscriptions:admin_users' %}?q={{ q }}&status={{ status_filter }}&type=business">Business</a>
+            <button type="submit" class="sa-btn sa-btn-primary sa-btn-sm">Search</button>
+        </form>
+    </div>
+    <table class="sa-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Staff</th>
+                <th>Joined</th>
+                <th>Last Login</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>
+                    <div class="sa-user-cell">
+                        <div class="sa-user-avatar">{{ u.username|first|upper }}</div>
+                        <div class="sa-user-info">
+                            <div class="sa-user-name">{{ u.username }}</div>
+                            <div class="sa-user-email">{{ u.email }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    {% if u.account_type == 'business' %}
+                    <span class="sa-badge sa-badge-purple">Business</span>
+                    {% elif u.account_type == 'personal' %}
+                    <span class="sa-badge sa-badge-blue">Personal</span>
+                    {% else %}
+                    <span class="sa-badge sa-badge-gray">Not Set</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if u.is_active %}
+                    <span class="sa-badge sa-badge-green">Active</span>
+                    {% else %}
+                    <span class="sa-badge sa-badge-red">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if u.is_superuser %}
+                    <span class="sa-badge sa-badge-purple">Superuser</span>
+                    {% elif u.is_staff %}
+                    <span class="sa-badge sa-badge-blue">Staff</span>
+                    {% else %}
+                    <span style="color:#94A3B8">—</span>
+                    {% endif %}
+                </td>
+                <td style="font-size:12px;color:#64748B">{{ u.date_joined|date:"M d, Y" }}</td>
+                <td style="font-size:12px;color:#64748B">{{ u.last_login|date:"M d, Y H:i"|default:"Never" }}</td>
+                <td>
+                    <div class="sa-actions">
+                        {% if u.is_active %}
+                        <form method="post" action="{% url 'subscriptions:admin_user_action' u.pk %}" onsubmit="return confirm('Deactivate {{ u.email }}?')">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="deactivate">
+                            <button class="sa-btn sa-btn-danger sa-btn-sm">Deactivate</button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'subscriptions:admin_user_action' u.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="activate">
+                            <button class="sa-btn sa-btn-success sa-btn-sm">Activate</button>
+                        </form>
+                        {% endif %}
+                        {% if not u.is_superuser %}
+                            {% if u.is_staff %}
+                            <form method="post" action="{% url 'subscriptions:admin_user_action' u.pk %}" onsubmit="return confirm('Remove staff access for {{ u.email }}?')">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="remove_staff">
+                                <button class="sa-btn sa-btn-warning sa-btn-sm">Remove Staff</button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'subscriptions:admin_user_action' u.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="make_staff">
+                                <button class="sa-btn sa-btn-ghost sa-btn-sm">Make Staff</button>
+                            </form>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="sa-empty">No users found</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if users %}
+    <div class="sa-card-footer">
+        Showing {{ users|length }} user{{ users|length|pluralize }}
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

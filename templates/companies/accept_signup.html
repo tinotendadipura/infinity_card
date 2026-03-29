@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Create Account — Join {{ company.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.as-wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 40px 20px 48px;
+}
+.as-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+.as-logo {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 24px rgba(99,102,241,0.2);
+}
+.as-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+.as-logo svg { width: 26px; height: 26px; color: #fff; }
+.as-header h1 {
+    font-size: 20px; font-weight: 800; color: #1E293B; margin: 0 0 6px;
+}
+.as-header p {
+    font-size: 13px; color: #64748B; margin: 0;
+}
+.as-card {
+    background: #fff; border: 1px solid #F1F5F9;
+    border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.as-group { margin-bottom: 14px; }
+.as-group label {
+    display: block; font-size: 12px; font-weight: 700;
+    color: #475569; margin-bottom: 5px;
+}
+.as-group input {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid #E2E8F0; border-radius: 10px;
+    font-size: 14px; font-family: inherit;
+    color: #1E293B; background: #FAFBFC;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.as-group input:focus {
+    outline: none; border-color: #6366F1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.08);
+}
+.as-group .err { font-size: 11px; color: #EF4444; margin-top: 4px; }
+.as-email-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 8px;
+    background: #EEF2FF; color: #4F46E5;
+    font-size: 12px; font-weight: 600;
+    margin-bottom: 16px;
+}
+.as-email-badge svg { width: 14px; height: 14px; }
+.as-submit {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 12px;
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    color: #fff; border: none; border-radius: 12px;
+    font-size: 14px; font-weight: 700; font-family: inherit;
+    cursor: pointer; margin-top: 20px;
+    box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+    transition: all 0.15s;
+}
+.as-submit:hover { box-shadow: 0 6px 24px rgba(99,102,241,0.4); transform: translateY(-1px); }
+.as-submit svg { width: 16px; height: 16px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="as-wrap">
+    <div class="as-header">
+        <div class="as-logo">
+            {% if company.logo %}
+            <img src="{{ company.logo.url }}" alt="{{ company.name }}">
+            {% else %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+            {% endif %}
+        </div>
+        <h1>Create Your Account</h1>
+        <p>Join <strong>{{ company.name }}</strong> on InfinityCard</p>
+    </div>
+
+    <div class="as-card">
+        <div class="as-email-badge">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+            {{ membership.invite_email }}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            {% if field.name != 'email' %}
+            <div class="as-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<div class="err">{{ field.errors.0 }}</div>{% endif %}
+            </div>
+            {% endif %}
+            {% endfor %}
+
+            <button type="submit" class="as-submit">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg>
+                Create Account &amp; Join {{ company.name }}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

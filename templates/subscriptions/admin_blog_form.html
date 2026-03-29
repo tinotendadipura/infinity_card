@@ -1,0 +1,396 @@
+{% extends 'subscriptions/admin_base.html' %}
+
+{% block title %}{% if editing %}Edit Post{% else %}New Post{% endif %}{% endblock %}
+{% block page_title %}{% if editing %}Edit Post{% else %}New Blog Post{% endif %}{% endblock %}
+{% block nav_blog %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+.bf-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+.bf-field{margin-bottom:18px}
+.bf-label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.bf-input,.bf-select,.bf-textarea{width:100%;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;font-family:inherit;color:#1E293B;background:#fff;transition:border-color .15s}
+.bf-input:focus,.bf-select:focus,.bf-textarea:focus{outline:none;border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+.bf-textarea{min-height:400px;resize:vertical;font-family:'Courier New',monospace;font-size:13px;line-height:1.6}
+.bf-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.bf-hint{font-size:11px;color:#94A3B8;margin-top:4px}
+.bf-sidebar-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:16px}
+.bf-sidebar-title{font-size:13px;font-weight:700;color:#0F172A;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.bf-sidebar-title svg{width:16px;height:16px;color:#64748B}
+.bf-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:#475569}
+.bf-toggle input{width:18px;height:18px;accent-color:#4F46E5}
+.bf-cover-preview{width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#F8FAFC;border:2px dashed #E2E8F0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#94A3B8;font-size:12px;margin-bottom:10px;position:relative;cursor:pointer}
+.bf-cover-preview img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.bf-cover-preview svg{width:32px;height:32px}
+.bf-actions{display:flex;gap:10px;padding-top:16px;border-top:1px solid #E2E8F0;margin-top:8px}
+.bf-toolbar{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-bottom:none;border-radius:10px 10px 0 0}
+.bf-toolbar button{background:none;border:1px solid transparent;border-radius:6px;padding:6px 8px;cursor:pointer;color:#475569;display:flex;align-items:center;font-size:12px;gap:4px;font-family:inherit;transition:.15s}
+.bf-toolbar button:hover{background:#E2E8F0;color:#0F172A}
+.bf-toolbar .sep{width:1px;background:#E2E8F0;margin:0 4px;align-self:stretch}
+.bf-textarea.with-toolbar{border-radius:0 0 10px 10px;border-top-color:#E2E8F0}
+
+/* ── Blog images ── */
+.bf-images-card{background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:24px;margin-top:20px}
+.bf-images-title{font-size:14px;font-weight:700;color:#0F172A;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.bf-images-title svg{width:18px;height:18px;color:#6366F1}
+.bf-images-subtitle{font-size:12px;color:#94A3B8;margin-bottom:18px}
+.bf-img-list{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.bf-img-row{display:flex;align-items:center;gap:10px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px 12px}
+.bf-img-row .bf-img-thumb{width:56px;height:42px;border-radius:6px;object-fit:cover;border:1px solid #E2E8F0;flex-shrink:0}
+.bf-img-row .bf-img-info{flex:1;min-width:0}
+.bf-img-row .bf-img-name{font-size:12px;font-weight:600;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bf-img-row .bf-img-caption-input{width:100%;padding:5px 8px;border:1px solid #E2E8F0;border-radius:6px;font-size:11px;font-family:inherit;color:#475569;margin-top:4px}
+.bf-img-row .bf-img-caption-input:focus{outline:none;border-color:#818CF8}
+.bf-img-actions{display:flex;gap:4px;flex-shrink:0}
+.bf-img-actions button{background:none;border:1px solid #E2E8F0;border-radius:6px;padding:5px 7px;cursor:pointer;color:#64748B;display:flex;align-items:center;transition:.15s;font-size:11px;gap:3px;font-family:inherit}
+.bf-img-actions button:hover{background:#EEF2FF;color:#4F46E5;border-color:#C7D2FE}
+.bf-img-actions button.bf-img-del{color:#EF4444}
+.bf-img-actions button.bf-img-del:hover{background:#FEF2F2;border-color:#FECACA}
+.bf-img-dropzone{border:2px dashed #CBD5E1;border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:.2s;background:#FAFBFC}
+.bf-img-dropzone:hover{border-color:#818CF8;background:#EEF2FF}
+.bf-img-dropzone svg{width:28px;height:28px;color:#94A3B8;margin:0 auto 8px}
+.bf-img-dropzone span{font-size:13px;color:#64748B;font-weight:500}
+.bf-img-dropzone small{display:block;font-size:11px;color:#94A3B8;margin-top:4px}
+.bf-existing-img{display:flex;align-items:center;gap:10px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.bf-existing-img img{width:56px;height:42px;border-radius:6px;object-fit:cover;border:1px solid #E2E8F0;flex-shrink:0}
+.bf-existing-img .bf-ei-info{flex:1;min-width:0;font-size:12px;color:#475569}
+.bf-existing-img .bf-ei-info strong{color:#0F172A;display:block;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bf-existing-img .bf-ei-actions{display:flex;gap:4px;flex-shrink:0}
+@media(max-width:900px){.bf-grid{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="bf-grid">
+        <!-- Main column -->
+        <div>
+            <div class="sa-card" style="padding:24px">
+                <div class="bf-field">
+                    <label class="bf-label">Title</label>
+                    <input type="text" name="title" class="bf-input" placeholder="Enter post title..." value="{% if editing %}{{ post.title }}{% elif form_data %}{{ form_data.title }}{% endif %}" required style="font-size:18px;font-weight:600;padding:14px 16px">
+                </div>
+
+                <div class="bf-field">
+                    <label class="bf-label">Excerpt</label>
+                    <input type="text" name="excerpt" class="bf-input" placeholder="Short summary for listing pages..." value="{% if editing %}{{ post.excerpt }}{% elif form_data %}{{ form_data.excerpt }}{% endif %}" maxlength="300">
+                    <div class="bf-hint">Max 300 characters. Shown on the blog listing page.</div>
+                </div>
+
+                <div class="bf-field">
+                    <label class="bf-label">Body Content</label>
+                    <div class="bf-toolbar" id="toolbar">
+                        <button type="button" onclick="insertTag('h2')" title="Heading 2"><strong>H2</strong></button>
+                        <button type="button" onclick="insertTag('h3')" title="Heading 3"><strong>H3</strong></button>
+                        <div class="sep"></div>
+                        <button type="button" onclick="wrapSelection('strong')" title="Bold"><strong>B</strong></button>
+                        <button type="button" onclick="wrapSelection('em')" title="Italic"><em>I</em></button>
+                        <button type="button" onclick="wrapSelection('u')" title="Underline"><u>U</u></button>
+                        <div class="sep"></div>
+                        <button type="button" onclick="insertTag('ul')" title="Bullet List">• List</button>
+                        <button type="button" onclick="insertTag('ol')" title="Numbered List">1. List</button>
+                        <button type="button" onclick="insertTag('blockquote')" title="Quote">❝ Quote</button>
+                        <div class="sep"></div>
+                        <button type="button" onclick="insertLink()" title="Link">🔗 Link</button>
+                        <button type="button" onclick="insertImage()" title="Image">🖼 Image</button>
+                        <button type="button" onclick="insertTag('pre')" title="Code Block">&lt;/&gt; Code</button>
+                    </div>
+                    <textarea name="body" class="bf-textarea with-toolbar" id="bodyEditor" placeholder="Write your blog post content here. HTML is supported." required>{% if editing %}{{ post.body }}{% elif form_data %}{{ form_data.body }}{% endif %}</textarea>
+                    <div class="bf-hint">HTML is fully supported. Use the toolbar above or write HTML directly.</div>
+                </div>
+            </div>
+
+            <!-- Blog Images -->
+            <div class="bf-images-card">
+                <div class="bf-images-title">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
+                    Post Images
+                </div>
+                <div class="bf-images-subtitle">Upload images for this blog post. You can insert them into the body using the "Insert" button.</div>
+
+                {% if editing and post.images.all %}
+                <div style="margin-bottom:14px">
+                    <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Existing Images</div>
+                    {% for img in post.images.all %}
+                    <div class="bf-existing-img" id="existing-img-{{ img.pk }}">
+                        <img src="{{ img.image.url }}" alt="{{ img.caption }}">
+                        <div class="bf-ei-info">
+                            <strong>{{ img.caption|default:"No caption" }}</strong>
+                            <span style="font-size:11px;color:#94A3B8">{{ img.uploaded_at|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="bf-ei-actions">
+                            <button type="button" onclick="insertUploadedImage('{{ img.image.url }}','{{ img.caption|escapejs }}')" style="background:none;border:1px solid #E2E8F0;border-radius:6px;padding:5px 7px;cursor:pointer;color:#64748B;display:flex;align-items:center;transition:.15s;font-size:11px;gap:3px;font-family:inherit" title="Insert into body">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                Insert
+                            </button>
+                            <label style="background:none;border:1px solid #E2E8F0;border-radius:6px;padding:5px 7px;cursor:pointer;color:#EF4444;display:flex;align-items:center;transition:.15s;font-size:11px;gap:3px;font-family:inherit" title="Delete">
+                                <input type="checkbox" name="delete_images" value="{{ img.pk }}" style="display:none" onchange="this.closest('.bf-existing-img').style.opacity=this.checked?'0.4':'1'">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                                Del
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="bf-img-list" id="newImageList"></div>
+
+                <label class="bf-img-dropzone" id="imgDropzone">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                    <span>Click to upload images</span>
+                    <small>JPG, PNG, GIF, WebP &mdash; multiple files allowed</small>
+                    <input type="file" name="blog_images" accept="image/*" multiple style="display:none" id="imgFileInput" onchange="handleImageSelect(this)">
+                </label>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Publish settings -->
+            <div class="bf-sidebar-card">
+                <div class="bf-sidebar-title">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Publish Settings
+                </div>
+                <div class="bf-field" style="margin-bottom:14px">
+                    <label class="bf-label">Status</label>
+                    <select name="status" class="bf-select">
+                        <option value="draft" {% if editing and post.status == 'draft' %}selected{% endif %}>Draft</option>
+                        <option value="published" {% if editing and post.status == 'published' %}selected{% endif %}>Published</option>
+                    </select>
+                </div>
+                <div class="bf-field" style="margin-bottom:14px">
+                    <label class="bf-label">Category</label>
+                    <select name="category" class="bf-select">
+                        {% for val, label in categories %}
+                        <option value="{{ val }}" {% if editing and post.category == val %}selected{% elif form_data and form_data.category == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <label class="bf-toggle">
+                    <input type="checkbox" name="is_featured" {% if editing and post.is_featured %}checked{% endif %}>
+                    Pin as Featured Post
+                </label>
+                <div class="bf-actions">
+                    <button type="submit" class="sa-btn sa-btn-primary" style="flex:1;justify-content:center;padding:10px">
+                        {% if editing %}
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Update Post
+                        {% else %}
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        Create Post
+                        {% endif %}
+                    </button>
+                    <a href="{% url 'subscriptions:admin_blog_list' %}" class="sa-btn sa-btn-ghost" style="justify-content:center;padding:10px">Cancel</a>
+                </div>
+            </div>
+
+            <!-- Cover image -->
+            <div class="bf-sidebar-card">
+                <div class="bf-sidebar-title">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
+                    Cover Image
+                </div>
+                <label class="bf-cover-preview" id="coverPreview">
+                    {% if editing and post.cover_image %}
+                    <img src="{{ post.cover_image.url }}" id="coverImg">
+                    {% else %}
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" id="coverPlaceholder"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
+                    <span id="coverText">Click to upload cover image</span>
+                    {% endif %}
+                    <input type="file" name="cover_image" accept="image/*" style="display:none" id="coverInput" onchange="previewCover(this)">
+                </label>
+                <div class="bf-hint">Recommended: 1200×630px. JPG or PNG.</div>
+            </div>
+
+            {% if editing %}
+            <!-- Post info -->
+            <div class="bf-sidebar-card">
+                <div class="bf-sidebar-title">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+                    Post Info
+                </div>
+                <div style="font-size:12px;color:#64748B;line-height:2">
+                    <div><strong>Author:</strong> {{ post.author.get_full_name|default:post.author.username }}</div>
+                    <div><strong>Created:</strong> {{ post.created_at|date:"M d, Y H:i" }}</div>
+                    <div><strong>Updated:</strong> {{ post.updated_at|date:"M d, Y H:i" }}</div>
+                    {% if post.published_at %}<div><strong>Published:</strong> {{ post.published_at|date:"M d, Y H:i" }}</div>{% endif %}
+                    <div><strong>Views:</strong> {{ post.views_count }}</div>
+                    <div><strong>Comments:</strong> {{ post.comments_count }}</div>
+                    <div><strong>Reading time:</strong> {{ post.reading_time }} min</div>
+                </div>
+                <div style="margin-top:12px">
+                    <a href="{% url 'core:blog_detail' post.slug %}" target="_blank" class="sa-btn sa-btn-ghost sa-btn-sm" style="width:100%;justify-content:center">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                        View on Site
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const editor = document.getElementById('bodyEditor');
+
+function wrapSelection(tag) {
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const selected = editor.value.substring(start, end);
+    const wrapped = '<' + tag + '>' + (selected || 'text') + '</' + tag + '>';
+    editor.setRangeText(wrapped, start, end, 'select');
+    editor.focus();
+}
+
+function insertTag(tag) {
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const selected = editor.value.substring(start, end);
+    let content;
+    if (tag === 'ul') {
+        content = '<ul>\n  <li>' + (selected || 'Item') + '</li>\n  <li>Item</li>\n</ul>';
+    } else if (tag === 'ol') {
+        content = '<ol>\n  <li>' + (selected || 'Item') + '</li>\n  <li>Item</li>\n</ol>';
+    } else if (tag === 'pre') {
+        content = '<pre><code>' + (selected || '// code here') + '</code></pre>';
+    } else {
+        content = '<' + tag + '>' + (selected || 'Content here') + '</' + tag + '>';
+    }
+    editor.setRangeText(content, start, end, 'end');
+    editor.focus();
+}
+
+function insertLink() {
+    const url = prompt('Enter URL:', 'https://');
+    if (!url) return;
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const selected = editor.value.substring(start, end) || 'Link text';
+    const link = '<a href="' + url + '">' + selected + '</a>';
+    editor.setRangeText(link, start, end, 'end');
+    editor.focus();
+}
+
+function insertImage() {
+    const url = prompt('Enter image URL:', 'https://');
+    if (!url) return;
+    const alt = prompt('Alt text:', 'Image');
+    const img = '<img src="' + url + '" alt="' + (alt || '') + '" style="max-width:100%;border-radius:8px">';
+    const start = editor.selectionStart;
+    editor.setRangeText(img, start, start, 'end');
+    editor.focus();
+}
+
+function previewCover(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('coverPreview');
+            let img = document.getElementById('coverImg');
+            if (!img) {
+                img = document.createElement('img');
+                img.id = 'coverImg';
+                preview.appendChild(img);
+            }
+            img.src = e.target.result;
+            const placeholder = document.getElementById('coverPlaceholder');
+            const text = document.getElementById('coverText');
+            if (placeholder) placeholder.style.display = 'none';
+            if (text) text.style.display = 'none';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+/* ── Image upload handling ── */
+const imgList = document.getElementById('newImageList');
+const imgInput = document.getElementById('imgFileInput');
+let pendingFiles = new DataTransfer();
+
+function handleImageSelect(input) {
+    const files = Array.from(input.files);
+    files.forEach(file => {
+        pendingFiles.items.add(file);
+        addImageRow(file);
+    });
+    syncFileInput();
+}
+
+function addImageRow(file) {
+    const idx = imgList.children.length;
+    const row = document.createElement('div');
+    row.className = 'bf-img-row';
+    row.dataset.idx = idx;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        row.innerHTML = `
+            <img src="${e.target.result}" class="bf-img-thumb">
+            <div class="bf-img-info">
+                <div class="bf-img-name">${file.name}</div>
+                <input type="text" name="image_captions" placeholder="Add a caption..." class="bf-img-caption-input">
+            </div>
+            <div class="bf-img-actions">
+                <button type="button" onclick="insertNewImage(this)" title="Insert into body">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    Insert
+                </button>
+                <button type="button" class="bf-img-del" onclick="removeImageRow(this)" title="Remove">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        `;
+    };
+    reader.readAsDataURL(file);
+    imgList.appendChild(row);
+}
+
+function removeImageRow(btn) {
+    const row = btn.closest('.bf-img-row');
+    const idx = parseInt(row.dataset.idx);
+    row.remove();
+    // Rebuild DataTransfer without the removed file
+    const newDT = new DataTransfer();
+    let j = 0;
+    for (let i = 0; i < pendingFiles.files.length; i++) {
+        if (i !== idx) {
+            newDT.items.add(pendingFiles.files[i]);
+        }
+    }
+    pendingFiles = newDT;
+    // Re-index remaining rows
+    Array.from(imgList.children).forEach((r, i) => r.dataset.idx = i);
+    syncFileInput();
+}
+
+function syncFileInput() {
+    imgInput.files = pendingFiles.files;
+}
+
+function insertNewImage(btn) {
+    const row = btn.closest('.bf-img-row');
+    const thumb = row.querySelector('.bf-img-thumb');
+    const caption = row.querySelector('.bf-img-caption-input').value || '';
+    // Use a placeholder that will resolve after upload
+    const altText = caption || 'Blog image';
+    const imgTag = '<img src="' + thumb.src + '" alt="' + altText + '" style="max-width:100%;border-radius:8px;margin:12px 0">';
+    const note = '<!-- Note: Replace the above data URL with the actual uploaded image URL after saving -->';
+    const start = editor.selectionStart;
+    editor.setRangeText('\n' + imgTag + '\n' + note + '\n', start, start, 'end');
+    editor.focus();
+}
+
+function insertUploadedImage(url, caption) {
+    const alt = caption || 'Blog image';
+    const imgTag = '<img src="' + url + '" alt="' + alt + '" style="max-width:100%;border-radius:8px;margin:12px 0">';
+    const start = editor.selectionStart;
+    editor.setRangeText('\n' + imgTag + '\n', start, start, 'end');
+    editor.focus();
+}
+</script>
+{% endblock %}

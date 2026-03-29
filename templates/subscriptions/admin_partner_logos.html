@@ -1,0 +1,115 @@
+{% extends "subscriptions/admin_base.html" %}
+
+{% block title %}Partner Logos{% endblock %}
+{% block page_title %}Partner Logos{% endblock %}
+{% block nav_partner_logos %}active{% endblock %}
+
+{% block admin_content %}
+<!-- Stats -->
+<div class="sa-stats">
+    <div class="sa-stat">
+        <div class="sa-stat-icon blue">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+        </div>
+        <div><div class="sa-stat-label">Total Logos</div><div class="sa-stat-value">{{ total }}</div></div>
+    </div>
+    <div class="sa-stat">
+        <div class="sa-stat-icon green">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div><div class="sa-stat-label">Active</div><div class="sa-stat-value">{{ active_count }}</div></div>
+    </div>
+    <div class="sa-stat">
+        <div class="sa-stat-icon amber">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+        </div>
+        <div><div class="sa-stat-label">Inactive</div><div class="sa-stat-value">{{ inactive_count }}</div></div>
+    </div>
+</div>
+
+<!-- Logo List -->
+<div class="sa-card">
+    <div class="sa-card-header">
+        <div class="sa-card-title">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
+            All Partner Logos
+        </div>
+        <a href="{% url 'subscriptions:admin_partner_logo_create' %}" class="sa-btn sa-btn-primary" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#4F46E5;color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add Logo
+        </a>
+    </div>
+    <div class="sa-card-body">
+        {% if logos %}
+        <table class="sa-table">
+            <thead>
+                <tr>
+                    <th>Logo</th>
+                    <th>Name</th>
+                    <th>Website</th>
+                    <th>Order</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for logo in logos %}
+                <tr>
+                    <td>
+                        <div style="width:80px;height:48px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px">
+                            <img src="{{ logo.logo.url }}" alt="{{ logo.name }}" style="max-width:100%;max-height:100%;object-fit:contain">
+                        </div>
+                    </td>
+                    <td style="font-weight:600">{{ logo.name }}</td>
+                    <td>
+                        {% if logo.website_url %}
+                        <a href="{{ logo.website_url }}" target="_blank" style="font-size:12px;color:#4F46E5">{{ logo.website_url|truncatechars:35 }}</a>
+                        {% else %}
+                        <span style="color:#94A3B8;font-size:12px">—</span>
+                        {% endif %}
+                    </td>
+                    <td style="color:#64748B">{{ logo.sort_order }}</td>
+                    <td>
+                        {% if logo.is_active %}
+                        <span style="display:inline-flex;align-items:center;gap:4px;background:#F0FDF4;color:#16A34A;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #BBF7D0">
+                            <span style="width:6px;height:6px;border-radius:50%;background:#16A34A"></span> Active
+                        </span>
+                        {% else %}
+                        <span style="display:inline-flex;align-items:center;gap:4px;background:#FEF2F2;color:#DC2626;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #FECACA">
+                            <span style="width:6px;height:6px;border-radius:50%;background:#DC2626"></span> Inactive
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px">
+                            <form method="post" action="{% url 'subscriptions:admin_partner_logo_toggle' logo.pk %}" style="display:inline">
+                                {% csrf_token %}
+                                <button type="submit" style="background:none;border:1px solid #E2E8F0;border-radius:6px;padding:5px 8px;cursor:pointer;color:#64748B;font-size:11px;font-weight:600" title="Toggle status">
+                                    {% if logo.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                            <a href="{% url 'subscriptions:admin_partner_logo_edit' logo.pk %}" style="background:none;border:1px solid #E2E8F0;border-radius:6px;padding:5px 8px;color:#4F46E5;font-size:11px;font-weight:600;text-decoration:none" title="Edit">Edit</a>
+                            <form method="post" action="{% url 'subscriptions:admin_partner_logo_delete' logo.pk %}" style="display:inline" onsubmit="return confirm('Delete partner logo &quot;{{ logo.name }}&quot;?')">
+                                {% csrf_token %}
+                                <button type="submit" style="background:none;border:1px solid #FECACA;border-radius:6px;padding:5px 8px;cursor:pointer;color:#DC2626;font-size:11px;font-weight:600" title="Delete">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="padding:48px 20px;text-align:center">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="width:48px;height:48px;color:#CBD5E1;margin:0 auto 12px"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
+            <div style="font-size:15px;font-weight:600;color:#1E293B;margin-bottom:4px">No partner logos yet</div>
+            <div style="font-size:13px;color:#64748B;margin-bottom:16px">Add your first partner or client logo to display on the homepage.</div>
+            <a href="{% url 'subscriptions:admin_partner_logo_create' %}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#4F46E5;color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                Add First Logo
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

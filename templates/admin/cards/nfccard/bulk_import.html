@@ -1,0 +1,20 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<p>Paste NFC card UIDs below, one per line. Existing UIDs will be skipped.</p>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    <fieldset class="module aligned">
+        {{ form.as_p }}
+    </fieldset>
+    <div class="submit-row">
+        <input type="submit" value="Import Cards" class="default">
+        <a href="../" class="button cancel-link">Cancel</a>
+    </div>
+</form>
+{% endblock %}

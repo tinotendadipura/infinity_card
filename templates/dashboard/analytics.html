@@ -1,0 +1,262 @@
+{% extends "dashboard/_app_shell.html" %}
+
+{% block title %}Analytics | InfinityCard{% endblock %}
+
+{% block page_header %}
+<h1 class="app-page-title">Analytics</h1>
+<p class="app-page-subtitle">Track profile views and card performance.</p>
+{% endblock %}
+
+{% block content %}
+{% if has_any_data %}
+
+{% if tap_count > 0 %}
+<!-- Stat Cards Row -->
+<div class="an-stats">
+    <div class="an-stat">
+        <div class="an-stat-icon an-stat-icon--views">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <div class="an-stat-body">
+            <div class="an-stat-value">{{ tap_count }}</div>
+            <div class="an-stat-label">Total Views</div>
+        </div>
+    </div>
+    <div class="an-stat">
+        <div class="an-stat-icon an-stat-icon--today">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="an-stat-body">
+            <div class="an-stat-value">{{ taps_today }}</div>
+            <div class="an-stat-label">Today</div>
+        </div>
+    </div>
+    <div class="an-stat">
+        <div class="an-stat-icon an-stat-icon--week">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+        </div>
+        <div class="an-stat-body">
+            <div class="an-stat-value">{{ taps_7d }}</div>
+            <div class="an-stat-label">Last 7 Days</div>
+        </div>
+    </div>
+    <div class="an-stat">
+        <div class="an-stat-icon an-stat-icon--month">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+        </div>
+        <div class="an-stat-body">
+            <div class="an-stat-value">{{ taps_30d }}</div>
+            <div class="an-stat-label">Last 30 Days</div>
+        </div>
+    </div>
+</div>
+
+<!-- Growth Badge -->
+{% if growth_pct is not None %}
+<div class="an-growth {% if growth_pct >= 0 %}an-growth--up{% else %}an-growth--down{% endif %}">
+    <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+        {% if growth_pct >= 0 %}
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/>
+        {% else %}
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181"/>
+        {% endif %}
+    </svg>
+    <span>{{ growth_pct }}% vs previous 30 days</span>
+</div>
+{% endif %}
+
+<!-- 14-Day Bar Chart -->
+<div class="an-card">
+    <div class="an-card-header">
+        <div class="an-card-title">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+            Last 14 Days
+        </div>
+        {% if peak_day %}
+        <div class="an-card-meta">Peak: {{ peak_day|date:"M d" }} ({{ peak_day_count }})</div>
+        {% endif %}
+    </div>
+    <div class="an-chart">
+        {% for day in daily_chart %}
+        <div class="an-bar-col">
+            <div class="an-bar" style="height: {{ day.pct }}%;" title="{{ day.date|date:'M d' }}: {{ day.count }} views"></div>
+            <div class="an-bar-label">{{ day.label }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ─── Catalog & Engagement Analytics ─── -->
+{% if catalog_total_clicks > 0 or profile_views > 0 %}
+<div class="an-section-divider">
+    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75v-2.25a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v2.25c0 .414.336.75.75.75z"/></svg>
+    <span>Catalog &amp; Engagement</span>
+</div>
+
+<!-- Catalog Stat Cards -->
+<div class="an-stats">
+    <div class="an-stat">
+        <div class="an-stat-icon an-stat-icon--catalog">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59"/></svg>
+        </div>
+        <div class="an-stat-body">
+            <div class="an-stat-value">{{ catalog_total_clicks }}</div>
+            <div class="an-stat-label">Product Clicks</div>
+        </div>
+    </div>
+    <div class="an-stat">
+        <div class="an-stat-icon an-stat-icon--today">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+        </div>
+        <div class="an-stat-body">
+            <div class="an-stat-value">{{ catalog_clicks_7d }}</div>
+            <div class="an-stat-label">Clicks (7d)</div>
+        </div>
+    </div>
+    <div class="an-stat">
+        <div class="an-stat-icon an-stat-icon--week">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <div class="an-stat-body">
+            <div class="an-stat-value">{{ catalog_seeall_clicks }}</div>
+            <div class="an-stat-label">See All Clicks</div>
+        </div>
+    </div>
+    <div class="an-stat">
+        <div class="an-stat-icon an-stat-icon--month">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+        </div>
+        <div class="an-stat-body">
+            <div class="an-stat-value">{{ catalog_conversion }}%</div>
+            <div class="an-stat-label">Click Rate</div>
+        </div>
+    </div>
+</div>
+
+<!-- Engagement Quick Stats -->
+<div class="an-engage-row">
+    <div class="an-engage-item">
+        <div class="an-engage-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <div class="an-engage-value">{{ profile_views }}</div>
+        <div class="an-engage-label">Profile Views</div>
+    </div>
+    <div class="an-engage-item">
+        <div class="an-engage-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+        </div>
+        <div class="an-engage-value">{{ contact_clicks }}</div>
+        <div class="an-engage-label">Contact Taps</div>
+    </div>
+    <div class="an-engage-item">
+        <div class="an-engage-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+        </div>
+        <div class="an-engage-value">{{ social_clicks }}</div>
+        <div class="an-engage-label">Social Taps</div>
+    </div>
+</div>
+
+<!-- Product Clicks Chart (14 days) -->
+{% if catalog_daily_chart %}
+<div class="an-card">
+    <div class="an-card-header">
+        <div class="an-card-title">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59"/></svg>
+            Product Clicks — 14 Days
+        </div>
+    </div>
+    <div class="an-chart">
+        {% for day in catalog_daily_chart %}
+        <div class="an-bar-col">
+            <div class="an-bar an-bar--catalog" style="height: {{ day.pct }}%;" title="{{ day.date|date:'M d' }}: {{ day.count }} clicks"></div>
+            <div class="an-bar-label">{{ day.label }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Top Products -->
+{% if top_products %}
+<div class="an-card">
+    <div class="an-card-header">
+        <div class="an-card-title">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M18.75 4.236c.982.143 1.954.317 2.916.52A6.003 6.003 0 0016.27 9.728M18.75 4.236V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.023 6.023 0 01-7.54 0"/></svg>
+            Top Products
+        </div>
+    </div>
+    <div class="an-locations">
+        {% for prod in top_products %}
+        <div class="an-loc-row">
+            <span class="an-loc-name">{{ prod.title|truncatechars:30 }}</span>
+            <div class="an-loc-bar-wrap">
+                <div class="an-loc-bar an-loc-bar--catalog" style="width: {{ prod.pct }}%;"></div>
+            </div>
+            <span class="an-loc-count">{{ prod.clicks }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Top Locations -->
+{% if top_countries %}
+<div class="an-card">
+    <div class="an-card-header">
+        <div class="an-card-title">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+            Top Locations
+        </div>
+    </div>
+    <div class="an-locations">
+        {% for loc in top_countries %}
+        <div class="an-loc-row">
+            <span class="an-loc-name">{{ loc.name }}</span>
+            <div class="an-loc-bar-wrap">
+                <div class="an-loc-bar" style="width: {{ loc.pct }}%;"></div>
+            </div>
+            <span class="an-loc-count">{{ loc.count }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Activity -->
+{% if recent_events %}
+<div class="an-card">
+    <div class="an-card-header">
+        <div class="an-card-title">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Recent Activity
+        </div>
+    </div>
+    <div class="an-activity">
+        {% for event in recent_events %}
+        <div class="an-activity-row">
+            <div class="an-activity-dot"></div>
+            <div class="an-activity-body">
+                <div class="an-activity-time">{{ event.timestamp|date:"M d · h:i A" }}</div>
+                <div class="an-activity-detail">{{ event.country|default:"Unknown location" }}{% if event.user_agent %} · {{ event.user_agent|truncatewords:4 }}{% endif %}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<!-- Empty State -->
+<div class="an-empty">
+    <div class="an-empty-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+    </div>
+    <div class="an-empty-title">No views yet</div>
+    <div class="an-empty-text">Share your InfinityCard to start tracking profile views and see detailed analytics here.</div>
+</div>
+{% endif %}
+{% endblock %}

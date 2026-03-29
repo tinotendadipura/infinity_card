@@ -1,0 +1,1590 @@
+{% extends "companies/company_base.html" %}
+{% load static %}
+{% block title %}Order {{ product.name }} — {{ company.name }}{% endblock %}
+{% block nav_order_cards %}active{% endblock %}
+{% block page_title %}{% endblock %}
+
+{% block company_head %}
+<style>
+/* ══════════════════════════════════════════════
+   Shop / Product Page Layout
+   ══════════════════════════════════════════════ */
+.shop-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: #64748B;
+    text-decoration: none; padding: 6px 0; margin-bottom: 8px;
+    transition: color 0.15s;
+}
+.shop-back:hover { color: #1E293B; }
+.shop-back svg { width: 16px; height: 16px; }
+
+.shop-heading {
+    font-size: 22px; font-weight: 800; color: #1E293B; letter-spacing: -0.3px; margin-bottom: 4px;
+}
+
+.shop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+/* ── Left: Card Showcase ── */
+.shop-preview {
+    position: sticky; top: 20px;
+}
+.shop-preview-stage {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 20px;
+    padding: 48px 32px 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 340px;
+    position: relative;
+    overflow: hidden;
+}
+.shop-preview-stage::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse at 25% 40%, rgba(6,182,212,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse at 75% 65%, rgba(79,70,229,0.05) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+/* ── NFC Card Render ── */
+.nfc-card-wrap {
+    position: relative;
+    perspective: 1000px;
+}
+.nfc-card {
+    position: relative;
+    width: 380px; height: 240px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.04),
+        0 6px 16px rgba(0,0,0,0.06),
+        0 16px 40px rgba(0,0,0,0.08);
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+                box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    transform: rotateY(-4deg) rotateX(2deg);
+}
+.nfc-card:hover {
+    transform: rotateY(0) rotateX(0) translateY(-6px) scale(1.01);
+    box-shadow:
+        0 2px 6px rgba(0,0,0,0.06),
+        0 12px 28px rgba(0,0,0,0.08),
+        0 28px 56px rgba(0,0,0,0.10);
+}
+.nfc-card-bg {
+    position: absolute; inset: 0;
+    transition: background 0.5s ease;
+}
+.nfc-card-face {
+    position: absolute; inset: 0;
+    padding: 28px 32px;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    z-index: 1;
+}
+.nfc-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.nfc-card-logo {
+    height: 42px; width: auto; object-fit: contain;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.12));
+    transition: opacity 0.3s;
+}
+.nfc-card-nfc {
+    width: 32px; height: 32px; opacity: 0.45;
+    transition: color 0.4s;
+}
+.nfc-card-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+.nfc-card-tagline {
+    font-size: 9.5px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; opacity: 0.65;
+    transition: color 0.4s;
+}
+.nfc-card-qr {
+    width: 52px; height: 52px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.4s;
+}
+.nfc-card-qr svg { width: 38px; height: 38px; transition: stroke 0.4s; }
+
+/* ── Shadow card (back card) ── */
+.nfc-shadow-card {
+    position: absolute;
+    width: 380px; height: 240px;
+    border-radius: 16px;
+    top: 18px; left: 22px;
+    z-index: -1; opacity: 0.3;
+    filter: blur(1.5px);
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.nfc-card-wrap:hover .nfc-shadow-card {
+    top: 22px; left: 26px; opacity: 0.2;
+}
+
+/* ── Swatches Row ── */
+.swatch-row {
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 20px; padding: 0 4px;
+}
+.swatch-label {
+    font-size: 13px; font-weight: 600; color: #475569;
+    white-space: nowrap;
+}
+.swatch-label strong { color: #1E293B; }
+.swatch-dots { display: flex; gap: 10px; margin-left: auto; }
+.swatch-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    cursor: pointer; border: 3px solid transparent;
+    transition: all 0.2s ease; position: relative;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.14), inset 0 1px 2px rgba(255,255,255,0.2);
+}
+.swatch-dot:hover { transform: scale(1.15); }
+.swatch-dot.active {
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.2), 0 2px 6px rgba(0,0,0,0.14);
+    transform: scale(1.1);
+}
+.swatch-dot::after {
+    content: ''; position: absolute; inset: 2px;
+    border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.3);
+}
+
+/* ── Right: Product Info ── */
+.shop-info { padding-top: 4px; }
+
+.product-title {
+    font-size: 26px; font-weight: 800; color: #0F172A;
+    letter-spacing: -0.5px; line-height: 1.2; margin: 0 0 6px;
+}
+.product-material {
+    font-size: 14px; font-weight: 500; color: #64748B;
+    margin-bottom: 16px; display: flex; align-items: center; gap: 6px;
+}
+.product-material .mat-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #06B6D4;
+}
+.product-price {
+    font-size: 32px; font-weight: 800; color: #0F172A;
+    margin-bottom: 4px; letter-spacing: -0.5px;
+}
+.product-price small {
+    font-size: 14px; font-weight: 500; color: #94A3B8;
+}
+.product-shipping-note {
+    font-size: 12px; color: #94A3B8; margin-bottom: 24px;
+}
+.product-shipping-note a {
+    color: #64748B; text-decoration: underline;
+    text-decoration-style: dotted; text-underline-offset: 2px;
+}
+
+/* ── Divider ── */
+.shop-divider {
+    border: none; border-top: 1px solid #F1F5F9;
+    margin: 24px 0;
+}
+
+/* ── Section titles ── */
+.sec-title {
+    font-size: 13px; font-weight: 700; color: #1E293B;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+/* ── Card Type Selector ── */
+.tier-option {
+    display: block; cursor: pointer;
+    border: 2px solid #E2E8F0; border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 10px;
+    transition: all 0.15s ease; position: relative;
+}
+.tier-option:hover { border-color: #CBD5E1; background: #FAFBFC; }
+.tier-option.active { border-color: #6366F1; background: #EEF2FF; }
+.tier-option input { display: none; }
+.tier-head {
+    display: flex; align-items: center; justify-content: space-between;
+}
+.tier-name {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 700; color: #1E293B;
+}
+.tier-name .tier-icon {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid #CBD5E1; display: flex;
+    align-items: center; justify-content: center;
+    transition: all 0.15s;
+}
+.tier-option.active .tier-icon {
+    border-color: #6366F1; background: #6366F1;
+}
+.tier-option.active .tier-icon::after {
+    content: ''; width: 8px; height: 8px;
+    border-radius: 50%; background: #fff;
+}
+.tier-price {
+    font-size: 18px; font-weight: 800;
+}
+.tier-price.green { color: #059669; }
+.tier-price.indigo { color: #4F46E5; }
+.tier-price small { font-size: 12px; font-weight: 500; color: #94A3B8; }
+.tier-desc {
+    font-size: 12px; color: #64748B; margin-top: 6px; padding-left: 30px;
+    line-height: 1.5;
+}
+
+/* ── Quantity ── */
+.qty-row {
+    display: flex; align-items: center; gap: 12px;
+}
+.qty-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    border: 1.5px solid #E2E8F0; background: #fff;
+    font-size: 20px; font-weight: 700; color: #475569;
+    cursor: pointer; display: flex; align-items: center;
+    justify-content: center; transition: all 0.1s;
+}
+.qty-btn:hover { background: #F1F5F9; border-color: #CBD5E1; }
+.qty-btn:active { transform: scale(0.95); }
+.qty-input {
+    width: 64px; text-align: center; font-size: 18px;
+    font-weight: 700; color: #0F172A;
+    border: 1.5px solid #E2E8F0; border-radius: 12px;
+    padding: 8px 4px; outline: none;
+    transition: border-color 0.15s;
+}
+.qty-input:focus { border-color: #6366F1; }
+.qty-label { font-size: 14px; color: #94A3B8; font-weight: 500; }
+
+/* ── Feature Pills ── */
+.feat-list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 20px;
+}
+.feat-pill {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 600; color: #475569;
+    background: #F8FAFC; border: 1px solid #E2E8F0;
+    border-radius: 20px; padding: 6px 12px;
+}
+.feat-pill svg { width: 14px; height: 14px; color: #10B981; }
+
+/* ── Employees ── */
+.emp-panel {
+    border: 1px solid #E2E8F0; border-radius: 14px;
+    overflow: hidden; background: #fff;
+}
+.emp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    background: #F8FAFC;
+    border-bottom: 1px solid #E2E8F0;
+}
+.emp-header-left {
+    display: flex; align-items: center; gap: 10px;
+}
+.emp-select-all {
+    position: relative; width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;
+}
+.emp-select-all input {
+    position: absolute; opacity: 0; width: 0; height: 0;
+}
+.emp-select-all .emp-cb {
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 2px solid #CBD5E1;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+.emp-select-all input:checked + .emp-cb {
+    background: #4F46E5; border-color: #4F46E5;
+}
+.emp-select-all input:checked + .emp-cb svg { opacity: 1; transform: scale(1); }
+.emp-select-all .emp-cb svg {
+    width: 11px; height: 11px; color: #fff; opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.emp-header-label {
+    font-size: 12px; font-weight: 600; color: #64748B;
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+.emp-counter {
+    font-size: 11px; font-weight: 600; color: #94A3B8;
+    background: #F1F5F9; border-radius: 20px;
+    padding: 3px 10px;
+    transition: all 0.2s;
+}
+.emp-counter.has-selection {
+    color: #4F46E5; background: #EEF2FF;
+}
+.emp-list {
+    max-height: 260px; overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #E2E8F0 transparent;
+}
+.emp-list::-webkit-scrollbar { width: 5px; }
+.emp-list::-webkit-scrollbar-track { background: transparent; }
+.emp-list::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+.emp-list::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
+.emp-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #F1F5F9;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+.emp-item:last-child { border-bottom: none; }
+.emp-item:hover { background: #FAFBFE; }
+.emp-item.selected { background: #F5F3FF; }
+.emp-item.selected::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; background: #4F46E5; border-radius: 0 3px 3px 0;
+}
+/* Custom checkbox */
+.emp-checkbox {
+    position: relative; width: 18px; height: 18px;
+    flex-shrink: 0; cursor: pointer;
+}
+.emp-checkbox input {
+    position: absolute; opacity: 0; width: 0; height: 0;
+}
+.emp-checkbox .emp-cb {
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 2px solid #D1D5DB;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+.emp-checkbox:hover .emp-cb { border-color: #A5B4FC; }
+.emp-checkbox input:checked + .emp-cb {
+    background: #4F46E5; border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+}
+.emp-checkbox input:checked + .emp-cb svg { opacity: 1; transform: scale(1); }
+.emp-checkbox .emp-cb svg {
+    width: 11px; height: 11px; color: #fff;
+    opacity: 0; transform: scale(0.5);
+    transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+/* Avatar */
+.emp-avatar {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff;
+    flex-shrink: 0; text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.emp-avatar--indigo { background: linear-gradient(135deg, #6366F1, #818CF8); }
+.emp-avatar--teal { background: linear-gradient(135deg, #0D9488, #2DD4BF); }
+.emp-avatar--rose { background: linear-gradient(135deg, #F43F5E, #FB7185); }
+.emp-avatar--amber { background: linear-gradient(135deg, #F59E0B, #FBBF24); }
+.emp-avatar--sky { background: linear-gradient(135deg, #0284C7, #38BDF8); }
+.emp-avatar--violet { background: linear-gradient(135deg, #7C3AED, #A78BFA); }
+.emp-avatar--emerald { background: linear-gradient(135deg, #059669, #34D399); }
+.emp-avatar--slate { background: linear-gradient(135deg, #475569, #94A3B8); }
+.emp-info { flex: 1; min-width: 0; }
+.emp-name {
+    font-size: 13px; font-weight: 600; color: #1E293B;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.3;
+}
+.emp-meta {
+    font-size: 11px; color: #94A3B8; font-weight: 400;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.3; margin-top: 1px;
+}
+.emp-badge {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; padding: 2px 8px;
+    border-radius: 20px; flex-shrink: 0;
+}
+.emp-badge--admin { color: #4F46E5; background: #EEF2FF; }
+.emp-badge--member { color: #64748B; background: #F1F5F9; }
+
+/* ── Shipping Form ── */
+.ship-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.ship-grid .full { grid-column: 1 / -1; }
+.ship-field label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: #475569; margin-bottom: 4px;
+}
+.ship-field input, .ship-field textarea {
+    width: 100%; padding: 10px 14px; font-size: 14px;
+    border: 1.5px solid #E2E8F0; border-radius: 10px;
+    color: #0F172A; background: #fff; outline: none;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+.ship-field input:focus, .ship-field textarea:focus {
+    border-color: #6366F1;
+}
+.ship-field input::placeholder, .ship-field textarea::placeholder {
+    color: #CBD5E1;
+}
+
+/* ── Country Dropdown ── */
+.country-select {
+    position: relative;
+}
+.country-trigger {
+    width: 100%; padding: 10px 14px; font-size: 14px;
+    border: 1.5px solid #E2E8F0; border-radius: 10px;
+    color: #0F172A; background: #fff; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    -webkit-appearance: none; appearance: none;
+    line-height: 1.4;
+}
+.country-trigger:hover { border-color: #CBD5E1; }
+.country-trigger.open { border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,0.08); border-radius: 10px 10px 0 0; }
+.country-trigger .ct-flag { font-size: 18px; line-height: 1; flex-shrink: 0; }
+.country-trigger .ct-text { flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.country-trigger .ct-text.placeholder { color: #CBD5E1; }
+.country-trigger .ct-arrow {
+    width: 16px; height: 16px; color: #94A3B8; flex-shrink: 0;
+    transition: transform 0.2s;
+}
+.country-trigger.open .ct-arrow { transform: rotate(180deg); }
+.country-dropdown {
+    display: none; position: absolute; top: 100%; left: 0; right: 0;
+    background: #fff; border: 1.5px solid #6366F1; border-top: none;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    z-index: 100; max-height: 240px;
+    overflow: hidden;
+    flex-direction: column;
+}
+.country-dropdown.open { display: flex; }
+.country-search-wrap {
+    padding: 8px 10px; border-bottom: 1px solid #F1F5F9;
+    position: sticky; top: 0; background: #fff; z-index: 1;
+}
+.country-search {
+    width: 100%; padding: 8px 10px 8px 32px; font-size: 13px;
+    border: 1.5px solid #E2E8F0; border-radius: 8px;
+    color: #0F172A; background: #FAFBFC; outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+.country-search:focus { border-color: #A5B4FC; background: #fff; }
+.country-search-wrap::before {
+    content: '';
+    position: absolute; left: 20px; top: 19px;
+    width: 14px; height: 14px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z'/%3E%3C/svg%3E");
+    background-size: contain;
+    pointer-events: none;
+}
+.country-search-wrap { position: relative; }
+.country-options {
+    overflow-y: auto; flex: 1;
+    scrollbar-width: thin; scrollbar-color: #E2E8F0 transparent;
+}
+.country-options::-webkit-scrollbar { width: 5px; }
+.country-options::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+.country-opt {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px; cursor: pointer;
+    font-size: 13px; color: #1E293B; font-weight: 500;
+    transition: background 0.1s;
+}
+.country-opt:hover { background: #F5F3FF; }
+.country-opt.active { background: #EEF2FF; color: #4F46E5; font-weight: 600; }
+.country-opt .co-flag { font-size: 17px; line-height: 1; flex-shrink: 0; }
+.country-opt .co-name { flex: 1; }
+.country-opt .co-code { font-size: 11px; color: #94A3B8; font-weight: 400; }
+.country-no-results {
+    padding: 16px 14px; text-align: center;
+    font-size: 13px; color: #94A3B8;
+}
+
+/* ── Order Summary Bar ── */
+.order-bar {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-top: 24px;
+}
+.order-bar-row {
+    display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 16px;
+}
+.order-bar-details {
+    display: flex; align-items: center; gap: 20px;
+}
+.order-bar-item {
+    font-size: 13px; color: #64748B; font-weight: 500;
+}
+.order-bar-item strong {
+    color: #1E293B; font-weight: 700;
+}
+.order-bar-total {
+    font-size: 24px; font-weight: 800; color: #0F172A;
+    letter-spacing: -0.3px;
+}
+/* ── Payment Method Tabs ── */
+.pay-methods { margin-top: 18px; }
+.pay-tabs {
+    display: flex; gap: 0; border-bottom: 2px solid #E2E8F0; margin-bottom: 0;
+}
+.pay-tab {
+    display: flex; align-items: center; gap: 7px;
+    padding: 10px 18px; font-size: 13px; font-weight: 600;
+    color: #64748B; background: none; border: none; cursor: pointer;
+    border-bottom: 2.5px solid transparent; margin-bottom: -2px;
+    transition: all 0.15s; white-space: nowrap;
+}
+.pay-tab svg { width: 16px; height: 16px; }
+.pay-tab:hover { color: #1E293B; }
+.pay-tab.active { color: #4F46E5; border-bottom-color: #4F46E5; }
+.pay-tab.active svg { color: #4F46E5; }
+.pay-panel { display: none; padding: 18px 0 0; }
+.pay-panel.active { display: block; }
+.pay-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 32px; border-radius: 12px;
+    font-size: 15px; font-weight: 700; color: #fff;
+    background: #0070BA; border: none; cursor: pointer;
+    transition: all 0.15s; box-shadow: 0 2px 8px rgba(0,112,186,0.3);
+}
+.pay-btn:hover {
+    background: #005EA6; transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,112,186,0.35);
+}
+.pay-btn:active { transform: translateY(0); }
+.pay-btn svg { width: 18px; height: 18px; }
+.pay-btn--bank {
+    background: #1E293B; box-shadow: 0 2px 8px rgba(30,41,59,0.25);
+}
+.pay-btn--bank:hover {
+    background: #0F172A; box-shadow: 0 4px 12px rgba(30,41,59,0.3);
+}
+.pay-btn--eco {
+    background: #059669; box-shadow: 0 2px 8px rgba(5,150,105,0.3);
+}
+.pay-btn--eco:hover {
+    background: #047857; box-shadow: 0 4px 12px rgba(5,150,105,0.35);
+}
+.pay-secure {
+    font-size: 11px; color: #94A3B8; margin-top: 10px;
+    display: flex; align-items: center; gap: 4px;
+}
+.pay-secure svg { width: 12px; height: 12px; }
+.pay-info-box {
+    background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 14px; font-size: 12px;
+    color: #475569; line-height: 1.6;
+}
+.pay-info-box strong { color: #1E293B; }
+.pay-info-row {
+    display: flex; justify-content: space-between; padding: 6px 0;
+    font-size: 12px; border-bottom: 1px solid #F1F5F9;
+}
+.pay-info-row:last-child { border-bottom: none; }
+.pay-info-label { color: #64748B; font-weight: 500; }
+.pay-info-value { color: #1E293B; font-weight: 700; font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; }
+
+/* ── Design Notes ── */
+.notes-box {
+    border: 1.5px solid #E2E8F0; border-radius: 12px;
+    padding: 16px; background: #FAFBFC;
+}
+.notes-box textarea {
+    width: 100%; border: none; background: transparent;
+    font-size: 14px; color: #0F172A; resize: vertical;
+    outline: none; min-height: 80px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+.notes-box textarea::placeholder { color: #CBD5E1; }
+
+/* ── Custom Branded Placeholder ── */
+.custom-preview { display: none; }
+.custom-preview.visible { display: block; }
+.custom-preview-stage {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 20px;
+    padding: 48px 32px 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 340px;
+    position: relative;
+    overflow: hidden;
+}
+.custom-preview-stage::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse at 30% 35%, rgba(79,70,229,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 70%, rgba(236,72,153,0.05) 0%, transparent 60%);
+    pointer-events: none;
+}
+.custom-card-mock {
+    position: relative;
+    width: 380px; height: 240px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1E293B 0%, #334155 50%, #475569 100%);
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.04),
+        0 6px 16px rgba(0,0,0,0.06),
+        0 16px 40px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    transform: rotateY(-4deg) rotateX(2deg);
+    perspective: 1000px;
+    transition: transform 0.6s cubic-bezier(0.23,1,0.32,1);
+}
+.custom-card-mock:hover {
+    transform: rotateY(0) rotateX(0) translateY(-6px) scale(1.01);
+}
+.custom-card-mock::before {
+    content: '';
+    position: absolute; inset: 0;
+    border: 2px dashed rgba(255,255,255,0.15);
+    border-radius: 16px;
+    margin: 16px;
+    pointer-events: none;
+}
+.custom-card-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.08);
+    border: 2px dashed rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+}
+.custom-card-icon svg { width: 28px; height: 28px; color: rgba(255,255,255,0.5); }
+.custom-card-text {
+    text-align: center;
+}
+.custom-card-text .cct-title {
+    font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.85);
+    letter-spacing: -0.3px;
+}
+.custom-card-text .cct-sub {
+    font-size: 12px; color: rgba(255,255,255,0.4);
+    margin-top: 4px;
+}
+.custom-info-cards {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-top: 20px; padding: 0 4px;
+}
+.custom-info-card {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: flex-start; gap: 10px;
+}
+.custom-info-card svg {
+    width: 18px; height: 18px; color: #6366F1;
+    flex-shrink: 0; margin-top: 1px;
+}
+.custom-info-card .cic-text {
+    font-size: 12px; font-weight: 600; color: #1E293B;
+    line-height: 1.4;
+}
+.custom-info-card .cic-text span {
+    display: block; font-weight: 400; color: #94A3B8;
+    font-size: 11px; margin-top: 2px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .shop-grid { grid-template-columns: 1fr; gap: 24px; }
+    .shop-preview { position: static; }
+    .nfc-card { width: 320px; height: 202px; }
+    .nfc-shadow-card { width: 320px; height: 202px; }
+    .custom-card-mock { width: 320px; height: 202px; }
+}
+@media (max-width: 500px) {
+    .nfc-card { width: 280px; height: 176px; }
+    .nfc-shadow-card { width: 280px; height: 176px; }
+    .custom-card-mock { width: 280px; height: 176px; }
+    .shop-preview-stage, .custom-preview-stage { padding: 32px 16px 24px; min-height: 280px; }
+    .nfc-card-face { padding: 20px 24px; }
+    .nfc-card-logo { height: 32px; }
+    .swatch-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .swatch-dots { margin-left: 0; }
+    .custom-info-cards { grid-template-columns: 1fr; }
+    .ship-grid { grid-template-columns: 1fr; }
+    .order-bar-row { flex-direction: column; align-items: stretch; }
+    .pay-btn { justify-content: center; width: 100%; }
+}
+</style>
+{% endblock %}
+
+{% block company_content %}
+
+<a href="{% url 'companies:order_cards' %}" class="shop-back">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+    Back to Shop
+</a>
+
+<form method="post">
+{% csrf_token %}
+
+<div class="shop-grid">
+
+    <!-- ═══════ LEFT: Card Preview ═══════ -->
+    <div class="shop-preview">
+
+        <!-- InfinityCard Preview -->
+        <div id="icShowcase">
+        <div class="shop-preview-stage">
+            <div class="nfc-card-wrap">
+                <div class="nfc-shadow-card" id="icShadowCard"></div>
+                <div class="nfc-card" id="icCard">
+                    <div class="nfc-card-bg" id="icCardBg"></div>
+                    <div class="nfc-card-face">
+                        <div class="nfc-card-top">
+                            <img src="" alt="InfinityCard" class="nfc-card-logo" id="icCardLogo">
+                            <svg class="nfc-card-nfc" id="icNfc" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0"/>
+                            </svg>
+                        </div>
+                        <div class="nfc-card-bottom">
+                            <div class="nfc-card-tagline" id="icTagline">Integrated with InfinityCard</div>
+                            <div class="nfc-card-qr" id="icQr">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                                    <rect x="14" y="14" width="3" height="3" rx=".5"/>
+                                    <rect x="18" y="14" width="3" height="3" rx=".5"/>
+                                    <rect x="14" y="18" width="3" height="3" rx=".5"/>
+                                    <rect x="18" y="18" width="3" height="3" rx=".5"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Swatches -->
+        <div class="swatch-row">
+            <div class="swatch-label">Color &mdash; <strong id="icColorName">Ocean Teal</strong></div>
+            <div class="swatch-dots">
+                <div class="swatch-dot active" data-color="teal" style="background:linear-gradient(135deg,#0D9488,#06B6D4)" title="Ocean Teal"></div>
+                <div class="swatch-dot" data-color="midnight" style="background:linear-gradient(135deg,#1E293B,#334155)" title="Midnight Black"></div>
+                <div class="swatch-dot" data-color="royal" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)" title="Royal Indigo"></div>
+                <div class="swatch-dot" data-color="platinum" style="background:linear-gradient(135deg,#94A3B8,#CBD5E1)" title="Platinum Silver"></div>
+                <div class="swatch-dot" data-color="ember" style="background:linear-gradient(135deg,#DC2626,#F97316)" title="Ember Red"></div>
+            </div>
+        </div>
+        </div><!-- /icShowcase -->
+
+        <!-- Custom Branded Preview -->
+        <div id="customShowcase" class="custom-preview">
+            <div class="custom-preview-stage">
+                <div class="custom-card-mock">
+                    <div class="custom-card-icon">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.068 2.068M12 6.75h.008v.008H12V6.75z"/>
+                        </svg>
+                    </div>
+                    <div class="custom-card-text">
+                        <div class="cct-title">Your Brand Here</div>
+                        <div class="cct-sub">Custom logo, colors & layout</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info cards -->
+            <div class="custom-info-cards">
+                <div class="custom-info-card">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/></svg>
+                    <div class="cic-text">Custom Design<span>Your logo & brand colors</span></div>
+                </div>
+                <div class="custom-info-card">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+                    <div class="cic-text">Design Consultation<span>We'll help refine your vision</span></div>
+                </div>
+                <div class="custom-info-card">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"/></svg>
+                    <div class="cic-text">Premium Quality<span>Same NFC chip & materials</span></div>
+                </div>
+                <div class="custom-info-card">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div class="cic-text">5-7 Day Turnaround<span>Design approval + production</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════ RIGHT: Product Details & Form ═══════ -->
+    <div class="shop-info">
+
+        <h1 class="product-title">{{ product.name }}</h1>
+        <div class="product-material">
+            <span class="mat-dot"></span>
+            {{ product.get_material_display }} NFC Business Card
+        </div>
+
+        <div class="product-price" id="displayPrice">${{ product.price }} <small>USD</small></div>
+        <div class="product-shipping-note">
+            <a href="#">Shipping</a> calculated at checkout.
+        </div>
+
+        <hr class="shop-divider">
+
+        <!-- Card Type -->
+        <div class="sec-title">Card Type</div>
+
+        <label class="tier-option active" id="tierStandardLabel">
+            <input type="radio" name="design_option" value="standard" id="designStandard" checked>
+            <div class="tier-head">
+                <div class="tier-name">
+                    <span class="tier-icon"></span>
+                    InfinityCard
+                </div>
+                <div class="tier-price green">${{ product.price }}<small>/card</small></div>
+            </div>
+            <div class="tier-desc">Our signature design with InfinityCard branding, NFC chip, and QR code. Professional and ready to use.</div>
+        </label>
+
+        <label class="tier-option" id="tierCustomLabel">
+            <input type="radio" name="design_option" value="custom" id="designCustom">
+            <div class="tier-head">
+                <div class="tier-name">
+                    <span class="tier-icon"></span>
+                    Custom Branded
+                </div>
+                <div class="tier-price green">${{ product.price }}<small>/card</small></div>
+            </div>
+            <div class="tier-desc">Bring your own design — your company logo, brand colors, and custom layout. Same price, no extra fee.</div>
+        </label>
+
+        <!-- Design Notes (custom only) -->
+        <div id="designNotesSection" style="display:none; margin-top:16px;">
+            <div class="sec-title">Branding Instructions</div>
+            <div class="notes-box">
+                <textarea name="design_notes" rows="3" placeholder="Describe your brand: company name, logo details, colors, layout preferences..."></textarea>
+            </div>
+        </div>
+
+        <hr class="shop-divider">
+
+        <!-- Quantity -->
+        <div class="sec-title">Quantity</div>
+        <div class="qty-row">
+            <button type="button" class="qty-btn" onclick="changeQty(-1)">&minus;</button>
+            <input type="number" name="quantity" id="qtyInput" value="1" min="1" max="999" class="qty-input">
+            <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+            <span class="qty-label">cards</span>
+        </div>
+
+        <!-- Features -->
+        <div class="feat-list">
+            <div class="feat-pill">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                NFC Enabled
+            </div>
+            <div class="feat-pill">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                iOS & Android
+            </div>
+            <div class="feat-pill">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Worldwide Shipping
+            </div>
+            <div class="feat-pill">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Secure & Trusted
+            </div>
+        </div>
+
+        <hr class="shop-divider">
+
+        <!-- Assign to Employees -->
+        <div class="sec-title">Assign to Employees <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#94A3B8">(optional)</span></div>
+        <p style="font-size:12px;color:#94A3B8;margin-bottom:10px;margin-top:-4px">Select employees who should receive cards. You can also assign later.</p>
+        {% if employees %}
+        <div class="emp-panel">
+            <div class="emp-header">
+                <div class="emp-header-left">
+                    <label class="emp-select-all">
+                        <input type="checkbox" id="empSelectAll">
+                        <span class="emp-cb"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>
+                    </label>
+                    <span class="emp-header-label">Team Members</span>
+                </div>
+                <span class="emp-counter" id="empCounter">0 of {{ employees|length }} selected</span>
+            </div>
+            <div class="emp-list">
+                {% for m in employees %}
+                <div class="emp-item" data-emp-row>
+                    <label class="emp-checkbox">
+                        <input type="checkbox" name="members" value="{{ m.pk }}">
+                        <span class="emp-cb"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>
+                    </label>
+                    <div class="emp-avatar emp-avatar--{% cycle 'indigo' 'teal' 'rose' 'amber' 'sky' 'violet' 'emerald' 'slate' %}">{{ m.employee_name|default:m.invite_email|make_list|first|upper }}{{ m.employee_name|default:m.invite_email|make_list|last|upper }}</div>
+                    <div class="emp-info">
+                        <div class="emp-name">{{ m.employee_name|default:m.invite_email }}</div>
+                        {% if m.employee_name %}<div class="emp-meta">{{ m.invite_email }}</div>{% endif %}
+                    </div>
+                    {% if m.role == 'admin' %}<span class="emp-badge emp-badge--admin">Admin</span>{% else %}<span class="emp-badge emp-badge--member">Member</span>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <p style="font-size:13px;color:#94A3B8">No employees yet. <a href="{% url 'companies:invite' %}" style="color:#6366F1;font-weight:600">Invite people</a></p>
+        {% endif %}
+
+        <hr class="shop-divider">
+
+        <!-- Shipping -->
+        <div class="sec-title">Shipping Address</div>
+        <div class="ship-grid">
+            <div class="ship-field full">
+                <label>Contact Name</label>
+                <input type="text" name="contact_name" placeholder="Full name for delivery">
+            </div>
+            <div class="ship-field">
+                <label>Email</label>
+                <input type="email" name="shipping_email" value="{{ company.email }}" placeholder="Email">
+            </div>
+            <div class="ship-field">
+                <label>Phone</label>
+                <input type="tel" name="shipping_phone" value="{{ company.phone }}" placeholder="Phone number">
+            </div>
+            <div class="ship-field full">
+                <label>Address Line 1</label>
+                <input type="text" name="shipping_address1" placeholder="Street address">
+            </div>
+            <div class="ship-field full">
+                <label>Address Line 2</label>
+                <input type="text" name="shipping_address2" placeholder="Apt, suite, etc. (optional)">
+            </div>
+            <div class="ship-field">
+                <label>City</label>
+                <input type="text" name="shipping_city" placeholder="City">
+            </div>
+            <div class="ship-field">
+                <label>State / Province</label>
+                <input type="text" name="shipping_state" placeholder="State">
+            </div>
+            <div class="ship-field">
+                <label>ZIP / Postal Code</label>
+                <input type="text" name="shipping_zip" placeholder="ZIP code">
+            </div>
+            <div class="ship-field">
+                <label>Country</label>
+                <div class="country-select" id="countrySelect">
+                    <input type="hidden" name="shipping_country" id="countryValue" value="United States">
+                    <div class="country-trigger" id="countryTrigger">
+                        <span class="ct-flag" id="countryFlag">🇺🇸</span>
+                        <span class="ct-text" id="countryText">United States</span>
+                        <svg class="ct-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                    </div>
+                    <div class="country-dropdown" id="countryDropdown">
+                        <div class="country-search-wrap">
+                            <input type="text" class="country-search" id="countrySearch" placeholder="Search countries..." autocomplete="off">
+                        </div>
+                        <div class="country-options" id="countryOptions"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary & Pay -->
+        <div class="order-bar">
+            <div class="order-bar-row">
+                <div class="order-bar-details">
+                    <div class="order-bar-item"><strong id="summaryTier">InfinityCard</strong></div>
+                    <div class="order-bar-item">&times; <strong id="summaryQty">1</strong></div>
+                    <div class="order-bar-item">@ <strong id="summaryUnit">${{ product.price }}</strong></div>
+                </div>
+                <div class="order-bar-total" id="summaryTotal">${{ product.price }}</div>
+            </div>
+            <!-- Payment Method Hidden Input -->
+            <input type="hidden" name="payment_method" id="paymentMethod" value="paypal">
+
+            <div class="pay-methods">
+                <div class="pay-tabs">
+                    {% if 'paypal' in enabled_payment_methods %}
+                    <button type="button" class="pay-tab active" data-method="paypal">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/></svg>
+                        PayPal
+                    </button>
+                    {% endif %}
+                    {% if 'bank_transfer' in enabled_payment_methods %}
+                    <button type="button" class="pay-tab{% if 'paypal' not in enabled_payment_methods %} active{% endif %}" data-method="bank_transfer">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"/></svg>
+                        Bank Transfer
+                    </button>
+                    {% endif %}
+                    {% if 'ecocash' in enabled_payment_methods %}
+                    <button type="button" class="pay-tab{% if 'paypal' not in enabled_payment_methods and 'bank_transfer' not in enabled_payment_methods %} active{% endif %}" data-method="ecocash">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>
+                        EcoCash
+                    </button>
+                    {% endif %}
+                    {% if 'cash' in enabled_payment_methods %}
+                    <button type="button" class="pay-tab{% if 'paypal' not in enabled_payment_methods and 'bank_transfer' not in enabled_payment_methods and 'ecocash' not in enabled_payment_methods %} active{% endif %}" data-method="cash">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg>
+                        Cash Payment
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- PayPal Panel -->
+                {% if 'paypal' in enabled_payment_methods %}
+                <div class="pay-panel active" data-panel="paypal">
+                    <button type="submit" class="pay-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/></svg>
+                        Pay with PayPal
+                    </button>
+                    <div class="pay-secure">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                        Secure checkout — you'll be redirected to PayPal
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Bank Transfer Panel -->
+                {% if 'bank_transfer' in enabled_payment_methods %}
+                <div class="pay-panel{% if 'paypal' not in enabled_payment_methods %} active{% endif %}" data-panel="bank_transfer">
+                    <div class="pay-info-box">
+                        <strong>How it works:</strong> Transfer the exact amount to our bank account, then upload your proof of payment on the next page. Your order will be activated once we verify the payment (within 24 hours).
+                    </div>
+                    {% for acc in bank_accounts %}
+                    <div class="pay-info-box" style="background:#fff; border-color:#D1D5DB;">
+                        {% if bank_accounts.count > 1 %}<div style="font-size:11px;font-weight:600;color:#6366F1;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">{% if acc.is_primary %}Primary Account{% else %}Account {{ forloop.counter }}{% endif %}</div>{% endif %}
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Bank</span>
+                            <span class="pay-info-value">{{ acc.bank_name }}</span>
+                        </div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Account Name</span>
+                            <span class="pay-info-value">{{ acc.account_name }}</span>
+                        </div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Account Number</span>
+                            <span class="pay-info-value">{{ acc.account_number }}</span>
+                        </div>
+                        {% if acc.branch %}
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Branch</span>
+                            <span class="pay-info-value">{{ acc.branch }}</span>
+                        </div>
+                        {% endif %}
+                        {% if acc.swift_code %}
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">SWIFT</span>
+                            <span class="pay-info-value">{{ acc.swift_code }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="pay-info-box" style="background:#fff; border-color:#D1D5DB;">
+                        <span style="color:#ef4444;">No bank accounts configured. Please contact support.</span>
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="pay-btn pay-btn--bank">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"/></svg>
+                        Continue with Bank Transfer
+                    </button>
+                    <div class="pay-secure">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                        You'll upload proof of payment on the next page
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- EcoCash Panel -->
+                {% if 'ecocash' in enabled_payment_methods %}
+                <div class="pay-panel{% if 'paypal' not in enabled_payment_methods and 'bank_transfer' not in enabled_payment_methods %} active{% endif %}" data-panel="ecocash">
+                    <div class="pay-info-box" style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5); border-color:#6EE7B7;">
+                        <strong style="color:#065F46;">How it works:</strong>
+                        <span style="color:#047857;">Enter your EcoCash mobile number below. A USSD prompt will be sent to your phone — enter your EcoCash PIN to authorize the payment.</span>
+                    </div>
+                    <div style="margin-bottom:14px;">
+                        <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:5px;">
+                            EcoCash Mobile Number <span style="color:#EF4444;">*</span>
+                        </label>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="display:flex;align-items:center;gap:6px;padding:10px 12px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;font-weight:600;color:#64748B;white-space:nowrap;">
+                                <span style="font-size:16px;">🇿🇼</span> +263
+                            </div>
+                            <input type="tel" name="ecocash_phone" id="ecocashPhone"
+                                   placeholder="7X XXX XXXX"
+                                   pattern="0?7[1-9][0-9]{7}"
+                                   style="flex:1;padding:10px 14px;font-size:15px;font-weight:600;border:1.5px solid #E2E8F0;border-radius:10px;color:#0F172A;outline:none;transition:border-color 0.15s;letter-spacing:0.5px;"
+                                   onfocus="this.style.borderColor='#059669'"
+                                   onblur="this.style.borderColor='#E2E8F0'">
+                        </div>
+                        <div style="font-size:11px;color:#94A3B8;margin-top:4px;">e.g. 0771 234 567 or 771 234 567</div>
+                    </div>
+                    <button type="submit" class="pay-btn pay-btn--eco" id="ecocashPayBtn">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>
+                        Pay with EcoCash
+                    </button>
+                    <div class="pay-secure" style="color:#059669;">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                        Secure — a prompt will be sent to your phone to authorize
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Cash Payment Panel -->
+                {% if 'cash' in enabled_payment_methods %}
+                <div class="pay-panel{% if 'paypal' not in enabled_payment_methods and 'bank_transfer' not in enabled_payment_methods and 'ecocash' not in enabled_payment_methods %} active{% endif %}" data-panel="cash">
+                    <div class="pay-info-box" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A); border-color:#FCD34D;">
+                        <strong style="color:#92400E;">How it works:</strong>
+                        <span style="color:#B45309;">Your order will be created and marked as pending. Pay in cash at our office or to our representative, and an admin will approve your order once payment is received.</span>
+                    </div>
+                    <div class="pay-info-box" style="background:#fff; border-color:#D1D5DB;">
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Payment Location</span>
+                            <span class="pay-info-value">InfinityCard Office</span>
+                        </div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Status</span>
+                            <span class="pay-info-value">Pending until admin approval</span>
+                        </div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Processing Time</span>
+                            <span class="pay-info-value">Within 24 hours of payment</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="pay-btn pay-btn--cash" style="background:linear-gradient(135deg,#F59E0B,#D97706); color:white;">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg>
+                        Continue with Cash Payment
+                    </button>
+                    <div class="pay-secure" style="color:#D97706;">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Order will be pending until you pay in cash and admin approves
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</form>
+
+{% endblock %}
+
+{% block company_scripts %}
+<script>
+(function(){
+    const standardPrice = parseFloat('{{ product.price }}');
+    const qtyInput = document.getElementById('qtyInput');
+    const notesSection = document.getElementById('designNotesSection');
+    const icShowcase = document.getElementById('icShowcase');
+    const displayPrice = document.getElementById('displayPrice');
+
+    const LOGO_WHITE  = '{% static "images/logo_white.png" %}';
+    const LOGO_COLOUR = '{% static "images/logo_colour.png" %}';
+    const LOGO_DARK   = '{% static "images/logo_dark.png" %}';
+
+    const THEMES = {
+        teal: {
+            name: 'Ocean Teal',
+            bg: 'linear-gradient(135deg, #0F766E 0%, #0D9488 30%, #06B6D4 100%)',
+            shadow: 'linear-gradient(135deg, #0D9488, #06B6D4)',
+            logo: LOGO_WHITE, nfc: '#fff', tagline: '#fff',
+            qrBg: 'rgba(255,255,255,0.15)', qrStroke: 'rgba(255,255,255,0.8)',
+            pattern: 'radial-gradient(ellipse at 85% 15%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(ellipse at 10% 85%, rgba(0,0,0,0.08) 0%, transparent 50%)'
+        },
+        midnight: {
+            name: 'Midnight Black',
+            bg: 'linear-gradient(135deg, #0F172A 0%, #1E293B 40%, #334155 100%)',
+            shadow: 'linear-gradient(135deg, #1E293B, #334155)',
+            logo: LOGO_WHITE, nfc: '#94A3B8', tagline: '#94A3B8',
+            qrBg: 'rgba(255,255,255,0.08)', qrStroke: 'rgba(255,255,255,0.55)',
+            pattern: 'radial-gradient(ellipse at 80% 15%, rgba(100,116,139,0.15) 0%, transparent 50%), radial-gradient(ellipse at 20% 85%, rgba(0,0,0,0.2) 0%, transparent 50%)'
+        },
+        royal: {
+            name: 'Royal Indigo',
+            bg: 'linear-gradient(135deg, #312E81 0%, #4F46E5 35%, #7C3AED 100%)',
+            shadow: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+            logo: LOGO_WHITE, nfc: '#E0E7FF', tagline: '#E0E7FF',
+            qrBg: 'rgba(255,255,255,0.12)', qrStroke: 'rgba(255,255,255,0.7)',
+            pattern: 'radial-gradient(ellipse at 90% 20%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(ellipse at 10% 80%, rgba(0,0,0,0.1) 0%, transparent 50%)'
+        },
+        platinum: {
+            name: 'Platinum Silver',
+            bg: 'linear-gradient(135deg, #E2E8F0 0%, #CBD5E1 35%, #F1F5F9 100%)',
+            shadow: 'linear-gradient(135deg, #CBD5E1, #E2E8F0)',
+            logo: LOGO_DARK, nfc: '#64748B', tagline: '#64748B',
+            qrBg: 'rgba(0,0,0,0.06)', qrStroke: 'rgba(51,65,85,0.55)',
+            pattern: 'radial-gradient(ellipse at 85% 20%, rgba(255,255,255,0.7) 0%, transparent 50%), radial-gradient(ellipse at 15% 80%, rgba(0,0,0,0.05) 0%, transparent 50%)'
+        },
+        ember: {
+            name: 'Ember Red',
+            bg: 'linear-gradient(135deg, #7F1D1D 0%, #DC2626 35%, #F97316 100%)',
+            shadow: 'linear-gradient(135deg, #DC2626, #F97316)',
+            logo: LOGO_WHITE, nfc: '#FEE2E2', tagline: '#FEE2E2',
+            qrBg: 'rgba(255,255,255,0.12)', qrStroke: 'rgba(255,255,255,0.7)',
+            pattern: 'radial-gradient(ellipse at 85% 15%, rgba(255,255,255,0.12) 0%, transparent 50%), radial-gradient(ellipse at 10% 85%, rgba(0,0,0,0.12) 0%, transparent 50%)'
+        }
+    };
+
+    function applyTheme(key) {
+        const t = THEMES[key];
+        if (!t) return;
+        const bg = document.getElementById('icCardBg');
+        const shadow = document.getElementById('icShadowCard');
+        const logo = document.getElementById('icCardLogo');
+        const nfc = document.getElementById('icNfc');
+        const tagline = document.getElementById('icTagline');
+        const qr = document.getElementById('icQr');
+        const colorName = document.getElementById('icColorName');
+
+        bg.style.background = t.bg;
+        bg.style.backgroundImage = t.bg + ',' + t.pattern;
+        shadow.style.background = t.shadow;
+        logo.src = t.logo;
+        nfc.style.color = t.nfc;
+        tagline.style.color = t.tagline;
+        qr.style.background = t.qrBg;
+        qr.querySelector('svg').style.stroke = t.qrStroke;
+        colorName.textContent = t.name;
+
+        document.querySelectorAll('.swatch-dot').forEach(function(s) {
+            s.classList.toggle('active', s.dataset.color === key);
+        });
+    }
+
+    document.querySelectorAll('.swatch-dot').forEach(function(swatch) {
+        swatch.addEventListener('click', function() {
+            applyTheme(swatch.dataset.color);
+        });
+    });
+
+    applyTheme('teal');
+
+    /* ── Employee selection ── */
+    var memberCheckboxes = document.querySelectorAll('input[name="members"]');
+    var selectAllCb = document.getElementById('empSelectAll');
+    var empCounter = document.getElementById('empCounter');
+    var totalEmployees = memberCheckboxes.length;
+
+    function updateEmployeeUI() {
+        var checkedCount = document.querySelectorAll('input[name="members"]:checked').length;
+
+        // Update counter
+        if (empCounter) {
+            empCounter.textContent = checkedCount + ' of ' + totalEmployees + ' selected';
+            empCounter.classList.toggle('has-selection', checkedCount > 0);
+        }
+
+        // Update select-all checkbox state
+        if (selectAllCb) {
+            selectAllCb.checked = checkedCount === totalEmployees && totalEmployees > 0;
+            selectAllCb.indeterminate = checkedCount > 0 && checkedCount < totalEmployees;
+        }
+
+        // Update row selected states
+        document.querySelectorAll('[data-emp-row]').forEach(function(row) {
+            var cb = row.querySelector('input[name="members"]');
+            row.classList.toggle('selected', cb && cb.checked);
+        });
+
+        // Sync quantity
+        if (checkedCount > 0) {
+            qtyInput.value = checkedCount;
+        }
+        updateSummary();
+    }
+
+    // Individual checkbox change
+    memberCheckboxes.forEach(function(cb) {
+        cb.addEventListener('change', updateEmployeeUI);
+    });
+
+    // Select-all toggle
+    if (selectAllCb) {
+        selectAllCb.addEventListener('change', function() {
+            var checked = selectAllCb.checked;
+            memberCheckboxes.forEach(function(cb) { cb.checked = checked; });
+            updateEmployeeUI();
+        });
+    }
+
+    // Click anywhere on the row to toggle (except the checkbox label itself)
+    document.querySelectorAll('[data-emp-row]').forEach(function(row) {
+        row.addEventListener('click', function(e) {
+            if (e.target.closest('.emp-checkbox')) return;
+            var cb = row.querySelector('input[name="members"]');
+            if (cb) { cb.checked = !cb.checked; updateEmployeeUI(); }
+        });
+    });
+
+    /* ── Quantity ── */
+    window.changeQty = function(delta) {
+        var v = parseInt(qtyInput.value) || 1;
+        v = Math.max(1, Math.min(999, v + delta));
+        qtyInput.value = v;
+        updateSummary();
+    };
+    qtyInput.addEventListener('input', updateSummary);
+
+    /* ── Tier selection ── */
+    var tierLabels = document.querySelectorAll('.tier-option');
+    tierLabels.forEach(function(label) {
+        var radio = label.querySelector('input[type=radio]');
+        if (radio) {
+            radio.addEventListener('change', function() {
+                tierLabels.forEach(function(l) { l.classList.remove('active'); });
+                label.classList.add('active');
+                updateSummary();
+            });
+        }
+    });
+
+    function updateSummary() {
+        var qty = parseInt(qtyInput.value) || 1;
+        var customEl = document.getElementById('designCustom');
+        var isCustom = customEl && customEl.checked;
+        var unitPrice = standardPrice;
+
+        document.getElementById('summaryTier').textContent = isCustom ? 'Custom Branded' : 'InfinityCard';
+        document.getElementById('summaryUnit').textContent = '$' + unitPrice.toFixed(2);
+        document.getElementById('summaryQty').textContent = qty;
+        document.getElementById('summaryTotal').textContent = '$' + (unitPrice * qty).toFixed(2);
+
+        if (displayPrice) {
+            displayPrice.innerHTML = '$' + unitPrice.toFixed(2) + ' <small>USD</small>';
+        }
+
+        if (notesSection) {
+            notesSection.style.display = isCustom ? 'block' : 'none';
+        }
+        if (icShowcase) {
+            icShowcase.style.display = isCustom ? 'none' : '';
+        }
+        var customShowcase = document.getElementById('customShowcase');
+        if (customShowcase) {
+            customShowcase.classList.toggle('visible', isCustom);
+        }
+    }
+
+    /* ── Country Dropdown ── */
+    var COUNTRIES = [
+        {code:'AF',name:'Afghanistan',flag:'\ud83c\udde6\ud83c\uddeb'},{code:'AL',name:'Albania',flag:'\ud83c\udde6\ud83c\uddf1'},{code:'DZ',name:'Algeria',flag:'\ud83c\udde9\ud83c\uddff'},
+        {code:'AD',name:'Andorra',flag:'\ud83c\udde6\ud83c\udde9'},{code:'AO',name:'Angola',flag:'\ud83c\udde6\ud83c\uddf4'},{code:'AG',name:'Antigua and Barbuda',flag:'\ud83c\udde6\ud83c\uddec'},
+        {code:'AR',name:'Argentina',flag:'\ud83c\udde6\ud83c\uddf7'},{code:'AM',name:'Armenia',flag:'\ud83c\udde6\ud83c\uddf2'},{code:'AU',name:'Australia',flag:'\ud83c\udde6\ud83c\uddfa'},
+        {code:'AT',name:'Austria',flag:'\ud83c\udde6\ud83c\uddf9'},{code:'AZ',name:'Azerbaijan',flag:'\ud83c\udde6\ud83c\uddff'},{code:'BS',name:'Bahamas',flag:'\ud83c\udde7\ud83c\uddf8'},
+        {code:'BH',name:'Bahrain',flag:'\ud83c\udde7\ud83c\udded'},{code:'BD',name:'Bangladesh',flag:'\ud83c\udde7\ud83c\udde9'},{code:'BB',name:'Barbados',flag:'\ud83c\udde7\ud83c\udde7'},
+        {code:'BY',name:'Belarus',flag:'\ud83c\udde7\ud83c\uddfe'},{code:'BE',name:'Belgium',flag:'\ud83c\udde7\ud83c\uddea'},{code:'BZ',name:'Belize',flag:'\ud83c\udde7\ud83c\uddff'},
+        {code:'BJ',name:'Benin',flag:'\ud83c\udde7\ud83c\uddef'},{code:'BT',name:'Bhutan',flag:'\ud83c\udde7\ud83c\uddf9'},{code:'BO',name:'Bolivia',flag:'\ud83c\udde7\ud83c\uddf4'},
+        {code:'BA',name:'Bosnia and Herzegovina',flag:'\ud83c\udde7\ud83c\udde6'},{code:'BW',name:'Botswana',flag:'\ud83c\udde7\ud83c\uddfc'},{code:'BR',name:'Brazil',flag:'\ud83c\udde7\ud83c\uddf7'},
+        {code:'BN',name:'Brunei',flag:'\ud83c\udde7\ud83c\uddf3'},{code:'BG',name:'Bulgaria',flag:'\ud83c\udde7\ud83c\uddec'},{code:'BF',name:'Burkina Faso',flag:'\ud83c\udde7\ud83c\uddeb'},
+        {code:'BI',name:'Burundi',flag:'\ud83c\udde7\ud83c\uddee'},{code:'CV',name:'Cabo Verde',flag:'\ud83c\udde8\ud83c\uddfb'},{code:'KH',name:'Cambodia',flag:'\ud83c\uddf0\ud83c\udded'},
+        {code:'CM',name:'Cameroon',flag:'\ud83c\udde8\ud83c\uddf2'},{code:'CA',name:'Canada',flag:'\ud83c\udde8\ud83c\udde6'},{code:'CF',name:'Central African Republic',flag:'\ud83c\udde8\ud83c\uddeb'},
+        {code:'TD',name:'Chad',flag:'\ud83c\uddf9\ud83c\udde9'},{code:'CL',name:'Chile',flag:'\ud83c\udde8\ud83c\uddf1'},{code:'CN',name:'China',flag:'\ud83c\udde8\ud83c\uddf3'},
+        {code:'CO',name:'Colombia',flag:'\ud83c\udde8\ud83c\uddf4'},{code:'KM',name:'Comoros',flag:'\ud83c\uddf0\ud83c\uddf2'},{code:'CG',name:'Congo',flag:'\ud83c\udde8\ud83c\uddec'},
+        {code:'CD',name:'Congo (DRC)',flag:'\ud83c\udde8\ud83c\udde9'},{code:'CR',name:'Costa Rica',flag:'\ud83c\udde8\ud83c\uddf7'},{code:'CI',name:"C\u00f4te d'Ivoire",flag:'\ud83c\udde8\ud83c\uddee'},
+        {code:'HR',name:'Croatia',flag:'\ud83c\udded\ud83c\uddf7'},{code:'CU',name:'Cuba',flag:'\ud83c\udde8\ud83c\uddfa'},{code:'CY',name:'Cyprus',flag:'\ud83c\udde8\ud83c\uddfe'},
+        {code:'CZ',name:'Czech Republic',flag:'\ud83c\udde8\ud83c\uddff'},{code:'DK',name:'Denmark',flag:'\ud83c\udde9\ud83c\uddf0'},{code:'DJ',name:'Djibouti',flag:'\ud83c\udde9\ud83c\uddef'},
+        {code:'DM',name:'Dominica',flag:'\ud83c\udde9\ud83c\uddf2'},{code:'DO',name:'Dominican Republic',flag:'\ud83c\udde9\ud83c\uddf4'},{code:'EC',name:'Ecuador',flag:'\ud83c\uddea\ud83c\udde8'},
+        {code:'EG',name:'Egypt',flag:'\ud83c\uddea\ud83c\uddec'},{code:'SV',name:'El Salvador',flag:'\ud83c\uddf8\ud83c\uddfb'},{code:'GQ',name:'Equatorial Guinea',flag:'\ud83c\uddec\ud83c\uddf6'},
+        {code:'ER',name:'Eritrea',flag:'\ud83c\uddea\ud83c\uddf7'},{code:'EE',name:'Estonia',flag:'\ud83c\uddea\ud83c\uddea'},{code:'SZ',name:'Eswatini',flag:'\ud83c\uddf8\ud83c\uddff'},
+        {code:'ET',name:'Ethiopia',flag:'\ud83c\uddea\ud83c\uddf9'},{code:'FJ',name:'Fiji',flag:'\ud83c\uddeb\ud83c\uddef'},{code:'FI',name:'Finland',flag:'\ud83c\uddeb\ud83c\uddee'},
+        {code:'FR',name:'France',flag:'\ud83c\uddeb\ud83c\uddf7'},{code:'GA',name:'Gabon',flag:'\ud83c\uddec\ud83c\udde6'},{code:'GM',name:'Gambia',flag:'\ud83c\uddec\ud83c\uddf2'},
+        {code:'GE',name:'Georgia',flag:'\ud83c\uddec\ud83c\uddea'},{code:'DE',name:'Germany',flag:'\ud83c\udde9\ud83c\uddea'},{code:'GH',name:'Ghana',flag:'\ud83c\uddec\ud83c\udded'},
+        {code:'GR',name:'Greece',flag:'\ud83c\uddec\ud83c\uddf7'},{code:'GD',name:'Grenada',flag:'\ud83c\uddec\ud83c\udde9'},{code:'GT',name:'Guatemala',flag:'\ud83c\uddec\ud83c\uddf9'},
+        {code:'GN',name:'Guinea',flag:'\ud83c\uddec\ud83c\uddf3'},{code:'GW',name:'Guinea-Bissau',flag:'\ud83c\uddec\ud83c\uddfc'},{code:'GY',name:'Guyana',flag:'\ud83c\uddec\ud83c\uddfe'},
+        {code:'HT',name:'Haiti',flag:'\ud83c\udded\ud83c\uddf9'},{code:'HN',name:'Honduras',flag:'\ud83c\udded\ud83c\uddf3'},{code:'HK',name:'Hong Kong',flag:'\ud83c\udded\ud83c\uddf0'},
+        {code:'HU',name:'Hungary',flag:'\ud83c\udded\ud83c\uddfa'},{code:'IS',name:'Iceland',flag:'\ud83c\uddee\ud83c\uddf8'},{code:'IN',name:'India',flag:'\ud83c\uddee\ud83c\uddf3'},
+        {code:'ID',name:'Indonesia',flag:'\ud83c\uddee\ud83c\udde9'},{code:'IR',name:'Iran',flag:'\ud83c\uddee\ud83c\uddf7'},{code:'IQ',name:'Iraq',flag:'\ud83c\uddee\ud83c\uddf6'},
+        {code:'IE',name:'Ireland',flag:'\ud83c\uddee\ud83c\uddea'},{code:'IL',name:'Israel',flag:'\ud83c\uddee\ud83c\uddf1'},{code:'IT',name:'Italy',flag:'\ud83c\uddee\ud83c\uddf9'},
+        {code:'JM',name:'Jamaica',flag:'\ud83c\uddef\ud83c\uddf2'},{code:'JP',name:'Japan',flag:'\ud83c\uddef\ud83c\uddf5'},{code:'JO',name:'Jordan',flag:'\ud83c\uddef\ud83c\uddf4'},
+        {code:'KZ',name:'Kazakhstan',flag:'\ud83c\uddf0\ud83c\uddff'},{code:'KE',name:'Kenya',flag:'\ud83c\uddf0\ud83c\uddea'},{code:'KI',name:'Kiribati',flag:'\ud83c\uddf0\ud83c\uddee'},
+        {code:'KP',name:'North Korea',flag:'\ud83c\uddf0\ud83c\uddf5'},{code:'KR',name:'South Korea',flag:'\ud83c\uddf0\ud83c\uddf7'},{code:'KW',name:'Kuwait',flag:'\ud83c\uddf0\ud83c\uddfc'},
+        {code:'KG',name:'Kyrgyzstan',flag:'\ud83c\uddf0\ud83c\uddec'},{code:'LA',name:'Laos',flag:'\ud83c\uddf1\ud83c\udde6'},{code:'LV',name:'Latvia',flag:'\ud83c\uddf1\ud83c\uddfb'},
+        {code:'LB',name:'Lebanon',flag:'\ud83c\uddf1\ud83c\udde7'},{code:'LS',name:'Lesotho',flag:'\ud83c\uddf1\ud83c\uddf8'},{code:'LR',name:'Liberia',flag:'\ud83c\uddf1\ud83c\uddf7'},
+        {code:'LY',name:'Libya',flag:'\ud83c\uddf1\ud83c\uddfe'},{code:'LI',name:'Liechtenstein',flag:'\ud83c\uddf1\ud83c\uddee'},{code:'LT',name:'Lithuania',flag:'\ud83c\uddf1\ud83c\uddf9'},
+        {code:'LU',name:'Luxembourg',flag:'\ud83c\uddf1\ud83c\uddfa'},{code:'MO',name:'Macau',flag:'\ud83c\uddf2\ud83c\uddf4'},{code:'MG',name:'Madagascar',flag:'\ud83c\uddf2\ud83c\uddec'},
+        {code:'MW',name:'Malawi',flag:'\ud83c\uddf2\ud83c\uddfc'},{code:'MY',name:'Malaysia',flag:'\ud83c\uddf2\ud83c\uddfe'},{code:'MV',name:'Maldives',flag:'\ud83c\uddf2\ud83c\uddfb'},
+        {code:'ML',name:'Mali',flag:'\ud83c\uddf2\ud83c\uddf1'},{code:'MT',name:'Malta',flag:'\ud83c\uddf2\ud83c\uddf9'},{code:'MH',name:'Marshall Islands',flag:'\ud83c\uddf2\ud83c\udded'},
+        {code:'MR',name:'Mauritania',flag:'\ud83c\uddf2\ud83c\uddf7'},{code:'MU',name:'Mauritius',flag:'\ud83c\uddf2\ud83c\uddfa'},{code:'MX',name:'Mexico',flag:'\ud83c\uddf2\ud83c\uddfd'},
+        {code:'FM',name:'Micronesia',flag:'\ud83c\uddeb\ud83c\uddf2'},{code:'MD',name:'Moldova',flag:'\ud83c\uddf2\ud83c\udde9'},{code:'MC',name:'Monaco',flag:'\ud83c\uddf2\ud83c\udde8'},
+        {code:'MN',name:'Mongolia',flag:'\ud83c\uddf2\ud83c\uddf3'},{code:'ME',name:'Montenegro',flag:'\ud83c\uddf2\ud83c\uddea'},{code:'MA',name:'Morocco',flag:'\ud83c\uddf2\ud83c\udde6'},
+        {code:'MZ',name:'Mozambique',flag:'\ud83c\uddf2\ud83c\uddff'},{code:'MM',name:'Myanmar',flag:'\ud83c\uddf2\ud83c\uddf2'},{code:'NA',name:'Namibia',flag:'\ud83c\uddf3\ud83c\udde6'},
+        {code:'NR',name:'Nauru',flag:'\ud83c\uddf3\ud83c\uddf7'},{code:'NP',name:'Nepal',flag:'\ud83c\uddf3\ud83c\uddf5'},{code:'NL',name:'Netherlands',flag:'\ud83c\uddf3\ud83c\uddf1'},
+        {code:'NZ',name:'New Zealand',flag:'\ud83c\uddf3\ud83c\uddff'},{code:'NI',name:'Nicaragua',flag:'\ud83c\uddf3\ud83c\uddee'},{code:'NE',name:'Niger',flag:'\ud83c\uddf3\ud83c\uddea'},
+        {code:'NG',name:'Nigeria',flag:'\ud83c\uddf3\ud83c\uddec'},{code:'MK',name:'North Macedonia',flag:'\ud83c\uddf2\ud83c\uddf0'},{code:'NO',name:'Norway',flag:'\ud83c\uddf3\ud83c\uddf4'},
+        {code:'OM',name:'Oman',flag:'\ud83c\uddf4\ud83c\uddf2'},{code:'PK',name:'Pakistan',flag:'\ud83c\uddf5\ud83c\uddf0'},{code:'PW',name:'Palau',flag:'\ud83c\uddf5\ud83c\uddfc'},
+        {code:'PS',name:'Palestine',flag:'\ud83c\uddf5\ud83c\uddf8'},{code:'PA',name:'Panama',flag:'\ud83c\uddf5\ud83c\udde6'},{code:'PG',name:'Papua New Guinea',flag:'\ud83c\uddf5\ud83c\uddec'},
+        {code:'PY',name:'Paraguay',flag:'\ud83c\uddf5\ud83c\uddfe'},{code:'PE',name:'Peru',flag:'\ud83c\uddf5\ud83c\uddea'},{code:'PH',name:'Philippines',flag:'\ud83c\uddf5\ud83c\udded'},
+        {code:'PL',name:'Poland',flag:'\ud83c\uddf5\ud83c\uddf1'},{code:'PT',name:'Portugal',flag:'\ud83c\uddf5\ud83c\uddf9'},{code:'QA',name:'Qatar',flag:'\ud83c\uddf6\ud83c\udde6'},
+        {code:'RO',name:'Romania',flag:'\ud83c\uddf7\ud83c\uddf4'},{code:'RU',name:'Russia',flag:'\ud83c\uddf7\ud83c\uddfa'},{code:'RW',name:'Rwanda',flag:'\ud83c\uddf7\ud83c\uddfc'},
+        {code:'KN',name:'Saint Kitts and Nevis',flag:'\ud83c\uddf0\ud83c\uddf3'},{code:'LC',name:'Saint Lucia',flag:'\ud83c\uddf1\ud83c\udde8'},{code:'VC',name:'Saint Vincent and the Grenadines',flag:'\ud83c\uddfb\ud83c\udde8'},
+        {code:'WS',name:'Samoa',flag:'\ud83c\uddfc\ud83c\uddf8'},{code:'SM',name:'San Marino',flag:'\ud83c\uddf8\ud83c\uddf2'},{code:'ST',name:'S\u00e3o Tom\u00e9 and Pr\u00edncipe',flag:'\ud83c\uddf8\ud83c\uddf9'},
+        {code:'SA',name:'Saudi Arabia',flag:'\ud83c\uddf8\ud83c\udde6'},{code:'SN',name:'Senegal',flag:'\ud83c\uddf8\ud83c\uddf3'},{code:'RS',name:'Serbia',flag:'\ud83c\uddf7\ud83c\uddf8'},
+        {code:'SC',name:'Seychelles',flag:'\ud83c\uddf8\ud83c\udde8'},{code:'SL',name:'Sierra Leone',flag:'\ud83c\uddf8\ud83c\uddf1'},{code:'SG',name:'Singapore',flag:'\ud83c\uddf8\ud83c\uddec'},
+        {code:'SK',name:'Slovakia',flag:'\ud83c\uddf8\ud83c\uddf0'},{code:'SI',name:'Slovenia',flag:'\ud83c\uddf8\ud83c\uddee'},{code:'SB',name:'Solomon Islands',flag:'\ud83c\uddf8\ud83c\udde7'},
+        {code:'SO',name:'Somalia',flag:'\ud83c\uddf8\ud83c\uddf4'},{code:'ZA',name:'South Africa',flag:'\ud83c\uddff\ud83c\udde6'},{code:'SS',name:'South Sudan',flag:'\ud83c\uddf8\ud83c\uddf8'},
+        {code:'ES',name:'Spain',flag:'\ud83c\uddea\ud83c\uddf8'},{code:'LK',name:'Sri Lanka',flag:'\ud83c\uddf1\ud83c\uddf0'},{code:'SD',name:'Sudan',flag:'\ud83c\uddf8\ud83c\udde9'},
+        {code:'SR',name:'Suriname',flag:'\ud83c\uddf8\ud83c\uddf7'},{code:'SE',name:'Sweden',flag:'\ud83c\uddf8\ud83c\uddea'},{code:'CH',name:'Switzerland',flag:'\ud83c\udde8\ud83c\udded'},
+        {code:'SY',name:'Syria',flag:'\ud83c\uddf8\ud83c\uddfe'},{code:'TW',name:'Taiwan',flag:'\ud83c\uddf9\ud83c\uddfc'},{code:'TJ',name:'Tajikistan',flag:'\ud83c\uddf9\ud83c\uddef'},
+        {code:'TZ',name:'Tanzania',flag:'\ud83c\uddf9\ud83c\uddff'},{code:'TH',name:'Thailand',flag:'\ud83c\uddf9\ud83c\udded'},{code:'TL',name:'Timor-Leste',flag:'\ud83c\uddf9\ud83c\uddf1'},
+        {code:'TG',name:'Togo',flag:'\ud83c\uddf9\ud83c\uddec'},{code:'TO',name:'Tonga',flag:'\ud83c\uddf9\ud83c\uddf4'},{code:'TT',name:'Trinidad and Tobago',flag:'\ud83c\uddf9\ud83c\uddf9'},
+        {code:'TN',name:'Tunisia',flag:'\ud83c\uddf9\ud83c\uddf3'},{code:'TR',name:'Turkey',flag:'\ud83c\uddf9\ud83c\uddf7'},{code:'TM',name:'Turkmenistan',flag:'\ud83c\uddf9\ud83c\uddf2'},
+        {code:'TV',name:'Tuvalu',flag:'\ud83c\uddf9\ud83c\uddfb'},{code:'UG',name:'Uganda',flag:'\ud83c\uddfa\ud83c\uddec'},{code:'UA',name:'Ukraine',flag:'\ud83c\uddfa\ud83c\udde6'},
+        {code:'AE',name:'United Arab Emirates',flag:'\ud83c\udde6\ud83c\uddea'},{code:'GB',name:'United Kingdom',flag:'\ud83c\uddec\ud83c\udde7'},{code:'US',name:'United States',flag:'\ud83c\uddfa\ud83c\uddf8'},
+        {code:'UY',name:'Uruguay',flag:'\ud83c\uddfa\ud83c\uddfe'},{code:'UZ',name:'Uzbekistan',flag:'\ud83c\uddfa\ud83c\uddff'},{code:'VU',name:'Vanuatu',flag:'\ud83c\uddfb\ud83c\uddfa'},
+        {code:'VA',name:'Vatican City',flag:'\ud83c\uddfb\ud83c\udde6'},{code:'VE',name:'Venezuela',flag:'\ud83c\uddfb\ud83c\uddea'},{code:'VN',name:'Vietnam',flag:'\ud83c\uddfb\ud83c\uddf3'},
+        {code:'YE',name:'Yemen',flag:'\ud83c\uddfe\ud83c\uddea'},{code:'ZM',name:'Zambia',flag:'\ud83c\uddff\ud83c\uddf2'},{code:'ZW',name:'Zimbabwe',flag:'\ud83c\uddff\ud83c\uddfc'}
+    ];
+
+    var cTrigger = document.getElementById('countryTrigger');
+    var cDropdown = document.getElementById('countryDropdown');
+    var cSearch = document.getElementById('countrySearch');
+    var cOptions = document.getElementById('countryOptions');
+    var cValue = document.getElementById('countryValue');
+    var cFlag = document.getElementById('countryFlag');
+    var cText = document.getElementById('countryText');
+    var cIsOpen = false;
+
+    function renderCountries(filter) {
+        var q = (filter || '').toLowerCase();
+        var html = '';
+        var count = 0;
+        COUNTRIES.forEach(function(c) {
+            if (q && c.name.toLowerCase().indexOf(q) === -1 && c.code.toLowerCase().indexOf(q) === -1) return;
+            var isActive = c.name === cValue.value ? ' active' : '';
+            html += '<div class="country-opt' + isActive + '" data-code="' + c.code + '" data-name="' + c.name + '" data-flag="' + c.flag + '">';
+            html += '<span class="co-flag">' + c.flag + '</span>';
+            html += '<span class="co-name">' + c.name + '</span>';
+            html += '<span class="co-code">' + c.code + '</span>';
+            html += '</div>';
+            count++;
+        });
+        if (count === 0) {
+            html = '<div class="country-no-results">No countries found</div>';
+        }
+        cOptions.innerHTML = html;
+
+        cOptions.querySelectorAll('.country-opt').forEach(function(opt) {
+            opt.addEventListener('click', function() {
+                selectCountry(opt.dataset.code, opt.dataset.name, opt.dataset.flag);
+            });
+        });
+    }
+
+    function selectCountry(code, name, flag) {
+        cValue.value = name;
+        cFlag.textContent = flag;
+        cText.textContent = name;
+        cText.classList.remove('placeholder');
+        closeDropdown();
+    }
+
+    function openDropdown() {
+        cIsOpen = true;
+        cTrigger.classList.add('open');
+        cDropdown.classList.add('open');
+        cSearch.value = '';
+        renderCountries('');
+        setTimeout(function() { cSearch.focus(); }, 50);
+        // Scroll active item into view
+        setTimeout(function() {
+            var active = cOptions.querySelector('.active');
+            if (active) active.scrollIntoView({ block: 'nearest' });
+        }, 60);
+    }
+
+    function closeDropdown() {
+        cIsOpen = false;
+        cTrigger.classList.remove('open');
+        cDropdown.classList.remove('open');
+    }
+
+    if (cTrigger) {
+        cTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (cIsOpen) closeDropdown(); else openDropdown();
+        });
+    }
+
+    if (cSearch) {
+        cSearch.addEventListener('input', function() {
+            renderCountries(cSearch.value);
+        });
+        cSearch.addEventListener('click', function(e) { e.stopPropagation(); });
+        cSearch.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeDropdown();
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                var first = cOptions.querySelector('.country-opt');
+                if (first) first.click();
+            }
+        });
+    }
+
+    if (cDropdown) {
+        cDropdown.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+
+    document.addEventListener('click', function() {
+        if (cIsOpen) closeDropdown();
+    });
+
+    renderCountries('');
+
+    /* ── Payment Method Tabs ── */
+    var payTabs = document.querySelectorAll('.pay-tab');
+    var payPanels = document.querySelectorAll('.pay-panel');
+    var payMethodInput = document.getElementById('paymentMethod');
+    var ecocashPhone = document.getElementById('ecocashPhone');
+
+    payTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var method = tab.dataset.method;
+            payTabs.forEach(function(t) { t.classList.remove('active'); });
+            payPanels.forEach(function(p) { p.classList.remove('active'); });
+            tab.classList.add('active');
+            var panel = document.querySelector('[data-panel="' + method + '"]');
+            if (panel) panel.classList.add('active');
+            if (payMethodInput) payMethodInput.value = method;
+            // Toggle required on ecocash phone based on active method
+            if (ecocashPhone) ecocashPhone.required = (method === 'ecocash');
+        });
+    });
+
+    /* ── EcoCash phone validation ── */
+    var checkoutForm = document.querySelector('form');
+    if (checkoutForm && ecocashPhone) {
+        checkoutForm.addEventListener('submit', function(e) {
+            if (payMethodInput && payMethodInput.value === 'ecocash') {
+                var phone = ecocashPhone.value.replace(/[\s\-\(\)]/g, '');
+                if (!phone.match(/^0?7[1-9]\d{7}$/)) {
+                    e.preventDefault();
+                    ecocashPhone.style.borderColor = '#EF4444';
+                    ecocashPhone.focus();
+                    alert('Please enter a valid EcoCash phone number (e.g. 0771 234 567)');
+                    return false;
+                }
+            }
+        });
+    }
+})();
+</script>
+{% endblock %}

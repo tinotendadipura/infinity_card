@@ -1,0 +1,269 @@
+{% extends 'subscriptions/admin_base.html' %}
+
+{% block title %}NFC Card URLs{% endblock %}
+{% block page_title %}NFC Card URLs{% endblock %}
+{% block nav_nfc_urls %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+
+.nfc-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.nfc-search{flex:1;min-width:200px;position:relative}
+.nfc-search input{width:100%;padding:9px 14px 9px 36px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;color:#1E293B;background:#fff}
+.nfc-search input:focus{outline:none;border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+.nfc-search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#94A3B8}
+.nfc-copy-all{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:linear-gradient(135deg,#4F46E5,#6366F1);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s;white-space:nowrap}
+.nfc-copy-all:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(79,70,229,.3)}
+.nfc-copy-all svg{width:15px;height:15px}
+
+.nfc-info{background:#EEF2FF;border:1px solid #C7D2FE;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#3730A3}
+.nfc-info svg{width:18px;height:18px;flex-shrink:0}
+.nfc-info strong{font-weight:700}
+.nfc-info code{background:rgba(79,70,229,.1);padding:2px 6px;border-radius:4px;font-size:12px;font-family:'Courier New',monospace}
+
+.nfc-table{width:100%;border-collapse:collapse}
+.nfc-table th{text-align:left;font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;border-bottom:2px solid #E2E8F0;background:#F8FAFC}
+.nfc-table td{padding:12px 14px;border-bottom:1px solid #F1F5F9;font-size:13px;color:#334155}
+.nfc-table tr:hover td{background:#FAFBFF}
+.nfc-user{display:flex;align-items:center;gap:10px}
+.nfc-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#818CF8,#6366F1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.nfc-name{font-weight:600;color:#0F172A;font-size:13px}
+.nfc-username{font-size:11px;color:#94A3B8}
+
+.nfc-url-cell{display:flex;align-items:center;gap:6px;min-width:0}
+.nfc-url{font-family:'Courier New',monospace;font-size:12px;color:#4F46E5;word-break:break-all;flex:1;min-width:0;background:#F8FAFC;padding:6px 10px;border-radius:6px;border:1px solid #E2E8F0}
+.nfc-copy-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;background:#fff;border:1px solid #E2E8F0;border-radius:8px;font-size:11px;font-weight:600;color:#475569;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap;flex-shrink:0}
+.nfc-copy-btn:hover{background:#EEF2FF;color:#4F46E5;border-color:#C7D2FE}
+.nfc-copy-btn.copied{background:#F0FDF4;color:#16A34A;border-color:#BBF7D0}
+.nfc-copy-btn svg{width:13px;height:13px}
+
+.nfc-code{font-family:'Courier New',monospace;font-size:12px;background:#F1F5F9;padding:3px 8px;border-radius:5px;color:#475569;font-weight:600;letter-spacing:.5px}
+
+.nfc-badge{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.nfc-badge-ok{background:#F0FDF4;color:#16A34A}
+.nfc-badge-warn{background:#FFFBEB;color:#D97706}
+
+.nfc-empty{text-align:center;padding:48px 20px;color:#94A3B8}
+.nfc-empty svg{width:40px;height:40px;margin-bottom:12px}
+
+.nfc-qr{display:flex;align-items:center;gap:8px}
+.nfc-qr-thumb{width:48px;height:48px;border-radius:6px;border:1px solid #E2E8F0;background:#fff;cursor:pointer;transition:.15s}
+.nfc-qr-thumb:hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.nfc-qr-dl{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;background:#fff;border:1px solid #E2E8F0;border-radius:7px;font-size:11px;font-weight:600;color:#475569;cursor:pointer;font-family:inherit;transition:.15s;text-decoration:none;white-space:nowrap}
+.nfc-qr-dl:hover{background:#EEF2FF;color:#4F46E5;border-color:#C7D2FE;text-decoration:none}
+.nfc-qr-dl svg{width:13px;height:13px}
+.nfc-qr-none{font-size:11px;color:#94A3B8;font-style:italic}
+
+/* QR lightbox */
+.nfc-qr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center}
+.nfc-qr-overlay.open{display:flex}
+.nfc-qr-modal{background:#fff;border-radius:16px;padding:24px;text-align:center;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.nfc-qr-modal img{width:280px;height:280px;border-radius:8px;border:1px solid #E2E8F0}
+.nfc-qr-modal-name{font-size:15px;font-weight:700;color:#0F172A;margin:12px 0 4px}
+.nfc-qr-modal-url{font-size:11px;color:#64748B;font-family:'Courier New',monospace;word-break:break-all}
+.nfc-qr-modal-actions{display:flex;gap:8px;justify-content:center;margin-top:16px}
+.nfc-qr-modal-close{position:absolute;top:12px;right:16px;background:none;border:none;font-size:20px;color:#94A3B8;cursor:pointer}
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Stats -->
+<div class="sa-stats">
+    <div class="sa-stat">
+        <div class="sa-stat-icon blue">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128H5.636a8.954 8.954 0 01-1.4-.104M12 6.75a3 3 0 11-6 0 3 3 0 016 0zm8.25 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+        </div>
+        <div>
+            <div class="sa-stat-label">Total Profiles</div>
+            <div class="sa-stat-value">{{ total_profiles }}</div>
+        </div>
+    </div>
+    <div class="sa-stat">
+        <div class="sa-stat-icon green">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+            <div class="sa-stat-label">Ready (Has Name)</div>
+            <div class="sa-stat-value">{{ with_names }}</div>
+        </div>
+    </div>
+    <div class="sa-stat">
+        <div class="sa-stat-icon amber">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+        </div>
+        <div>
+            <div class="sa-stat-label">Missing Name</div>
+            <div class="sa-stat-value">{{ missing_names }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Format info -->
+<div class="nfc-info">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+    <div>
+        <strong>URL Format:</strong>
+        {% if debug %}
+        <code>http://localhost:8000/p/[firstname].[lastname]/[code]</code> (dev mode)
+        {% else %}
+        <code>https://[firstname].[lastname].inftycard.cc/[code]</code>
+        {% endif %}
+        &mdash; Each profile has a unique 7-character code to prevent subdomain conflicts.
+    </div>
+</div>
+
+<div class="sa-card">
+    <div class="sa-card-header">
+        <div class="sa-card-title">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-3.022a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L5.25 9.5"/></svg>
+            All Profile URLs
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div style="padding:14px 20px;border-bottom:1px solid #E2E8F0">
+        <div class="nfc-toolbar">
+            <form class="nfc-search" method="get">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <input type="text" name="q" placeholder="Search by name, username, email, or code..." value="{{ search_q }}">
+            </form>
+            <button class="nfc-copy-all" onclick="copyAllUrls()" title="Copy all visible URLs">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"/></svg>
+                Copy All URLs
+            </button>
+        </div>
+    </div>
+
+    <div class="sa-card-body" style="padding:0;overflow-x:auto">
+        {% if profiles %}
+        <table class="nfc-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Profile Code</th>
+                    <th>NFC Card URL</th>
+                    <th>QR Code</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in profiles %}
+                <tr>
+                    <td>
+                        <div class="nfc-user">
+                            <div class="nfc-avatar">{{ profile.user.first_name|default:"?" |make_list|first|upper }}</div>
+                            <div>
+                                <div class="nfc-name">
+                                    {% if profile.user.first_name and profile.user.last_name %}
+                                    {{ profile.user.first_name }} {{ profile.user.last_name }}
+                                    {% else %}
+                                    <span style="color:#D97706">Name not set</span>
+                                    {% endif %}
+                                </div>
+                                <div class="nfc-username">@{{ profile.user.username }} &middot; {{ profile.user.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="nfc-code">{{ profile.profile_code }}</span></td>
+                    <td>
+                        <div class="nfc-url-cell">
+                            <div class="nfc-url" id="url-{{ profile.pk }}">{{ profile.nfc_url }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if profile.qr_code %}
+                        <div class="nfc-qr">
+                            <img class="nfc-qr-thumb" src="{{ profile.qr_code.url }}" alt="QR" onclick="openQrModal('{{ profile.qr_code.url }}', '{{ profile.user.first_name }} {{ profile.user.last_name }}', '{{ profile.nfc_url }}')">
+                            <a class="nfc-qr-dl" href="{{ profile.qr_code.url }}" download="qr_{{ profile.user.username }}.png" title="Download QR">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                            </a>
+                        </div>
+                        {% else %}
+                        <span class="nfc-qr-none">Not generated</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if profile.user.first_name and profile.user.last_name %}
+                        <span class="nfc-badge nfc-badge-ok">Ready</span>
+                        {% else %}
+                        <span class="nfc-badge nfc-badge-warn">Missing Name</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="nfc-copy-btn" onclick="copyUrl(this, '{{ profile.nfc_url }}')" title="Copy URL">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"/></svg>
+                            Copy
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="nfc-empty">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128H5.636a8.954 8.954 0 01-1.4-.104M12 6.75a3 3 0 11-6 0 3 3 0 016 0zm8.25 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+            <div>No profiles found{% if search_q %} matching "{{ search_q }}"{% endif %}.</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<!-- QR Lightbox Modal -->
+<div class="nfc-qr-overlay" id="qrOverlay" onclick="if(event.target===this)closeQrModal()">
+    <div class="nfc-qr-modal" style="position:relative">
+        <button class="nfc-qr-modal-close" onclick="closeQrModal()">&times;</button>
+        <img id="qrModalImg" src="" alt="QR Code">
+        <div class="nfc-qr-modal-name" id="qrModalName"></div>
+        <div class="nfc-qr-modal-url" id="qrModalUrl"></div>
+        <div class="nfc-qr-modal-actions">
+            <a id="qrModalDl" class="nfc-qr-dl" href="" download="" style="padding:8px 16px;font-size:12px">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                Download PNG
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openQrModal(imgUrl, name, nfcUrl) {
+    document.getElementById('qrModalImg').src = imgUrl;
+    document.getElementById('qrModalName').textContent = name;
+    document.getElementById('qrModalUrl').textContent = nfcUrl;
+    var dl = document.getElementById('qrModalDl');
+    dl.href = imgUrl;
+    dl.download = 'qr_' + name.replace(/\s+/g, '_').toLowerCase() + '.png';
+    document.getElementById('qrOverlay').classList.add('open');
+}
+function closeQrModal() {
+    document.getElementById('qrOverlay').classList.remove('open');
+}
+
+function copyUrl(btn, url) {
+    navigator.clipboard.writeText(url).then(function() {
+        btn.classList.add('copied');
+        var origHTML = btn.innerHTML;
+        btn.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Copied!';
+        setTimeout(function() {
+            btn.innerHTML = origHTML;
+            btn.classList.remove('copied');
+        }, 2000);
+    });
+}
+
+function copyAllUrls() {
+    var urls = [];
+    document.querySelectorAll('.nfc-url').forEach(function(el) {
+        urls.push(el.textContent.trim());
+    });
+    if (urls.length === 0) return;
+    navigator.clipboard.writeText(urls.join('\n')).then(function() {
+        var btn = document.querySelector('.nfc-copy-all');
+        var origHTML = btn.innerHTML;
+        btn.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Copied ' + urls.length + ' URLs!';
+        setTimeout(function() { btn.innerHTML = origHTML; }, 2500);
+    });
+}
+</script>
+{% endblock %}

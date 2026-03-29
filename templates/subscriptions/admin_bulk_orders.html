@@ -1,0 +1,86 @@
+{% extends "subscriptions/admin_base.html" %}
+{% block title %}Bulk Orders{% endblock %}
+{% block nav_bulk_orders %}active{% endblock %}
+{% block page_title %}Company Bulk Orders{% endblock %}
+
+{% block admin_content %}
+
+<div class="sa-card">
+    <div class="sa-filter">
+        <a class="sa-filter-tab {% if not status_filter %}active{% endif %}" href="{% url 'subscriptions:admin_bulk_orders' %}">All</a>
+        <a class="sa-filter-tab {% if status_filter == 'pending' %}active{% endif %}" href="{% url 'subscriptions:admin_bulk_orders' %}?status=pending">Pending</a>
+        <a class="sa-filter-tab {% if status_filter == 'paid' %}active{% endif %}" href="{% url 'subscriptions:admin_bulk_orders' %}?status=paid">Paid</a>
+        <a class="sa-filter-tab {% if status_filter == 'shipped' %}active{% endif %}" href="{% url 'subscriptions:admin_bulk_orders' %}?status=shipped">Shipped</a>
+        <a class="sa-filter-tab {% if status_filter == 'delivered' %}active{% endif %}" href="{% url 'subscriptions:admin_bulk_orders' %}?status=delivered">Delivered</a>
+        <a class="sa-filter-tab {% if status_filter == 'cancelled' %}active{% endif %}" href="{% url 'subscriptions:admin_bulk_orders' %}?status=cancelled">Cancelled</a>
+    </div>
+    <table class="sa-table">
+        <thead>
+            <tr>
+                <th>Order #</th>
+                <th>Company</th>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Ordered By</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td><strong>#{{ order.pk }}</strong></td>
+                <td>
+                    <div class="sa-user-cell">
+                        <div class="sa-user-avatar">{{ order.company.name|first|upper }}</div>
+                        <div class="sa-user-info">
+                            <div class="sa-user-name">{{ order.company.name }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ order.card_product.name }}</td>
+                <td><strong>{{ order.quantity }}</strong></td>
+                <td style="font-weight:600">${{ order.total_amount }}</td>
+                <td><span class="sa-badge sa-badge-gray">{{ order.get_payment_method_display }}</span></td>
+                <td>
+                    <span class="sa-badge {% if order.status == 'paid' or order.status == 'delivered' %}sa-badge-green{% elif order.status == 'pending' %}sa-badge-amber{% elif order.status == 'shipped' %}sa-badge-blue{% else %}sa-badge-red{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </td>
+                <td style="font-size:12px;color:#64748B">{{ order.ordered_by.email|default:"-" }}</td>
+                <td style="font-size:12px;color:#64748B">{{ order.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <div class="sa-actions">
+                        {% if order.status == 'pending' %}
+                        <form method="post" action="{% url 'subscriptions:admin_bulk_order_action' order.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="mark_paid">
+                            <button class="sa-btn sa-btn-success sa-btn-sm">Mark Paid</button>
+                        </form>
+                        {% elif order.status == 'paid' %}
+                        <form method="post" action="{% url 'subscriptions:admin_bulk_order_action' order.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="mark_shipped">
+                            <button class="sa-btn sa-btn-primary sa-btn-sm">Mark Shipped</button>
+                        </form>
+                        {% elif order.status == 'shipped' %}
+                        <form method="post" action="{% url 'subscriptions:admin_bulk_order_action' order.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="mark_delivered">
+                            <button class="sa-btn sa-btn-success sa-btn-sm">Mark Delivered</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="10" class="sa-empty">No bulk orders found</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

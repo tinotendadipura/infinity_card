@@ -1,0 +1,644 @@
+{% extends "pages/home/base.html" %}
+{% load static %}
+
+{% block title %}Shop NFC Business Cards | InfinityCard{% endblock %}
+
+{% block content %}
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --ec-primary:#6366F1;--ec-primary-h:#4F46E5;--ec-accent:#8B5CF6;
+  --ec-bg:#0A0A0A;--ec-surface:#111111;--ec-border:rgba(255,255,255,.08);
+  --ec-text:#F1F5F9;--ec-text2:rgba(255,255,255,.55);--ec-text3:rgba(255,255,255,.3);
+  --ec-success:#10B981;--ec-radius:16px;
+  --ec-shadow:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);
+  --ec-shadow-lg:0 20px 40px rgba(0,0,0,.4),0 8px 16px rgba(0,0,0,.3);
+}
+
+/* ── Hero ── */
+.ec-hero{
+  background:#030303;
+  color:#fff;padding:0 2rem 4rem;text-align:center;position:relative;overflow:hidden;
+  padding-top:120px;border-radius:0 0 32px 32px;
+}
+.ec-hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,.05) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(244,63,94,.05) 0%,transparent 50%);
+  pointer-events:none;z-index:0}
+.ec-hero::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,#030303,transparent 40%,rgba(3,3,3,.8));
+  pointer-events:none;z-index:1}
+
+/* Geometric floating shapes */
+.ec-hero-shapes{position:absolute;inset:0;overflow:hidden;z-index:0}
+.ec-shape{position:absolute;border-radius:9999px;border:2px solid rgba(255,255,255,.15);
+  backdrop-filter:blur(2px);
+  box-shadow:0 8px 32px 0 rgba(255,255,255,.1);
+  opacity:0;animation:ec-shape-enter 2.4s cubic-bezier(.23,.86,.39,.96) forwards}
+.ec-shape::after{content:'';position:absolute;inset:0;border-radius:9999px;
+  background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.2),transparent 70%)}
+.ec-shape-inner{width:100%;height:100%;animation:ec-float 12s ease-in-out infinite}
+
+.ec-shape-1{width:600px;height:140px;left:-10%;top:15%;transform:rotate(12deg);
+  background:linear-gradient(to right,rgba(99,102,241,.15),transparent);
+  animation-delay:0.3s}
+.ec-shape-2{width:500px;height:120px;right:-5%;top:70%;transform:rotate(-15deg);
+  background:linear-gradient(to right,rgba(244,63,94,.15),transparent);
+  animation-delay:0.5s}
+.ec-shape-3{width:300px;height:80px;left:5%;bottom:5%;transform:rotate(-8deg);
+  background:linear-gradient(to right,rgba(139,92,246,.15),transparent);
+  animation-delay:0.4s}
+.ec-shape-4{width:200px;height:60px;right:15%;top:10%;transform:rotate(20deg);
+  background:linear-gradient(to right,rgba(245,158,11,.15),transparent);
+  animation-delay:0.6s}
+.ec-shape-5{width:150px;height:40px;left:20%;top:5%;transform:rotate(-25deg);
+  background:linear-gradient(to right,rgba(6,182,212,.15),transparent);
+  animation-delay:0.7s}
+
+@keyframes ec-shape-enter{
+  0%{opacity:0;transform:translateY(-150px) rotate(var(--r,-15deg))}
+  100%{opacity:1;transform:translateY(0) rotate(var(--r,0deg))}
+}
+@keyframes ec-float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(15px)}
+}
+
+/* Fade-up entrance for hero content */
+.ec-hero-inner{position:relative;z-index:2;max-width:720px;margin:0 auto}
+.ec-hero-inner > *{opacity:0;transform:translateY(30px);animation:ec-fadeup 1s cubic-bezier(.25,.4,.25,1) forwards}
+.ec-hero-inner > *:nth-child(1){animation-delay:.5s}
+.ec-hero-inner > *:nth-child(2){animation-delay:.7s}
+.ec-hero-inner > *:nth-child(3){animation-delay:.9s}
+.ec-hero-inner > *:nth-child(4){animation-delay:1.1s}
+@keyframes ec-fadeup{
+  to{opacity:1;transform:translateY(0)}
+}
+
+.ec-hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:100px;
+  font-size:13px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:24px}
+.ec-hero-badge svg{flex-shrink:0}
+.ec-hero h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;line-height:1.15;
+  letter-spacing:-.03em;margin-bottom:20px}
+.ec-hero h1 .ec-h1-line1{display:block;
+  background:linear-gradient(to bottom,#fff,rgba(255,255,255,.8));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ec-hero h1 .ec-h1-line2{display:block;
+  background:linear-gradient(to right,#A5B4FC,rgba(255,255,255,.9),#FDA4AF);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ec-hero p{font-size:clamp(1rem,2vw,1.25rem);line-height:1.7;color:rgba(255,255,255,.4);
+  margin-bottom:32px;max-width:560px;margin-left:auto;margin-right:auto;font-weight:300;letter-spacing:.01em}
+.ec-hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.ec-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:12px;
+  font-size:15px;font-weight:700;text-decoration:none;transition:all .2s;cursor:pointer;border:none;
+  font-family:inherit;letter-spacing:-.01em}
+.ec-btn-primary{background:#4F46E5;color:#fff;box-shadow:0 4px 16px rgba(79,70,229,.35)}
+.ec-btn-primary:hover{background:#4338CA;transform:translateY(-1px);box-shadow:0 8px 24px rgba(79,70,229,.4)}
+.ec-btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);
+  backdrop-filter:blur(8px)}
+.ec-btn-ghost:hover{background:rgba(255,255,255,.14)}
+
+/* ── Trust bar ── */
+.ec-trust{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;padding:20px 2rem;
+  background:var(--ec-surface);border-bottom:1px solid var(--ec-border)}
+.ec-trust-item{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ec-text2)}
+.ec-trust-item svg{color:var(--ec-primary);flex-shrink:0;opacity:.8}
+
+/* ── Filter pills ── */
+.ec-filters{padding:32px 2rem 0;background:var(--ec-bg)}
+.ec-filters-inner{max-width:1280px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.ec-pill{padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;
+  border:1.5px solid var(--ec-border);background:rgba(255,255,255,.04);color:var(--ec-text2);
+  transition:all .2s;font-family:inherit}
+.ec-pill:hover{border-color:rgba(99,102,241,.4);color:var(--ec-primary)}
+.ec-pill.active{background:var(--ec-primary);color:#fff;border-color:var(--ec-primary);
+  box-shadow:0 2px 12px rgba(99,102,241,.3)}
+
+/* ── Products grid ── */
+.ec-products{padding:32px 2rem 64px;background:var(--ec-bg)}
+.ec-products-inner{max-width:1280px;margin:0 auto}
+.ec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:8px}
+
+/* ── Product card ── */
+.ec-card{background:var(--ec-surface);border-radius:var(--ec-radius);overflow:hidden;
+  border:1px solid var(--ec-border);transition:all .3s cubic-bezier(.23,1,.32,1);
+  display:flex;flex-direction:column;position:relative}
+.ec-card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,.4);border-color:rgba(99,102,241,.2)}
+.ec-card-img{width:100%;height:180px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#1E293B 0%,#334155 100%)}
+.ec-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.23,1,.32,1),opacity .4s ease;
+  position:absolute;inset:0;opacity:0}
+.ec-card-img img.active{opacity:1}
+.ec-card:hover .ec-card-img img.active{transform:scale(1.04)}
+.ec-gallery-dots{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:6px;z-index:2}
+.ec-gallery-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.35);border:none;padding:0;cursor:pointer;transition:background .2s}
+.ec-gallery-dot.active{background:#fff}
+.ec-gallery-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);color:#fff;border:none;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .2s;z-index:2;font-size:14px}
+.ec-card-img:hover .ec-gallery-nav{opacity:1}
+.ec-gallery-nav.prev{left:8px}
+.ec-gallery-nav.next{right:8px}
+.ec-card-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#1E293B,#334155)}
+.ec-card-img-ph svg{width:48px;height:48px;color:rgba(255,255,255,.2)}
+.ec-card-badge{position:absolute;top:10px;left:10px;padding:3px 8px;border-radius:6px;
+  font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  background:rgba(15,23,42,.75);color:#fff;backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.1)}
+.ec-card-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column}
+.ec-card-material{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--ec-primary);margin-bottom:4px}
+.ec-card-name{font-size:1rem;font-weight:700;color:var(--ec-text);margin-bottom:4px;line-height:1.3}
+.ec-card-desc{font-size:12.5px;color:var(--ec-text2);line-height:1.5;margin-bottom:12px;flex:1;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ec-card-features{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.ec-card-feat{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;
+  font-size:11px;font-weight:600;background:rgba(16,185,129,.1);color:#6EE7B7;border:1px solid rgba(16,185,129,.15)}
+.ec-card-feat svg{width:12px;height:12px;flex-shrink:0}
+.ec-card-footer{display:flex;align-items:center;justify-content:space-between;
+  padding-top:12px;border-top:1px solid var(--ec-border)}
+.ec-card-price{font-size:1.1rem;font-weight:800;color:var(--ec-text);letter-spacing:-.02em}
+.ec-card-price small{font-size:11px;font-weight:500;color:var(--ec-text3);margin-left:3px}
+.ec-atc{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;
+  font-size:11.5px;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit;
+  background:var(--ec-accent);color:#fff;box-shadow:0 1px 6px rgba(139,92,246,.25)}
+.ec-atc:hover{background:#7C3AED;transform:translateY(-1px);
+  box-shadow:0 4px 14px rgba(139,92,246,.4)}
+.ec-atc:active{transform:translateY(0)}
+.ec-atc.added{background:var(--ec-success);box-shadow:0 2px 8px rgba(16,185,129,.25)}
+.ec-atc svg{width:14px;height:14px;flex-shrink:0}
+
+/* ── How it works ── */
+.ec-steps{padding:80px 2rem;background:var(--ec-surface);border-top:1px solid var(--ec-border)}
+.ec-steps-inner{max-width:1080px;margin:0 auto}
+.ec-section-label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.5px;color:var(--ec-primary);text-align:center;margin-bottom:12px}
+.ec-section-title{font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;text-align:center;
+  color:var(--ec-text);margin-bottom:12px;letter-spacing:-.02em}
+.ec-section-sub{text-align:center;color:var(--ec-text2);font-size:1rem;margin-bottom:48px;
+  max-width:520px;margin-left:auto;margin-right:auto;line-height:1.65}
+.ec-steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px}
+.ec-step{text-align:center;padding:24px 16px}
+.ec-step-num{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;font-weight:800;margin:0 auto 20px;
+  background:rgba(99,102,241,.1);color:var(--ec-primary);
+  border:2px solid rgba(99,102,241,.15)}
+.ec-step h3{font-size:1.05rem;font-weight:700;color:var(--ec-text);margin-bottom:8px}
+.ec-step p{font-size:14px;color:var(--ec-text2);line-height:1.6}
+
+/* ── Cart drawer ── */
+.ec-cart-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);
+  z-index:9998;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(6px)}
+.ec-cart-overlay.open{opacity:1;pointer-events:auto}
+.ec-cart-drawer{position:fixed;top:0;right:-420px;width:400px;max-width:92vw;height:100%;
+  background:#111111;z-index:9999;transition:right .3s cubic-bezier(.23,1,.32,1);
+  display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,.5)}
+.ec-cart-drawer.open{right:0}
+.ec-cart-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;
+  border-bottom:1px solid var(--ec-border)}
+.ec-cart-header h2{font-size:1.1rem;font-weight:700;color:var(--ec-text);display:flex;align-items:center;gap:8px}
+.ec-cart-header h2 span{display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:8px;background:var(--ec-primary);color:#fff;font-size:12px;font-weight:700}
+.ec-cart-close{width:36px;height:36px;border-radius:10px;border:1px solid var(--ec-border);
+  background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;color:var(--ec-text2)}
+.ec-cart-close:hover{background:rgba(255,255,255,.08);color:var(--ec-text)}
+.ec-cart-body{flex:1;overflow-y:auto;padding:16px 24px}
+.ec-cart-empty{text-align:center;padding:48px 16px;color:var(--ec-text3)}
+.ec-cart-empty svg{width:48px;height:48px;margin-bottom:16px;color:var(--ec-border)}
+.ec-cart-empty p{font-size:15px;font-weight:600;color:var(--ec-text2);margin-bottom:6px}
+.ec-cart-empty small{font-size:13px}
+.ec-cart-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--ec-border)}
+.ec-cart-item:last-child{border-bottom:none}
+.ec-cart-item-img{width:64px;height:64px;border-radius:10px;overflow:hidden;flex-shrink:0;
+  background:linear-gradient(135deg,#1E293B,#334155)}
+.ec-cart-item-img img{width:100%;height:100%;object-fit:cover}
+.ec-cart-item-info{flex:1;min-width:0}
+.ec-cart-item-name{font-size:14px;font-weight:700;color:var(--ec-text);margin-bottom:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ec-cart-item-material{font-size:12px;color:var(--ec-text3)}
+.ec-cart-item-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+.ec-cart-item-price{font-size:15px;font-weight:700;color:var(--ec-text)}
+.ec-cart-qty{display:flex;align-items:center;gap:0;border-radius:8px;overflow:hidden;
+  border:1px solid var(--ec-border)}
+.ec-cart-qty button{width:28px;height:28px;border:none;background:rgba(255,255,255,.06);cursor:pointer;
+  font-size:14px;font-weight:700;color:var(--ec-text2);display:flex;align-items:center;
+  justify-content:center;transition:background .15s}
+.ec-cart-qty button:hover{background:rgba(255,255,255,.12)}
+.ec-cart-qty span{width:32px;text-align:center;font-size:13px;font-weight:700;color:var(--ec-text)}
+.ec-cart-remove{border:none;background:transparent;cursor:pointer;color:var(--ec-text3);
+  font-size:11px;font-weight:600;padding:2px 0;transition:color .15s}
+.ec-cart-remove:hover{color:#EF4444}
+.ec-cart-footer{padding:20px 24px;border-top:1px solid var(--ec-border);background:rgba(255,255,255,.03)}
+.ec-cart-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.ec-cart-total span:first-child{font-size:14px;font-weight:600;color:var(--ec-text2)}
+.ec-cart-total span:last-child{font-size:1.3rem;font-weight:800;color:var(--ec-text)}
+.ec-cart-checkout{width:100%;padding:14px;border-radius:12px;border:none;
+  background:var(--ec-primary);color:#fff;font-size:15px;font-weight:700;cursor:pointer;
+  transition:all .2s;font-family:inherit;box-shadow:0 4px 16px rgba(99,102,241,.3)}
+.ec-cart-checkout:hover{background:var(--ec-primary-h);transform:translateY(-1px)}
+
+/* ── Toast ── */
+.ec-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  padding:14px 24px;background:#1E1E1E;color:#F1F5F9;border-radius:12px;border:1px solid rgba(255,255,255,.08);
+  font-size:14px;font-weight:600;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,.5);
+  display:flex;align-items:center;gap:10px;transition:transform .3s cubic-bezier(.23,1,.32,1);
+  pointer-events:none;white-space:nowrap}
+.ec-toast.show{transform:translateX(-50%) translateY(0)}
+.ec-toast svg{width:18px;height:18px;color:var(--ec-success);flex-shrink:0}
+
+/* ── No products ── */
+.ec-empty{grid-column:1/-1;text-align:center;padding:64px 24px;color:var(--ec-text3);font-size:15px}
+
+/* ── Page-level overrides (dark theme inherited from base.html) ── */
+footer{margin-top:0!important}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  .ec-hero{padding-top:100px;padding-bottom:3rem}
+  .ec-shape-1{width:350px;height:90px;left:-15%}
+  .ec-shape-2{width:300px;height:80px;right:-10%}
+  .ec-shape-3{width:200px;height:55px}
+  .ec-shape-4{width:140px;height:42px}
+  .ec-shape-5{width:100px;height:28px}
+  .ec-grid{grid-template-columns:1fr;gap:16px}
+  .ec-trust{gap:16px;padding:16px 1rem}
+  .ec-trust-item{font-size:12px}
+  .ec-cart-drawer{width:100%;max-width:100%;right:-100%}
+  .ec-steps-grid{grid-template-columns:1fr 1fr;gap:20px}
+}
+@media(max-width:480px){
+  .ec-steps-grid{grid-template-columns:1fr}
+  .ec-hero-actions{flex-direction:column;align-items:center}
+}
+</style>
+
+<!-- ── Hero ── -->
+<section class="ec-hero">
+  <div class="ec-hero-shapes">
+    <div class="ec-shape ec-shape-1" style="--r:12deg"><div class="ec-shape-inner"></div></div>
+    <div class="ec-shape ec-shape-2" style="--r:-15deg"><div class="ec-shape-inner"></div></div>
+    <div class="ec-shape ec-shape-3" style="--r:-8deg"><div class="ec-shape-inner"></div></div>
+    <div class="ec-shape ec-shape-4" style="--r:20deg"><div class="ec-shape-inner"></div></div>
+    <div class="ec-shape ec-shape-5" style="--r:-25deg"><div class="ec-shape-inner"></div></div>
+  </div>
+  <div class="ec-hero-inner">
+    <div class="ec-hero-badge">
+      <svg fill="currentColor" viewBox="0 0 24 24" width="10" height="10"><circle cx="12" cy="12" r="5" fill="rgba(244,63,94,.8)"/></svg>
+      NFC-Enabled Smart Cards
+    </div>
+    <h1>
+      <span class="ec-h1-line1">The Future of Networking</span>
+      <span class="ec-h1-line2">Starts Here</span>
+    </h1>
+    <p>Premium NFC business cards that connect your physical presence to your digital identity. One tap, instant connection.</p>
+    <div class="ec-hero-actions">
+      <a href="#products" class="ec-btn ec-btn-primary">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+        Shop Collection
+      </a>
+      <a href="#how-it-works" class="ec-btn ec-btn-ghost">How It Works</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Trust bar ── -->
+<div class="ec-trust">
+  <div class="ec-trust-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+    Secure NFC Technology
+  </div>
+  <div class="ec-trust-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>
+    Fast Worldwide Shipping
+  </div>
+  <div class="ec-trust-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+    Premium Quality Materials
+  </div>
+  <div class="ec-trust-item">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+    Secure Payments
+  </div>
+</div>
+
+<!-- ── Filters ── -->
+<div class="ec-filters" id="products">
+  <div class="ec-filters-inner">
+    <button class="ec-pill active" onclick="ecFilter('all',this)">All Cards</button>
+    <button class="ec-pill" onclick="ecFilter('plastic',this)">Plastic</button>
+    <button class="ec-pill" onclick="ecFilter('plastic_gold',this)">Plastic Gold</button>
+    <button class="ec-pill" onclick="ecFilter('plastic_transparent',this)">Transparent</button>
+    <button class="ec-pill" onclick="ecFilter('wood',this)">Wood</button>
+    <button class="ec-pill" onclick="ecFilter('metal',this)">Metal</button>
+  </div>
+</div>
+
+<!-- ── Products grid ── -->
+<section class="ec-products">
+  <div class="ec-products-inner">
+    {% if products %}
+    <div class="ec-grid" id="ecGrid">
+      {% for product in products %}
+      <div class="ec-card" data-material="{{ product.material }}" data-slug="{{ product.slug }}">
+        <div class="ec-card-img" data-ec-gallery="{{ product.pk }}">
+          {% with images=product.gallery_images.all %}
+          {% if images %}
+            {% for img in images %}
+            <img src="{{ img.image.url }}" alt="{{ img.caption|default:product.name }}" loading="lazy" {% if forloop.first %}class="active"{% endif %}>
+            {% endfor %}
+            {% if images|length > 1 %}
+            <button class="ec-gallery-nav prev" onclick="ecGalleryNav({{ product.pk }},-1)">&lsaquo;</button>
+            <button class="ec-gallery-nav next" onclick="ecGalleryNav({{ product.pk }},1)">&rsaquo;</button>
+            <div class="ec-gallery-dots">
+              {% for img in images %}
+              <button class="ec-gallery-dot {% if forloop.first %}active{% endif %}" onclick="ecGalleryGo({{ product.pk }},{{ forloop.counter0 }})"></button>
+              {% endfor %}
+            </div>
+            {% endif %}
+          {% elif product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy" class="active">
+          {% else %}
+          <div class="ec-card-img-ph">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+          </div>
+          {% endif %}
+          {% endwith %}
+          <span class="ec-card-badge">{{ product.get_material_display }}</span>
+        </div>
+        <div class="ec-card-body">
+          <div class="ec-card-material">{{ product.get_material_display }}</div>
+          <h3 class="ec-card-name">{{ product.name }}</h3>
+          <p class="ec-card-desc">{{ product.description|default:"Premium NFC-enabled business card. Tap to share your digital profile instantly with anyone."|truncatewords:20 }}</p>
+          <div class="ec-card-footer">
+            <div class="ec-card-price">${{ product.price }}<small>USD</small></div>
+            <button class="ec-atc" onclick="addToCart('{{ product.slug }}',this)">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="ec-empty">No cards available at the moment. Please check back soon!</div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ── How It Works ── -->
+<section class="ec-steps" id="how-it-works">
+  <div class="ec-steps-inner">
+    <span class="ec-section-label">How It Works</span>
+    <h2 class="ec-section-title">From purchase to first tap in 4 steps</h2>
+    <p class="ec-section-sub">Getting started with your NFC business card is simple and straightforward</p>
+    <div class="ec-steps-grid">
+      <div class="ec-step">
+        <div class="ec-step-num">1</div>
+        <h3>Choose Your Card</h3>
+        <p>Pick from our collection of premium materials and finishes</p>
+      </div>
+      <div class="ec-step">
+        <div class="ec-step-num">2</div>
+        <h3>Place Your Order</h3>
+        <p>Complete checkout with your preferred payment method</p>
+      </div>
+      <div class="ec-step">
+        <div class="ec-step-num">3</div>
+        <h3>Set Up Profile</h3>
+        <p>Create your digital profile with links, contact info, and more</p>
+      </div>
+      <div class="ec-step">
+        <div class="ec-step-num">4</div>
+        <h3>Tap & Share</h3>
+        <p>Hold your card to any smartphone to instantly share your profile</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Cart Drawer ── -->
+<div class="ec-cart-overlay" id="ecCartOverlay" onclick="closeCart()"></div>
+<div class="ec-cart-drawer" id="ecCartDrawer">
+  <div class="ec-cart-header">
+    <h2>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+      Your Cart <span id="ecCartCount">0</span>
+    </h2>
+    <button class="ec-cart-close" onclick="closeCart()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="ec-cart-body" id="ecCartBody">
+    <!-- populated by JS -->
+  </div>
+  <div class="ec-cart-footer" id="ecCartFooter" style="display:none;">
+    <div class="ec-cart-total">
+      <span>Subtotal</span>
+      <span id="ecCartTotal">$0.00</span>
+    </div>
+    <button class="ec-cart-checkout" id="ecCheckoutBtn" onclick="goCheckout()">
+      Proceed to Checkout
+    </button>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="ec-toast" id="ecToast">
+  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+  <span id="ecToastMsg">Added to cart</span>
+</div>
+
+<script>
+/* ── CSRF helper ── */
+function getCSRF(){
+  let c=document.cookie.match(/csrftoken=([^;]+)/);
+  return c?c[1]:'';
+}
+
+/* ── Cart state ── */
+var cartData={{ cart_json|safe }};
+
+function renderCart(){
+  var body=document.getElementById('ecCartBody');
+  var footer=document.getElementById('ecCartFooter');
+  var countEl=document.getElementById('ecCartCount');
+  var totalEl=document.getElementById('ecCartTotal');
+  var navCounter=document.querySelector('.nb-cart-count');
+
+  countEl.textContent=cartData.count||0;
+  if(navCounter)navCounter.textContent=cartData.count||0;
+
+  if(!cartData.items||cartData.items.length===0){
+    body.innerHTML='<div class="ec-cart-empty"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg><p>Your cart is empty</p><small>Add some cards to get started</small></div>';
+    footer.style.display='none';
+    return;
+  }
+
+  var html='';
+  cartData.items.forEach(function(item){
+    html+='<div class="ec-cart-item">';
+    html+='<div class="ec-cart-item-img">';
+    if(item.image)html+='<img src="'+item.image+'" alt="'+item.name+'">';
+    html+='</div>';
+    html+='<div class="ec-cart-item-info"><div class="ec-cart-item-name">'+item.name+'</div><div class="ec-cart-item-material">'+item.material+'</div></div>';
+    html+='<div class="ec-cart-item-right">';
+    html+='<div class="ec-cart-item-price">$'+item.line_total+'</div>';
+    html+='<div class="ec-cart-qty">';
+    html+='<button onclick="updateQty(\''+item.slug+'\','+(item.qty-1)+')">-</button>';
+    html+='<span>'+item.qty+'</span>';
+    html+='<button onclick="updateQty(\''+item.slug+'\','+(item.qty+1)+')">+</button>';
+    html+='</div>';
+    html+='<button class="ec-cart-remove" onclick="removeItem(\''+item.slug+'\')">Remove</button>';
+    html+='</div></div>';
+  });
+  body.innerHTML=html;
+  totalEl.textContent='$'+cartData.total;
+  footer.style.display='block';
+}
+
+function openCart(){
+  document.getElementById('ecCartOverlay').classList.add('open');
+  document.getElementById('ecCartDrawer').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeCart(){
+  document.getElementById('ecCartOverlay').classList.remove('open');
+  document.getElementById('ecCartDrawer').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function showToast(msg){
+  var t=document.getElementById('ecToast');
+  document.getElementById('ecToastMsg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2200);
+}
+
+function addToCart(slug,btn){
+  var orig=btn.innerHTML;
+  btn.disabled=true;
+  btn.classList.add('added');
+  btn.innerHTML='<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Added!';
+
+  fetch('{% url "cards:add_to_cart" %}',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},
+    body:JSON.stringify({slug:slug,qty:1})
+  }).then(function(r){
+    if(!r.ok) throw new Error(r.status);
+    return r.json();
+  }).then(function(data){
+    cartData=data;
+    renderCart();
+    showToast(data.added?data.added.name+' added to cart':'Added to cart');
+    setTimeout(function(){
+      btn.disabled=false;
+      btn.classList.remove('added');
+      btn.innerHTML=orig;
+    },1200);
+  }).catch(function(err){
+    console.error('Add to cart failed:',err);
+    showToast('Failed to add item – please try again');
+    btn.disabled=false;
+    btn.classList.remove('added');
+    btn.innerHTML=orig;
+  });
+}
+
+function updateQty(slug,qty){
+  fetch('{% url "cards:update_cart" %}',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},
+    body:JSON.stringify({slug:slug,qty:qty})
+  }).then(function(r){
+    if(!r.ok) throw new Error(r.status);
+    return r.json();
+  }).then(function(data){
+    cartData=data;renderCart();
+  }).catch(function(err){
+    console.error('Update cart failed:',err);
+    showToast('Failed to update – please try again');
+  });
+}
+
+function removeItem(slug){
+  fetch('{% url "cards:remove_from_cart" %}',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},
+    body:JSON.stringify({slug:slug})
+  }).then(function(r){
+    if(!r.ok) throw new Error(r.status);
+    return r.json();
+  }).then(function(data){
+    cartData=data;renderCart();
+    showToast('Item removed');
+  }).catch(function(err){
+    console.error('Remove from cart failed:',err);
+    showToast('Failed to remove – please try again');
+  });
+}
+
+function goCheckout(){
+  if(!cartData.items||cartData.items.length===0) return;
+  {% if user.is_authenticated %}
+    window.location.href='{% url "cards:buy_card" "placeholder" %}'.replace('placeholder',cartData.items[0].slug);
+  {% else %}
+    window.location.href='{% url "accounts:signup" %}?next={% url "cards:ecommerce_store" %}';
+  {% endif %}
+}
+
+/* ── Filter ── */
+function ecFilter(material,btn){
+  document.querySelectorAll('.ec-pill').forEach(function(p){p.classList.remove('active')});
+  btn.classList.add('active');
+  document.querySelectorAll('.ec-card').forEach(function(c){
+    if(material==='all'||c.dataset.material===material){
+      c.style.display='';c.style.opacity='0';
+      setTimeout(function(){c.style.transition='opacity .3s';c.style.opacity='1';},10);
+    }else{c.style.display='none'}
+  });
+}
+
+/* ── Smooth scroll ── */
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    var t=document.querySelector(this.getAttribute('href'));
+    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+/* ── Gallery navigation ── */
+function ecGalleryNav(productId, dir) {
+    var container = document.querySelector('[data-ec-gallery="'+productId+'"]');
+    if (!container) return;
+    var imgs = container.querySelectorAll('img');
+    var dots = container.querySelectorAll('.ec-gallery-dot');
+    if (imgs.length < 2) return;
+    var cur = -1;
+    imgs.forEach(function(img, i) { if (img.classList.contains('active')) cur = i; });
+    if (cur < 0) cur = 0;
+    imgs[cur].classList.remove('active');
+    if (dots[cur]) dots[cur].classList.remove('active');
+    var next = (cur + dir + imgs.length) % imgs.length;
+    imgs[next].classList.add('active');
+    if (dots[next]) dots[next].classList.add('active');
+}
+function ecGalleryGo(productId, idx) {
+    var container = document.querySelector('[data-ec-gallery="'+productId+'"]');
+    if (!container) return;
+    var imgs = container.querySelectorAll('img');
+    var dots = container.querySelectorAll('.ec-gallery-dot');
+    imgs.forEach(function(img) { img.classList.remove('active'); });
+    dots.forEach(function(dot) { dot.classList.remove('active'); });
+    if (imgs[idx]) imgs[idx].classList.add('active');
+    if (dots[idx]) dots[idx].classList.add('active');
+}
+
+/* ── Init ── */
+renderCart();
+</script>
+{% endblock %}

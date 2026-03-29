@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Billing Reminder — InfinityCard</title>
+    <!--[if mso]>
+    <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+    <![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+
+<!-- Wrapper -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;">
+<tr><td align="center" style="padding:32px 16px;">
+
+<!-- Card -->
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);max-width:600px;width:100%;">
+
+    <!-- Header -->
+    <tr>
+        <td style="background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);padding:40px 40px 32px;text-align:center;">
+            <!-- Logo -->
+            <img src="{{ logo_url }}" alt="InfinityCard" width="180" style="display:inline-block;max-width:180px;height:auto;" />
+            <div style="margin-top:24px;">
+                <div style="display:inline-block;background-color:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);border-radius:24px;padding:6px 20px;">
+                    <span style="color:#FBBF24;font-size:13px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;">Billing Reminder</span>
+                </div>
+            </div>
+            <h1 style="color:#ffffff;font-size:26px;font-weight:700;margin:20px 0 0;line-height:1.3;">Your subscription is expiring soon</h1>
+            <p style="color:#94A3B8;font-size:15px;margin:8px 0 0;line-height:1.5;">Don't lose access to your InfinityCard profile and features.</p>
+        </td>
+    </tr>
+
+    <!-- Urgency Banner -->
+    <tr>
+        <td style="padding:32px 40px 0;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;overflow:hidden;">
+                <tr>
+                    <td style="padding:20px 24px;text-align:center;">
+                        <p style="color:#92400E;font-size:40px;font-weight:800;margin:0;line-height:1;">{{ days_remaining }}</p>
+                        <p style="color:#B45309;font-size:14px;font-weight:600;margin:6px 0 0;text-transform:uppercase;letter-spacing:1px;">Day{{ days_remaining|pluralize }} Remaining</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- Subscription Details -->
+    <tr>
+        <td style="padding:24px 40px 0;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;">
+                <!-- Header -->
+                <tr>
+                    <td style="background-color:#F1F5F9;padding:16px 24px;border-bottom:1px solid #E2E8F0;">
+                        <span style="color:#475569;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Subscription Details</span>
+                    </td>
+                </tr>
+                <!-- Account -->
+                <tr>
+                    <td style="padding:16px 24px;border-bottom:1px solid #F1F5F9;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="color:#64748B;font-size:14px;">Account</td>
+                                <td align="right" style="color:#1E293B;font-size:14px;font-weight:600;">{{ account_name }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                {% if account_type %}
+                <tr>
+                    <td style="padding:16px 24px;border-bottom:1px solid #F1F5F9;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="color:#64748B;font-size:14px;">Account Type</td>
+                                <td align="right" style="color:#1E293B;font-size:14px;font-weight:600;">{{ account_type }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                {% endif %}
+                <!-- Plan -->
+                <tr>
+                    <td style="padding:16px 24px;border-bottom:1px solid #F1F5F9;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="color:#64748B;font-size:14px;">Current Plan</td>
+                                <td align="right" style="color:#1E293B;font-size:14px;font-weight:600;">{{ plan_name }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <!-- Billing Period -->
+                <tr>
+                    <td style="padding:16px 24px;border-bottom:1px solid #F1F5F9;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="color:#64748B;font-size:14px;">Billing Period</td>
+                                <td align="right" style="color:#1E293B;font-size:14px;font-weight:600;">{{ billing_period }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <!-- Expiry Date -->
+                <tr>
+                    <td style="padding:16px 24px;border-bottom:1px solid #F1F5F9;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="color:#64748B;font-size:14px;">Expires On</td>
+                                <td align="right" style="color:#EF4444;font-size:14px;font-weight:700;">{{ expires_at }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <!-- Renewal Amount -->
+                <tr>
+                    <td style="padding:20px 24px;background-color:#F1F5F9;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="color:#1E293B;font-size:16px;font-weight:700;">Renewal Amount</td>
+                                <td align="right" style="color:#2EC4B6;font-size:22px;font-weight:800;">${{ renewal_amount }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- What happens if expired -->
+    <tr>
+        <td style="padding:24px 40px 0;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#FEF2F2;border:1px solid #FECACA;border-radius:12px;overflow:hidden;">
+                <tr>
+                    <td style="padding:20px 24px;">
+                        <p style="color:#991B1B;font-size:14px;font-weight:700;margin:0 0 8px;">What happens if your subscription expires?</p>
+                        <table role="presentation" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="padding:4px 0;color:#DC2626;font-size:13px;line-height:1.5;">
+                                    &#10005;&nbsp;&nbsp;Your public NFC profile will be suspended
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:4px 0;color:#DC2626;font-size:13px;line-height:1.5;">
+                                    &#10005;&nbsp;&nbsp;People tapping your NFC card will see a "suspended" page
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:4px 0;color:#DC2626;font-size:13px;line-height:1.5;">
+                                    &#10005;&nbsp;&nbsp;Your catalog, services, and contact form will be hidden
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- CTA Button -->
+    <tr>
+        <td style="padding:32px 40px 0;text-align:center;">
+            <a href="{{ billing_url }}" style="display:inline-block;background:linear-gradient(135deg,#2EC4B6 0%,#26A69A 100%);color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;padding:14px 40px;border-radius:10px;letter-spacing:0.3px;">
+                Renew Now
+            </a>
+            <p style="color:#64748B;font-size:12px;margin:12px 0 0;">Renew today and keep your profile live without interruption.</p>
+        </td>
+    </tr>
+
+    <!-- Help Text -->
+    <tr>
+        <td style="padding:24px 40px 0;text-align:center;">
+            <p style="color:#94A3B8;font-size:13px;line-height:1.6;margin:0;">
+                Need help? Contact us at
+                <a href="mailto:support@inftycard.cc" style="color:#2EC4B6;text-decoration:none;font-weight:500;">support@inftycard.cc</a>
+            </p>
+        </td>
+    </tr>
+
+    <!-- Divider -->
+    <tr>
+        <td style="padding:32px 40px 0;">
+            <div style="border-top:1px solid #E2E8F0;"></div>
+        </td>
+    </tr>
+
+    <!-- Footer -->
+    <tr>
+        <td style="padding:24px 40px 32px;text-align:center;">
+            <p style="color:#94A3B8;font-size:12px;line-height:1.6;margin:0 0 8px;">
+                InfinityCard Technologies &bull; Smart NFC Business Cards
+            </p>
+            <p style="color:#CBD5E1;font-size:11px;line-height:1.6;margin:0;">
+                This is an automated billing reminder. Please do not reply directly to this email.
+            </p>
+        </td>
+    </tr>
+
+</table>
+<!-- /Card -->
+
+</td></tr>
+</table>
+<!-- /Wrapper -->
+
+</body>
+</html>

@@ -1,0 +1,823 @@
+{% extends "dashboard/_app_shell.html" %}
+{% load static %}
+
+{% block title %}My Card | InfinityCard{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ═══════════════════════════════════════════════
+   MY CARD PAGE — Inline styles (cache-proof)
+   ═══════════════════════════════════════════════ */
+
+/* ── Card Showcase Container ── */
+.mc-showcase {
+    padding: 0.5rem 0 0.75rem;
+}
+.mc-glow {
+    position: relative;
+    max-width: 340px;
+    margin: 0 auto;
+}
+.mc-glow::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 80%; height: 70%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse, rgba(46,196,182,0.18) 0%, rgba(99,102,241,0.10) 40%, transparent 70%);
+    filter: blur(30px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ── 3D Scene ── */
+.mc-scene {
+    perspective: 1000px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.mc-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.586 / 1;
+    transform-style: preserve-3d;
+    transition: transform 0.65s cubic-bezier(0.4, 0, 0.15, 1);
+}
+.mc-card.flipped { transform: rotateY(180deg); }
+
+.mc-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.20),
+        0 4px 16px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.mc-face img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    user-select: none;
+}
+.mc-face--back { transform: rotateY(180deg); }
+
+/* ── COLOR THEMES ── */
+.mc-card[data-theme="frost"] { --card-bg: #F8FAFB; --card-bg2: #EFF3F5; --card-text: #1A2332; --card-sub: #5A6B7A; --card-nfc: rgba(0,0,0,0.08); --card-nfc-ico: rgba(0,0,0,0.28); --card-border: rgba(0,0,0,0.06); --card-gloss: rgba(255,255,255,0.60); --card-shadow: rgba(0,0,0,0.10); --card-foot: rgba(0,0,0,0.18); --card-qr-bg: #fff; --card-qr-fg: #1A2332; --logo-filter: brightness(0) saturate(100%) invert(12%) sepia(10%) saturate(800%) hue-rotate(175deg); }
+.mc-card[data-theme="midnight"] { --card-bg: #0F172A; --card-bg2: #1E293B; --card-text: #F1F5F9; --card-sub: #94A3B8; --card-nfc: rgba(255,255,255,0.06); --card-nfc-ico: rgba(255,255,255,0.35); --card-border: rgba(255,255,255,0.06); --card-gloss: rgba(255,255,255,0.04); --card-shadow: rgba(0,0,0,0.50); --card-foot: rgba(255,255,255,0.22); --card-qr-bg: #fff; --card-qr-fg: #0F172A; --logo-filter: brightness(0) invert(1); }
+.mc-card[data-theme="ocean"] { --card-bg: #0C4A6E; --card-bg2: #0E7490; --card-text: #F0F9FF; --card-sub: #BAE6FD; --card-nfc: rgba(255,255,255,0.08); --card-nfc-ico: rgba(255,255,255,0.40); --card-border: rgba(255,255,255,0.08); --card-gloss: rgba(255,255,255,0.06); --card-shadow: rgba(0,0,0,0.40); --card-foot: rgba(255,255,255,0.25); --card-qr-bg: #fff; --card-qr-fg: #0C4A6E; --logo-filter: brightness(0) invert(1); }
+.mc-card[data-theme="obsidian"] { --card-bg: #18181B; --card-bg2: #27272A; --card-text: #FAFAFA; --card-sub: #A1A1AA; --card-nfc: rgba(255,255,255,0.05); --card-nfc-ico: rgba(255,255,255,0.30); --card-border: rgba(255,255,255,0.05); --card-gloss: rgba(255,255,255,0.03); --card-shadow: rgba(0,0,0,0.60); --card-foot: rgba(255,255,255,0.20); --card-qr-bg: #fff; --card-qr-fg: #18181B; --logo-filter: brightness(0) invert(1); }
+.mc-card[data-theme="rose"] { --card-bg: #1C1917; --card-bg2: #292524; --card-text: #FFF1F2; --card-sub: #D4A574; --card-nfc: rgba(212,165,116,0.10); --card-nfc-ico: rgba(212,165,116,0.50); --card-border: rgba(212,165,116,0.10); --card-gloss: rgba(255,255,255,0.03); --card-shadow: rgba(0,0,0,0.55); --card-foot: rgba(212,165,116,0.30); --card-qr-bg: #FFF1F2; --card-qr-fg: #1C1917; --logo-filter: brightness(0) invert(1) sepia(1) saturate(0.3) hue-rotate(330deg) brightness(1.8); }
+
+/* ── FRONT CARD DESIGN ── */
+.mc-cfront {
+    width: 100%; height: 100%;
+    position: relative;
+    background: linear-gradient(160deg, var(--card-bg) 0%, var(--card-bg2) 100%);
+    overflow: hidden;
+}
+/* subtle surface texture */
+.mc-cfront::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 80%, rgba(46,196,182,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(99,102,241,0.04) 0%, transparent 50%);
+    pointer-events: none;
+}
+/* gloss reflection */
+.mc-cfront::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -20%; right: -20%;
+    height: 80%;
+    background: linear-gradient(180deg, var(--card-gloss) 0%, transparent 100%);
+    border-radius: 0 0 50% 50%;
+    pointer-events: none;
+}
+.mc-cf-inner {
+    position: relative; z-index: 1;
+    height: 100%;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    padding: 8% 8%;
+}
+.mc-cf-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.mc-cf-brand {
+    display: flex; align-items: center;
+}
+.mc-cf-brand img {
+    height: 28px;
+    width: auto;
+    object-fit: contain;
+    filter: var(--logo-filter);
+    user-select: none;
+    -webkit-user-drag: none;
+}
+.mc-cf-nfc {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--card-nfc);
+    display: flex; align-items: center; justify-content: center;
+}
+.mc-cf-nfc svg {
+    width: 18px; height: 18px;
+    color: var(--card-nfc-ico);
+}
+.mc-cf-bot {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.mc-cf-name {
+    font-size: 17px; font-weight: 700;
+    color: var(--card-text);
+    letter-spacing: 0.4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.3;
+}
+.mc-cf-role {
+    font-size: 9.5px; font-weight: 600;
+    color: var(--card-sub);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+/* Integrated with InfinityCard footer */
+.mc-cf-foot {
+    position: absolute;
+    bottom: 6%; right: 8%;
+    font-size: 7.5px; font-weight: 600;
+    color: var(--card-foot);
+    letter-spacing: 0.5px;
+}
+
+/* ── BACK CARD DESIGN ── */
+.mc-cback {
+    width: 100%; height: 100%;
+    position: relative;
+    background: linear-gradient(160deg, var(--card-bg) 0%, var(--card-bg2) 100%);
+    overflow: hidden;
+}
+.mc-cback::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse at 75% 75%, rgba(46,196,182,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 25% 25%, rgba(99,102,241,0.03) 0%, transparent 50%);
+    pointer-events: none;
+}
+.mc-cback::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -20%; right: -20%;
+    height: 80%;
+    background: linear-gradient(180deg, var(--card-gloss) 0%, transparent 100%);
+    border-radius: 0 0 50% 50%;
+    pointer-events: none;
+}
+.mc-cb-inner {
+    position: relative; z-index: 1;
+    height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8%;
+    gap: 6%;
+}
+.mc-qr-box {
+    width: 72px; height: 72px;
+    background: var(--card-qr-bg);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow:
+        0 4px 12px var(--card-shadow),
+        0 1px 3px rgba(0,0,0,0.06);
+}
+.mc-qr-box svg { color: var(--card-qr-fg); width: 46px; height: 46px; }
+.mc-qr-lbl {
+    font-size: 8.5px; font-weight: 700;
+    color: var(--card-sub);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-top: 6px;
+}
+.mc-cb-url {
+    font-size: 10px; font-weight: 600;
+    color: var(--card-sub);
+    letter-spacing: 0.3px;
+}
+.mc-cb-foot {
+    position: absolute;
+    bottom: 6%; left: 0; right: 0;
+    text-align: center;
+}
+.mc-cb-foot img {
+    height: 14px;
+    width: auto;
+    object-fit: contain;
+    filter: var(--logo-filter);
+    opacity: 0.35;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* ── Color Picker ── */
+.mc-colors {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+}
+.mc-color-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2.5px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+    position: relative;
+    padding: 0;
+    outline: none;
+}
+.mc-color-btn:hover { transform: scale(1.15); }
+.mc-color-btn.active {
+    border-color: #6366F1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.20), 0 2px 6px rgba(0,0,0,0.10);
+}
+.mc-color-btn[data-theme="frost"] { background: linear-gradient(135deg, #F8FAFB, #E2E8F0); }
+.mc-color-btn[data-theme="midnight"] { background: linear-gradient(135deg, #0F172A, #1E293B); }
+.mc-color-btn[data-theme="ocean"] { background: linear-gradient(135deg, #0C4A6E, #0E7490); }
+.mc-color-btn[data-theme="obsidian"] { background: linear-gradient(135deg, #18181B, #27272A); }
+.mc-color-btn[data-theme="rose"] { background: linear-gradient(135deg, #1C1917, #D4A574); }
+.mc-color-label {
+    display: flex;
+    justify-content: center;
+    margin-top: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #94A3B8;
+    letter-spacing: 0.3px;
+}
+
+/* ── Toggle Pills ── */
+.mc-toggles {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+}
+.mc-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px;
+    border-radius: 100px;
+    border: 1.5px solid #E2E8F0;
+    background: #fff;
+    color: #64748B;
+    font-size: 12px; font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.mc-pill:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+}
+.mc-pill.active {
+    background: #0F172A;
+    color: #fff;
+    border-color: #0F172A;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.25);
+}
+.mc-pill-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.35;
+    transition: all 0.2s;
+}
+.mc-pill.active .mc-pill-dot {
+    background: #2EC4B6;
+    opacity: 1;
+    box-shadow: 0 0 6px rgba(46,196,182,0.5);
+}
+
+/* ── Tap Hint ── */
+.mc-hint {
+    display: flex; align-items: center; justify-content: center;
+    gap: 5px;
+    margin-top: 10px;
+    font-size: 11px; font-weight: 500;
+    color: #B0B8C9;
+    opacity: 0.7;
+}
+.mc-hint svg { opacity: 0.6; }
+
+/* ── Info Sections (shared card style) ── */
+.mc-section {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #F1F5F9;
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.mc-sec-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+.mc-sec-ico {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.mc-sec-ico--card { background: linear-gradient(135deg, #F0FDF4, #E0F7F5); }
+.mc-sec-ico--card svg { color: #2EC4B6; }
+.mc-sec-ico--nfc { background: linear-gradient(135deg, #EEF2FF, #E8EAFF); }
+.mc-sec-ico--nfc svg { color: #6366F1; }
+.mc-sec-ico--how { background: linear-gradient(135deg, #FFF7ED, #FEF3C7); }
+.mc-sec-ico--how svg { color: #F59E0B; }
+.mc-sec-ico svg { width: 18px; height: 18px; }
+.mc-sec-title {
+    font-size: 14px; font-weight: 700; color: #0F172A;
+    line-height: 1.2;
+}
+.mc-sec-sub {
+    font-size: 11px; font-weight: 500; color: #94A3B8;
+    margin-top: 1px;
+}
+
+/* ── Detail Rows ── */
+.mc-rows { margin: 0; padding: 0; }
+.mc-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 16px;
+    border-bottom: 1px solid #F8FAFC;
+}
+.mc-row:last-child { border-bottom: none; }
+.mc-row-label {
+    font-size: 12px; font-weight: 500; color: #94A3B8;
+}
+.mc-row-val {
+    font-size: 12.5px; font-weight: 600; color: #1E293B;
+    text-align: right; max-width: 58%;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mc-row-link { color: #2EC4B6; }
+.mc-tag {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: #EEF2FF;
+    color: #6366F1;
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+/* ── NFC Card Rows ── */
+.mc-nfc-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #F8FAFC;
+}
+.mc-nfc-row:last-child { border-bottom: none; }
+.mc-nfc-ico {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: #F1F5F9;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.mc-nfc-ico svg { width: 16px; height: 16px; color: #64748B; }
+.mc-nfc-body { min-width: 0; flex: 1; }
+.mc-nfc-uid {
+    font-size: 12px; font-weight: 700; color: #1E293B;
+    letter-spacing: 0.3px;
+    font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mc-nfc-date {
+    font-size: 10.5px; font-weight: 500; color: #94A3B8;
+    margin-top: 1px;
+}
+.mc-status {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    flex-shrink: 0;
+}
+.mc-status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+}
+.mc-status--on { background: #ECFDF5; color: #059669; }
+.mc-status--on .mc-status-dot { background: #059669; }
+.mc-status--off { background: #FEF2F2; color: #DC2626; }
+.mc-status--off .mc-status-dot { background: #DC2626; }
+
+/* ── Empty NFC State ── */
+.mc-empty-nfc {
+    text-align: center;
+    padding: 20px 16px;
+}
+.mc-empty-nfc svg { color: #CBD5E1; width: 28px; height: 28px; margin-bottom: 6px; }
+.mc-empty-nfc p {
+    font-size: 12px; color: #94A3B8;
+    line-height: 1.5;
+    max-width: 220px; margin: 0 auto;
+}
+.mc-empty-nfc .mc-card-img {
+    width: 100%; max-width: 280px; margin: 0 auto 12px;
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,.1);
+}
+.mc-empty-nfc .mc-card-img img {
+    width: 100%; height: auto; display: block; object-fit: cover;
+}
+
+/* ── How It Works Steps ── */
+.mc-steps { padding: 4px 16px 14px; }
+.mc-step {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 8px 0;
+}
+.mc-step-num {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    background: #0F172A;
+    color: #fff;
+    font-size: 11px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(15,23,42,0.15);
+}
+.mc-step-txt { padding-top: 2px; }
+.mc-step-txt strong {
+    display: block;
+    font-size: 12.5px; font-weight: 700; color: #1E293B;
+}
+.mc-step-txt span {
+    font-size: 11px; font-weight: 500; color: #94A3B8;
+    margin-top: 0px;
+    display: block;
+}
+
+/* ── Responsive ── */
+@media (min-width: 640px) {
+    .mc-glow { max-width: 380px; }
+    .mc-cf-name { font-size: 18px; }
+    .mc-cf-brand img { height: 32px; }
+    .mc-qr-box { width: 80px; height: 80px; }
+    .mc-qr-box svg { width: 52px; height: 52px; }
+}
+@media (min-width: 960px) {
+    .mc-glow { max-width: 420px; }
+}
+</style>
+{% endblock %}
+
+{% block page_header %}
+<h1 class="app-page-title">My Card</h1>
+<p class="app-page-subtitle">Your InfinityCard NFC business card</p>
+{% endblock %}
+
+{% block content %}
+
+{% if not card_order %}
+<!-- ═══ NO CARD YET ═══ -->
+<div style="text-align:center;padding:48px 24px;">
+    <div style="width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,#1E293B,#0F172A);display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,0.12)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#475569" stroke-width="1.2" width="40" height="40"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+    </div>
+    <h2 style="font-size:20px;font-weight:700;color:#1E293B;margin:0 0 8px">No Card Yet</h2>
+    {% if is_company_member %}
+    <p style="font-size:14px;color:#64748B;max-width:360px;margin:0 auto 24px;line-height:1.6">Your NFC business card will be provided by your company. Please contact your company administrator for details.</p>
+    {% else %}
+    <p style="font-size:14px;color:#64748B;max-width:360px;margin:0 auto 24px;line-height:1.6">You haven't purchased an NFC business card yet. Get your card to start sharing your digital profile with a tap.</p>
+    <a href="{% url 'cards:shop' %}" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;box-shadow:0 4px 16px rgba(59,130,246,0.3);transition:.15s">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
+        Browse Card Shop
+    </a>
+    {% endif %}
+</div>
+{% else %}
+
+<!-- ═══ PURCHASED CARD TYPE BADGE ═══ -->
+<div style="display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #F1F5F9;border-radius:14px;padding:14px 18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.03)">
+    <div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;{% if card_order.card_product.material == 'metal' %}background:linear-gradient(135deg,#475569,#334155){% elif card_order.card_product.material == 'wood' %}background:linear-gradient(135deg,#A16207,#854D0E){% elif card_order.card_product.material == 'plastic_gold' %}background:linear-gradient(135deg,#F59E0B,#D97706){% elif card_order.card_product.material == 'plastic_transparent' %}background:linear-gradient(135deg,#8B5CF6,#7C3AED){% else %}background:linear-gradient(135deg,#3B82F6,#2563EB){% endif %}">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="1.8" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+    </div>
+    <div style="min-width:0;flex:1">
+        <div style="font-size:15px;font-weight:700;color:#1E293B">{{ card_order.card_product.name }}</div>
+        <div style="font-size:12px;color:#64748B;margin-top:2px">
+            {{ card_order.card_product.get_material_display }} &middot;
+            <span style="{% if card_order.status == 'delivered' %}color:#059669{% elif card_order.status == 'shipped' %}color:#D97706{% else %}color:#3B82F6{% endif %};font-weight:600">{{ card_order.get_status_display }}</span>
+        </div>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:#94A3B8;flex-shrink:0">Purchased {{ card_order.paid_at|date:"M d, Y" }}</div>
+</div>
+
+<!-- ═══ ORDER TRACKING ═══ -->
+<div class="mc-section" style="margin-bottom:16px">
+    <div class="mc-sec-head">
+        <div class="mc-sec-ico" style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF)">
+            <svg fill="none" viewBox="0 0 24 24" stroke="#6366F1" stroke-width="1.8" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.07-.504 1.004-1.12A18.684 18.684 0 0018.75 9.75l-2.625-.75a3.375 3.375 0 00-2.143.12L12 10.5m8.25 8.25V10.5M12 10.5H7.5"/></svg>
+        </div>
+        <div>
+            <div class="mc-sec-title">Order Tracking</div>
+            <div class="mc-sec-sub">Order #{{ card_order.pk }} &middot; {{ card_order.card_product.name }}</div>
+        </div>
+    </div>
+
+    <!-- Status Timeline -->
+    <div style="padding:20px 24px">
+        <div style="display:flex;align-items:flex-start;gap:0;position:relative">
+            {% with status=card_order.status %}
+
+            <!-- Step 1: Paid -->
+            <div style="flex:1;text-align:center;position:relative;z-index:1">
+                <div style="width:32px;height:32px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;{% if status == 'paid' or status == 'shipped' or status == 'delivered' %}background:#3B82F6;color:#fff{% else %}background:#E2E8F0;color:#94A3B8{% endif %}">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                </div>
+                <div style="font-size:11px;font-weight:700;{% if status == 'paid' and status != 'shipped' and status != 'delivered' %}color:#3B82F6{% else %}color:#1E293B{% endif %}">Paid</div>
+                {% if card_order.paid_at %}<div style="font-size:10px;color:#94A3B8;margin-top:2px">{{ card_order.paid_at|date:"M d" }}</div>{% endif %}
+            </div>
+
+            <!-- Connector 1 -->
+            <div style="flex:0.5;height:2px;margin-top:16px;{% if status == 'shipped' or status == 'delivered' %}background:#3B82F6{% else %}background:#E2E8F0{% endif %}"></div>
+
+            <!-- Step 2: Shipped -->
+            <div style="flex:1;text-align:center;position:relative;z-index:1">
+                <div style="width:32px;height:32px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;{% if status == 'shipped' or status == 'delivered' %}background:#F59E0B;color:#fff{% else %}background:#E2E8F0;color:#94A3B8{% endif %}">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.07-.504 1.004-1.12A18.684 18.684 0 0018.75 9.75l-2.625-.75a3.375 3.375 0 00-2.143.12L12 10.5"/></svg>
+                </div>
+                <div style="font-size:11px;font-weight:700;{% if status == 'shipped' and status != 'delivered' %}color:#F59E0B{% elif status == 'shipped' or status == 'delivered' %}color:#1E293B{% else %}color:#94A3B8{% endif %}">Shipped</div>
+                {% if card_order.shipped_at %}<div style="font-size:10px;color:#94A3B8;margin-top:2px">{{ card_order.shipped_at|date:"M d" }}</div>{% endif %}
+            </div>
+
+            <!-- Connector 2 -->
+            <div style="flex:0.5;height:2px;margin-top:16px;{% if status == 'delivered' %}background:#059669{% else %}background:#E2E8F0{% endif %}"></div>
+
+            <!-- Step 3: Delivered -->
+            <div style="flex:1;text-align:center;position:relative;z-index:1">
+                <div style="width:32px;height:32px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;{% if status == 'delivered' %}background:#059669;color:#fff{% else %}background:#E2E8F0;color:#94A3B8{% endif %}">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+                </div>
+                <div style="font-size:11px;font-weight:700;{% if status == 'delivered' %}color:#059669{% else %}color:#94A3B8{% endif %}">Delivered</div>
+                {% if card_order.delivered_at %}<div style="font-size:10px;color:#94A3B8;margin-top:2px">{{ card_order.delivered_at|date:"M d" }}</div>{% endif %}
+            </div>
+
+            {% endwith %}
+        </div>
+
+        {% if card_order.tracking_number %}
+        <div style="margin-top:18px;padding:12px 16px;background:#F8FAFC;border-radius:10px;border:1px solid #F1F5F9;display:flex;align-items:center;gap:10px">
+            <svg fill="none" viewBox="0 0 24 24" stroke="#6366F1" stroke-width="1.8" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+            <div style="flex:1;min-width:0">
+                <div style="font-size:11px;font-weight:600;color:#64748B">Tracking Number</div>
+                <div style="font-size:13px;font-weight:700;color:#1E293B;font-family:'SF Mono','Fira Code',ui-monospace,monospace">{{ card_order.tracking_number }}</div>
+            </div>
+            {% if card_order.tracking_url %}
+            <a href="{{ card_order.tracking_url }}" target="_blank" rel="noopener" style="padding:6px 14px;background:#6366F1;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none">Track Package</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if card_order.status == 'paid' and not card_order.tracking_number %}
+        <div style="margin-top:14px;padding:10px 14px;background:#FFF7ED;border-radius:8px;border:1px solid #FED7AA;font-size:12px;color:#92400E;display:flex;align-items:center;gap:8px">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+            Your card is being prepared and will be shipped soon. We'll update the tracking info here.
+        </div>
+        {% endif %}
+
+        <!-- Shipping Address Summary -->
+        {% if card_order.shipping_address1 %}
+        <div style="margin-top:14px;padding:12px 16px;background:#F8FAFC;border-radius:10px;border:1px solid #F1F5F9">
+            <div style="font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px">Shipping to</div>
+            <div style="font-size:13px;color:#1E293B;line-height:1.5">
+                {{ card_order.shipping_first_name }} {{ card_order.shipping_last_name }}<br>
+                {{ card_order.shipping_address1 }}{% if card_order.shipping_address2 %}, {{ card_order.shipping_address2 }}{% endif %}<br>
+                {{ card_order.shipping_city }}, {{ card_order.shipping_state }} {{ card_order.shipping_zip }}<br>
+                {{ card_order.shipping_country }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ═══ ALL MY CARDS (shown if user has more than 1 card order) ═══ -->
+{% if card_orders.count > 1 %}
+<div class="mc-section" style="margin-bottom:16px">
+    <div class="mc-sec-head">
+        <div class="mc-sec-ico" style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7)">
+            <svg fill="none" viewBox="0 0 24 24" stroke="#059669" stroke-width="1.8" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0120.25 9v.878M4.5 9.878V18a2.25 2.25 0 002.25 2.25h10.5A2.25 2.25 0 0019.5 18V9.878m-15 0A2.243 2.243 0 005.25 11.25h13.5A2.243 2.243 0 0019.5 9.878"/></svg>
+        </div>
+        <div>
+            <div class="mc-sec-title">My Cards ({{ card_orders.count }})</div>
+            <div class="mc-sec-sub">All your NFC business card orders</div>
+        </div>
+    </div>
+    <div style="padding:4px 16px 16px">
+        {% for order in card_orders %}
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;{% if not forloop.last %}border-bottom:1px solid #F1F5F9;{% endif %}">
+            <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;{% if order.card_product.material == 'metal' %}background:linear-gradient(135deg,#475569,#334155){% elif order.card_product.material == 'wood' %}background:linear-gradient(135deg,#A16207,#854D0E){% elif order.card_product.material == 'plastic_gold' %}background:linear-gradient(135deg,#F59E0B,#D97706){% elif order.card_product.material == 'plastic_transparent' %}background:linear-gradient(135deg,#8B5CF6,#7C3AED){% else %}background:linear-gradient(135deg,#3B82F6,#2563EB){% endif %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="1.8" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:700;color:#1E293B">{{ order.card_product.name }}</div>
+                <div style="font-size:11px;color:#64748B;margin-top:1px">
+                    Order #{{ order.pk }} &middot; {{ order.paid_at|date:"M d, Y" }}
+                </div>
+            </div>
+            <span style="padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:0.3px;{% if order.status == 'delivered' %}background:#ECFDF5;color:#059669{% elif order.status == 'shipped' %}background:#FFF7ED;color:#D97706{% else %}background:#EFF6FF;color:#3B82F6{% endif %}">{{ order.get_status_display }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if not is_company_member %}
+<!-- ═══ BUY ANOTHER CARD ═══ -->
+<div style="text-align:center;margin-bottom:20px">
+    <a href="{% url 'cards:shop' %}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 20px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;font-size:12px;font-weight:600;color:#475569;text-decoration:none;transition:all .15s">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Order Another Card
+    </a>
+</div>
+{% endif %}
+
+<!-- ═══ CARD DETAILS ═══ -->
+<div class="mc-section">
+    <div class="mc-sec-head">
+        <div class="mc-sec-ico mc-sec-ico--card">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+        </div>
+        <div>
+            <div class="mc-sec-title">Card Details</div>
+            <div class="mc-sec-sub">Your NFC business card information</div>
+        </div>
+    </div>
+    <div class="mc-rows">
+        <div class="mc-row">
+            <span class="mc-row-label">Cardholder</span>
+            <span class="mc-row-val">{{ profile.display_name }}</span>
+        </div>
+        <div class="mc-row">
+            <span class="mc-row-label">Title</span>
+            <span class="mc-row-val">{{ profile.headline|default:"\u2014" }}</span>
+        </div>
+        <div class="mc-row">
+            <span class="mc-row-label">Profile URL</span>
+            <span class="mc-row-val mc-row-link">inftycard.cc/{{ user.username }}</span>
+        </div>
+        <div class="mc-row">
+            <span class="mc-row-label">Card Type</span>
+            <span class="mc-row-val"><span class="mc-tag">NFC + QR</span></span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ LINKED NFC CARDS ═══ -->
+<div class="mc-section">
+    <div class="mc-sec-head">
+        <div class="mc-sec-ico mc-sec-ico--nfc">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>
+        </div>
+        <div>
+            <div class="mc-sec-title">Linked Cards</div>
+            <div class="mc-sec-sub">{% if nfc_cards %}{{ nfc_cards|length }} card{{ nfc_cards|length|pluralize }} assigned to your profile{% else %}No NFC cards linked yet{% endif %}</div>
+        </div>
+    </div>
+    {% if nfc_cards %}
+        {% for card in nfc_cards %}
+        <div class="mc-nfc-row">
+            <div class="mc-nfc-ico">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+            </div>
+            <div class="mc-nfc-body">
+                <div class="mc-nfc-uid">{{ card.uid }}</div>
+                <div class="mc-nfc-date">{% if card.assigned_at %}Linked {{ card.assigned_at|date:"M d, Y" }}{% else %}Assigned{% endif %}</div>
+            </div>
+            {% if card.is_active %}
+            <span class="mc-status mc-status--on"><span class="mc-status-dot"></span> Active</span>
+            {% else %}
+            <span class="mc-status mc-status--off"><span class="mc-status-dot"></span> Inactive</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="mc-empty-nfc">
+        {% if card_order and card_order.card_product %}
+            {% with product=card_order.card_product %}
+            {% with primary_img=product.gallery_images.all|first %}
+            {% if primary_img %}
+            <div class="mc-card-img"><img src="{{ primary_img.image.url }}" alt="{{ product.name }}"></div>
+            {% elif product.image %}
+            <div class="mc-card-img"><img src="{{ product.image.url }}" alt="{{ product.name }}"></div>
+            {% else %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+            {% endif %}
+            {% endwith %}
+            {% if card_order.status == 'delivered' %}
+            <p>Your <strong>{{ product.name }}</strong> has been delivered! It will appear here once assigned by the InfinityCard team.</p>
+            {% elif card_order.status == 'shipped' %}
+            <p>Your <strong>{{ product.name }}</strong> has been shipped and is on the way!</p>
+            {% else %}
+            <p>Your <strong>{{ product.name }}</strong> order is being processed.</p>
+            {% endif %}
+            {% endwith %}
+        {% else %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+            <p>Your NFC card will appear here once assigned by the InfinityCard team.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<div class="mc-section">
+    <div class="mc-sec-head">
+        <div class="mc-sec-ico mc-sec-ico--how">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg>
+        </div>
+        <div>
+            <div class="mc-sec-title">How your card works</div>
+            <div class="mc-sec-sub">Share your profile in seconds</div>
+        </div>
+    </div>
+    <div class="mc-steps">
+        <div class="mc-step">
+            <div class="mc-step-num">1</div>
+            <div class="mc-step-txt">
+                <strong>Tap or scan</strong>
+                <span>Hold your card near any smartphone</span>
+            </div>
+        </div>
+        <div class="mc-step">
+            <div class="mc-step-num">2</div>
+            <div class="mc-step-txt">
+                <strong>Instant profile</strong>
+                <span>Your digital profile opens instantly</span>
+            </div>
+        </div>
+        <div class="mc-step">
+            <div class="mc-step-num">3</div>
+            <div class="mc-step-txt">
+                <strong>Connect</strong>
+                <span>They save your contact, links &amp; catalog</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="height:2rem;"></div>
+{% endif %}
+
+<script>
+(function(){
+    var card=document.getElementById('mcCard'),
+        scene=document.getElementById('cardScene'),
+        bF=document.getElementById('btnFront'),
+        bB=document.getElementById('btnBack');
+    if(!card||!scene) return;
+    var flipped=false;
+    function flip(side){
+        flipped=side==='back';
+        card.classList.toggle('flipped',flipped);
+        bF.classList.toggle('active',!flipped);
+        bB.classList.toggle('active',flipped);
+    }
+    scene.addEventListener('click',function(){flip(flipped?'front':'back');});
+    bF.addEventListener('click',function(e){e.stopPropagation();flip('front');});
+    bB.addEventListener('click',function(e){e.stopPropagation();flip('back');});
+
+    /* ── Color Theme Switcher ── */
+    var colorBtns=document.querySelectorAll('.mc-color-btn'),
+        colorLabel=document.getElementById('mcColorLabel'),
+        themeNames={frost:'Frost White',midnight:'Midnight',ocean:'Ocean Blue',obsidian:'Obsidian',rose:'Rose Gold'};
+    colorBtns.forEach(function(btn){
+        btn.addEventListener('click',function(e){
+            e.stopPropagation();
+            var theme=btn.getAttribute('data-theme');
+            card.setAttribute('data-theme',theme);
+            colorBtns.forEach(function(b){b.classList.remove('active');});
+            btn.classList.add('active');
+            if(colorLabel) colorLabel.textContent=themeNames[theme]||theme;
+        });
+    });
+})();
+</script>
+
+{% endblock %}

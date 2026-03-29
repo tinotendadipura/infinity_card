@@ -1,0 +1,1418 @@
+{% extends 'pages/home/base.html' %}
+{% load static %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --ab-primary:#6366F1;--ab-primary-h:#4F46E5;--ab-accent:#8B5CF6;
+  --ab-bg:#0A0A0A;--ab-surface:#111111;--ab-border:rgba(255,255,255,.08);
+  --ab-text:#F1F5F9;--ab-text2:rgba(255,255,255,.55);--ab-text3:rgba(255,255,255,.3);
+}
+
+/* ── Hero ── */
+.ab-hero{
+  background:#030303;
+  color:#fff;padding:0 2rem 4rem;text-align:center;position:relative;overflow:hidden;
+  padding-top:120px;border-radius:0 0 32px 32px;
+}
+.ab-hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,.05) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(244,63,94,.05) 0%,transparent 50%);
+  pointer-events:none;z-index:0}
+.ab-hero::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,#030303,transparent 40%,rgba(3,3,3,.8));
+  pointer-events:none;z-index:1}
+.ab-hero-inner{position:relative;z-index:2;max-width:720px;margin:0 auto}
+.ab-hero-inner > *{opacity:0;transform:translateY(30px);animation:hero-fadeup 1s cubic-bezier(.25,.4,.25,1) forwards}
+.ab-hero-inner > *:nth-child(1){animation-delay:.5s}
+.ab-hero-inner > *:nth-child(2){animation-delay:.7s}
+.ab-hero-inner > *:nth-child(3){animation-delay:.9s}
+.ab-hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:100px;
+  font-size:13px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:24px}
+.ab-hero h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;line-height:1.15;
+  letter-spacing:-.03em;margin-bottom:20px}
+.ab-hero h1 .ab-h1-line1{display:block;
+  background:linear-gradient(to bottom,#fff,rgba(255,255,255,.8));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ab-hero h1 .ab-h1-line2{display:block;
+  background:linear-gradient(to right,#A5B4FC,rgba(255,255,255,.9),#FDA4AF);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ab-hero p{font-size:clamp(1rem,2vw,1.25rem);line-height:1.7;color:rgba(255,255,255,.4);
+  max-width:560px;margin-left:auto;margin-right:auto;font-weight:300;letter-spacing:.01em}
+
+/* ── About Us Section ── */
+.about_us_section{background:var(--ab-bg)!important}
+.about_us_section .abt_text h2{color:var(--ab-text)!important}
+.about_us_section .abt_text h2 span{color:#A78BFA!important}
+.about_us_section .abt_text p{color:var(--ab-text2)!important}
+.about_us_section .abt_slides{background:var(--ab-surface)!important;border-radius:16px;overflow:hidden}
+
+/* ── Why Choose / Statistics ── */
+.why_choose{background:var(--ab-bg)!important}
+.why_choose_inner{background:var(--ab-surface)!important;border:1px solid var(--ab-border)!important}
+.app_statstic li{border-color:var(--ab-border)!important}
+.app_statstic li .text p{color:var(--ab-text2)!important}
+.app_statstic li .text p .counter-value,
+.app_statstic li .text p span{color:#A78BFA!important}
+
+/* ── Our Value ── */
+.our_value_section{background:var(--ab-bg)!important}
+.value_block{background:var(--ab-surface)!important;border:1px solid var(--ab-border)!important;border-radius:16px!important}
+.value_block .text h3{color:var(--ab-text)!important}
+.value_block .text p{color:var(--ab-text2)!important}
+
+/* ── Text List ── */
+.text_list_section{background:var(--ab-bg)!important}
+.text_list_section .text_block span{color:var(--ab-text)!important}
+.text_list_section .mark_star{color:#A78BFA!important}
+
+/* ── Service Section ── */
+.service_section{background:var(--ab-bg)!important}
+.service_section .inner_block{background:var(--ab-surface)!important;border:1px solid var(--ab-border)!important;border-radius:16px!important}
+.service_text h2{color:var(--ab-text)!important}
+.service_text h2 span{color:#A78BFA!important}
+.service_text p{color:var(--ab-text2)!important}
+.service_badge{color:var(--ab-text2)!important;border-color:var(--ab-border)!important}
+.service_badge i{color:#A78BFA!important}
+.feature_list li .text p{color:var(--ab-text2)!important}
+.feature_list li .icon span i{color:#A78BFA!important}
+.btn.puprple_btn{background:var(--ab-primary)!important;color:#fff!important;border-radius:12px!important}
+.btn.puprple_btn:hover{background:var(--ab-primary-h)!important}
+
+/* ── Testimonial ── */
+.testimonial_section{background:linear-gradient(160deg,#0F172A,#1E293B)!important}
+.testimonial_section .testimonial_box .testi_text p{color:rgba(255,255,255,.7)!important}
+.testimonial_section .testimonial_box .user_info h3{color:#fff!important}
+.testimonial_section .testimonial_box .user_info span{color:rgba(255,255,255,.5)!important}
+.client_logo_slider .img{opacity:.4}
+
+/* ── Experts Team ── */
+.experts_team_section{background:var(--ab-bg)!important}
+.experts_box{background:var(--ab-surface)!important;border:1px solid var(--ab-border)!important;border-radius:16px!important;overflow:hidden}
+.experts_box .text{background:var(--ab-surface)!important}
+.experts_box .text h3{color:var(--ab-text)!important}
+.experts_box .text span{color:var(--ab-text2)!important}
+.experts_box .text .social_media li a{border-color:var(--ab-border)!important;color:var(--ab-text3)!important}
+.experts_box .text .social_media li a:hover{background:#7C3AED!important;border-color:#7C3AED!important;color:#fff!important}
+
+/* ── FAQ ── */
+.faq_section{background:var(--ab-bg)!important}
+.faq_section .nav-tabs{border-color:var(--ab-border)!important}
+.faq_section .nav-tabs .nav-link{color:var(--ab-text2)!important;border:1px solid var(--ab-border)!important;
+  background:transparent!important;border-radius:8px!important;margin-right:8px!important}
+.faq_section .nav-tabs .nav-link.active{background:var(--ab-primary)!important;color:#fff!important;
+  border-color:var(--ab-primary)!important}
+.faq_section .card{background:var(--ab-surface)!important;border:1px solid var(--ab-border)!important;
+  border-radius:12px!important;margin-bottom:12px!important}
+.faq_section .card-header{background:transparent!important;border-bottom:1px solid var(--ab-border)!important}
+.faq_section .card-header .btn{color:var(--ab-text)!important;font-weight:600!important}
+.faq_section .card-header .btn .icons i{color:var(--ab-text3)!important}
+.faq_section .card-body{color:var(--ab-text2)!important;background:transparent!important}
+
+/* ── CTA Banner — now uses global .bp-cta from base.html ── */
+
+/* ── Download App ── */
+.download_app{background:var(--ab-bg)!important}
+.download_app .task_block{background:linear-gradient(160deg,#0F172A,#1E293B)!important}
+.download_app .task_text .white_text h2{color:#fff!important}
+.download_app .task_text .white_text p{color:rgba(255,255,255,.65)!important}
+
+@media(max-width:768px){
+  .ab-hero{padding-top:100px;padding-bottom:3rem}
+}
+</style>
+
+<!-- ── Hero ── -->
+<section class="ab-hero">
+  <div class="hero-shapes">
+    <div class="hero-shape hero-shape-1" style="--r:12deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-2" style="--r:-15deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-3" style="--r:-8deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-4" style="--r:20deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-5" style="--r:-25deg"><div class="hero-shape-inner"></div></div>
+  </div>
+  <div class="ab-hero-inner">
+    <div class="ab-hero-badge">About Us</div>
+    <h1><span class="ab-h1-line1">Building the Future of</span><span class="ab-h1-line2">Smart Networking</span></h1>
+    <p>We're on a mission to replace paper business cards with intelligent NFC-powered digital profiles that make first impressions unforgettable.</p>
+  </div>
+</section>
+
+  <!-- Page-wrapper-Start -->
+  <div class="page_wrapper">
+
+    <!-- About Us Section Start -->
+    <section class="about_us_section">
+      <div class="container">
+        <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+          <span class="title_badge">About us</span>
+          <h2>We are app agency <br> <span>building high level of smart app</span> </h2>
+          <p>Lorem Ipsum is simply dummy text of the printing indus orem Ipsum <br> has been the industrys standard
+            dummy text ever since.</p>
+        </div>
+      </div>
+      <div class="about_slider row_am" data-aos="fade-in" data-aos-duration="1500">
+        <div class="owl-carousel owl-theme" id="about_slider">
+          <div class="item">
+            <div class="abt_slides">
+              <img src="{% static './home/images/.png' %}" alt="image">
+            </div>
+          </div>
+          <div class="item">
+            <div class="abt_slides">
+              <img src="{% static './home/images/.png' %}" alt="image">
+            </div>
+          </div>
+          <div class="item">
+            <div class="abt_slides">
+              <img src="{% static './home/images/.png' %}" alt="image">
+            </div>
+          </div>
+          <div class="item">
+            <div class="abt_slides">
+              <img src="{% static './home/images/.png' %}" alt="image">
+            </div>
+          </div>
+          <div class="item">
+            <div class="abt_slides">
+              <img src="{% static './home/images/.png' %}" alt="image">
+            </div>
+          </div>
+          <div class="item">
+            <div class="abt_slides">
+              <img src="{% static './home/images/.png' %}" alt="image">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="row abt_text" data-aos="fade-up" data-aos-duration="1500">
+          <div class="col-md-5">
+            <h2><span>Our story</span> behind our
+              success & achievement</h2>
+          </div>
+          <div class="col-md-7">
+            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry lorem Ipsu
+              m has been the industrys standard dummy text ever since the when an unknown print
+              er took a galley of type and scrambled it to make a type specimen book. It has survived not only five
+              centuries, but also the leap into electronic typesetting, remaining esse
+              ntially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem
+              Ipsum passages, and more recently with desktop publishing soft
+              ware like Aldus PageMaker including versions of lorem Ipsum.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- About Us Section End -->
+
+    <!-- Why Choose Us Section Start -->
+    <section class="why_choose row_am " data-aos="fade-in" data-aos-duration="1500">
+      <div class="why_choose_inner">
+        <div class="container">
+          <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+            <span class="title_badge">Why choos us</span>
+            <h2>Company statistics</h2>
+          </div>
+          <div class="company_statistics">
+            <ul class="app_statstic" id="counter" data-aos="fade-in" data-aos-duration="1500">
+              <li data-aos="fade-up" data-aos-duration="1500">
+                <div class="text">
+                  <p><span class="counter-value" data-count="150">0</span><span>+</span></p>
+                  <p>Countries</p>
+                </div>
+              </li>
+              <li data-aos="fade-up" data-aos-duration="1500">
+                <div class="text">
+                  <p><span class="counter-value" data-count="2300">1500</span><span>+</span></p>
+                  <p>Reviews</p>
+                </div>
+              </li>
+              <li data-aos="fade-up" data-aos-duration="1500">
+                <div class="text">
+                  <p><span class="counter-value" data-count="08">0 </span><span>M+</span></p>
+                  <p>Followers</p>
+                </div>
+              </li>
+              <li data-aos="fade-up" data-aos-duration="1500">
+                <div class="text">
+                  <p><span class="counter-value" data-count="17">0</span><span>M+</span></p>
+                  <p>Download</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Why Choose Us Section End -->
+
+    <!-- Our Value Section Start -->
+    <section class="our_value_section row_am">
+      <div class="container">
+        <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+          <span class="title_badge">Our values</span>
+          <h2><span>Our values</span> driven by relations</h2>
+        </div>
+        <!-- Value Slider Start -->
+        <div class="value_slider" data-aos="fade-in" data-aos-duration="1500">
+          <div class="owl-carousel owl-theme" id="value_slider">
+            <div class="item">
+              <div class="value_block">
+                <div class="icon">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+                <div class="text">
+                  <h3>Skilled Team</h3>
+                  <p>Lorem Ipsum is simply dummy
+                    text of the printing and typtting industry lorem Ipsum has.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div class="value_block">
+                <div class="icon">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+                <div class="text">
+                  <h3>Creative Thinking</h3>
+                  <p>Lorem Ipsum is simply dummy
+                    text of the printing and typtting industry lorem Ipsum has.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div class="value_block">
+                <div class="icon">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+                <div class="text">
+                  <h3>Growth Support</h3>
+                  <p>Lorem Ipsum is simply dummy
+                    text of the printing and typtting industry lorem Ipsum has.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div class="value_block">
+                <div class="icon">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+                <div class="text">
+                  <h3>Skilled Team</h3>
+                  <p>Lorem Ipsum is simply dummy
+                    text of the printing and typtting industry lorem Ipsum has.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Value Slider End -->
+      </div>
+    </section>
+    <!-- Our Value Section End -->
+
+    <!-- Text List flow Section Start -->
+    <div class="text_list_section row_am" data-aos="fade-in" data-aos-duration="1500">
+      <div class="container">
+        <span class="title_badge down_fix">Why choose our app</span>
+      </div>
+      <div class="slider_block">
+        <div class="owl-carousel owl-theme" id="text_list_flow">
+          <div class="item">
+            <div class="text_block">
+              <span>Multiple campaigns </span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span>User friendly</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span>Advanced analytics </span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span> Task management</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span> Event Scheduler</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span> Group Video Calls</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span>Live Chat</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span>Activity Streem</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Text List flow Section End -->
+
+    <!-- Why We Uniqiue Section Start -->
+    <section class="unique_section white_text" style="display: none;">
+      <div class="unique_inner">
+        <div class="dotes_blue"><img src="{% static './home/images/.png' %}" alt="image"></div>
+        <div class="container">
+          <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+            <span class="title_badge">Benifits from Us</span>
+            <h2>Why we are Uqnqiue</h2>
+          </div>
+          <div class="row">
+            <div class="col-lg-3 col-md-6 mb_5" data-aos="fade-up" data-aos-duration="1500">
+              <div class="unique_box">
+                <div class="text">
+                  <h3>Custom analytics</h3>
+                  <p>Lorem Ipsum is simply my text of the printing.</p>
+                </div>
+                <div class="img_block">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6 col-md-6 mb_5" data-aos="fade-up" data-aos-duration="1500">
+              <div class="unique_box">
+                <div class="text">
+                  <h3>Schedule meeting</h3>
+                  <p>Lorem Ipsum is simply my text of the printing and typtting.</p>
+                </div>
+                <div class="img_block">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb_5" data-aos="fade-up" data-aos-duration="1500">
+              <div class="unique_box">
+                <div class="text">
+                  <h3>Easy setup</h3>
+                  <p>Lorem Ipsum is simply my text of the printing.</p>
+                </div>
+                <div class="img_block">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6 col-md-6 mb_5" data-aos="fade-up" data-aos-duration="1500">
+              <div class="unique_box">
+                <div class="text">
+                  <h3>Connect multiple apps</h3>
+                  <p>Lorem Ipsum is simply my text of the printing and typtting.</p>
+                </div>
+                <div class="img_block">
+                  <div class="img">
+                    <img src="{% static './home/images/.png' %}" alt="image">
+                  </div>
+                  <div class="img">
+                    <img src="{% static './home/images/.png' %}" alt="image">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb_5" data-aos="fade-up" data-aos-duration="1500">
+              <div class="unique_box">
+                <div class="text">
+                  <h3>Payment transfer</h3>
+                  <p>Lorem Ipsum is simply my text of the printing.</p>
+                </div>
+                <div class="img_block">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb_5" data-aos="fade-up" data-aos-duration="1500">
+              <div class="unique_box">
+                <div class="text">
+                  <h3>Task management</h3>
+                  <p>Lorem Ipsum is simply my text of the printing.</p>
+                </div>
+                <div class="img_block">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Why We Uniqiue Section End -->
+
+    <!-- Service Section Start -->
+    <section class="row_am service_section about_service">
+      <div class="container">
+        <div class="row service_blocks">
+          <div class="col-md-6">
+            <div class="service_text" data-aos="fade-up" data-aos-duration="1500">
+              <div class="service_badge"><i class="icofont-gear"></i>
+                <span>Process</span>
+              </div>
+              <h2><span>Overviews</span> how we develope lorem </h2>
+              <p>Lorem Ipsum is simply dummy text of the printing and typtting
+                industry lorem Ipsum has been the
+                industrys standard dummy text ever since.</p>
+              <ul class="feature_list">
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>Lorem Ipsum is simply dummy text</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>The printing and typesetting industry lorem</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>Has been the industrys dummy</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>Text ever since the when an unknown </p>
+                  </div>
+                </li>
+              </ul>
+              <div class="btn_block">
+                <a href="#" class="btn puprple_btn ml-0">Start Free Trial</a>
+                <div class="btn_bottom"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="inner_block rotate_left" data-aos="fade-up" data-aos-duration="1500">
+              <div class="star_img">
+                <img src="{% static './home/images/.png' %}" alt="" srcset="">
+                <img src="{% static './home/images/.png' %}" alt="" srcset="">
+              </div>
+              <div class="img video_player">
+                <img src="{% static './home/images/.png' %}" alt="">
+                <a href="#" class="popup-youtube play-button play_icon"
+                  data-url="https://www.youtube.com/embed/tgbNymZ7vqY?autoplay=1&mute=1" data-toggle="modal"
+                  data-target="#myModal" title="XJj2PbenIsU"><img src="{% static './home/images/.png' %}" alt="img"></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row service_blocks flex-row-reverse">
+          <div class="col-md-6">
+            <div class="service_text right_side" data-aos="fade-up" data-aos-duration="1500">
+              <div class="service_badge"><i class="icofont-ui-messaging"></i>
+                <span>Comunication</span>
+              </div>
+              <h2><span>Client comunication</span> for best results</h2>
+              <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry lorem Ipsum has been the
+                industrys standard dummy..</p>
+              <ul class="feature_list">
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>Lorem Ipsum is simply dummy text</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>The printing and typesetting industry lorem</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>Has been the industrys dummy</p>
+                  </div>
+                </li>
+              </ul>
+              <div class="btn_block">
+                <a href="#" class="btn puprple_btn ml-0">Start Free Trial</a>
+                <div class="btn_bottom"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="inner_block rotate_right" data-aos="fade-up" data-aos-duration="1500">
+              <div class="star_img">
+                <img src="{% static './home/images/.png' %}" alt="" srcset="">
+                <img src="{% static './home/images/.png' %}" alt="" srcset="">
+              </div>
+              <div class="img">
+                <img src="{% static './home/images/.png' %}" alt="">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Service Section End -->
+
+    <!-- Testimonial Section Start -->
+    <section class="testimonial_section white_text" data-aos="fade-in" data-aos-duration="1500">
+      <div class="title">
+        <div class="star">
+          <span><i class="icofont-star"></i></span>
+          <span><i class="icofont-star"></i></span>
+          <span><i class="icofont-star"></i></span>
+          <span><i class="icofont-star"></i></span>
+          <span><i class="icofont-star"></i></span>
+        </div>
+        <span class="sub_title">4.9 / 5.0 Rated on App store</span>
+      </div>
+      <div class="testimonial_inner">
+        <div class="dotes_blue"><img src="{% static './home/images/.png' %}" alt="image"></div>
+        <div class="container">
+          <div class="testimonial_slides">
+            <div class="owl-carousel owl-theme" id="testimonial_slider">
+              <div class="item">
+                <div class="testimonial_box">
+                  <div class="testi_img">
+                    <img class="user_img" src="{% static './home/images/.png' %}" alt="image">
+                    <a href="#" class="popup-youtube play-button play_icon"
+                      data-url="https://www.youtube.com/embed/tgbNymZ7vqY?autoplay=1&mute=1" data-toggle="modal" data-target="#myModal" title="XJj2PbenIsU"><img src="{% static './home/images/.png' %}" alt="img"></a>
+                  </div>
+                  <div class="testi_text">
+                    <div class="star">
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                    </div>
+                    <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry lorem Ipsum has been
+                      the
+                      standard dummy.</p>
+                    <div class="user_info">
+                      <h3>Willium Joy, </h3>
+                      <span>Smartbrain Tech</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="item">
+                <div class="testimonial_box">
+                  <div class="testi_img">
+                    <img class="user_img" src="{% static './home/images/.png' %}" alt="image">
+                    <a href="#" class="popup-youtube play-button play_icon"
+                      data-url="https://www.youtube.com/embed/tgbNymZ7vqY?autoplay=1&mute=1" data-toggle="modal" data-target="#myModal" title="XJj2PbenIsU"><img src="{% static './home/images/.png' %}" alt="img"></a>
+                  </div>
+                  <div class="testi_text">
+                    <div class="star">
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                    </div>
+                    <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry lorem Ipsum has been
+                      the
+                      standard dummy.</p>
+                    <div class="user_info">
+                      <h3>Willium Joy, </h3>
+                      <span>Smartbrain Tech</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="item">
+                <div class="testimonial_box">
+                  <div class="testi_img">
+                    <img class="user_img" src="{% static './home/images/.png' %}" alt="image">
+                    <a href="#" class="popup-youtube play-button play_icon"
+                      data-url="https://www.youtube.com/embed/tgbNymZ7vqY?autoplay=1&mute=1" data-toggle="modal" data-target="#myModal" title="XJj2PbenIsU"><img src="{% static './home/images/.png' %}" alt="img"></a>
+                  </div>
+                  <div class="testi_text">
+                    <div class="star">
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                      <span><i class="icofont-star"></i></span>
+                    </div>
+                    <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry lorem Ipsum has been
+                      the
+                      standard dummy.</p>
+                    <div class="user_info">
+                      <h3>Willium Joy, </h3>
+                      <span>Smartbrain Tech</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
+          </div>
+          <div class="client_logo_slider">
+            <div class="owl-carousel owl-theme" id="client_slider">
+              <div class="item">
+                <div class="img">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+              <div class="item">
+                <div class="img">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+              <div class="item">
+                <div class="img">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+              <div class="item">
+                <div class="img">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+              <div class="item">
+                <div class="img">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+              <div class="item">
+                <div class="img">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+              <div class="item">
+                <div class="img">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+              <div class="item">
+                <div class="img">
+                  <img src="{% static './home/images/.png' %}" alt="image">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Testimonial Section End -->
+
+    <!--Experts Team Section Start  -->
+    <section class="row_am experts_team_section">
+      <div class="container">
+        <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+          <span class="title_badge">Experts</span>
+          <h2>Meet <span>our team</span></h2>
+        </div>
+        <div class="row">
+          <div class="col-md-4" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="100">
+            <div class="experts_box">
+              <img src="{% static './home/images/.png' %}" alt="image">
+              <div class="text">
+                <h3>Willium Scott </h3>
+                <span>CEO & Managing Director</span>
+                <ul class="social_media">
+                  <li><a href="#"><i class="icofont-facebook"></i></a></li>
+                  <li><a href="#"><i class="icofont-twitter"></i></a></li>
+                  <li><a href="#"><i class="icofont-instagram"></i></a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="200">
+            <div class="experts_box">
+              <img src="{% static './home/images/.png' %}" alt="image">
+              <div class="text">
+                <h3>Averill Rack</h3>
+                <span>Team Lead</span>
+                <ul class="social_media">
+                  <li><a href="#"><i class="icofont-facebook"></i></a></li>
+                  <li><a href="#"><i class="icofont-twitter"></i></a></li>
+                  <li><a href="#"><i class="icofont-instagram"></i></a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="300">
+            <div class="experts_box">
+              <img src="{% static './home/images/.png' %}" alt="image">
+              <div class="text">
+                <h3>Geo Back</h3>
+                <span>Product Manager</span>
+                <ul class="social_media">
+                  <li><a href="#"><i class="icofont-facebook"></i></a></li>
+                  <li><a href="#"><i class="icofont-twitter"></i></a></li>
+                  <li><a href="#"><i class="icofont-instagram"></i></a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!--Experts Team Section End  -->
+
+    <!-- FAQ Tab Section Start -->
+    <section class="row_am faq_section">
+      <div class="container">
+        <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+          <span class="title_badge">Question & Answer</span>
+          <h2><span>FAQs</span> - Frequently Asked Questions</h2>
+        </div>
+        <ul class="nav nav-tabs" id="myTab" role="tablist" data-aos="fade-up" data-aos-duration="1500">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="genral-tab" data-toggle="tab" data-target="#genral" type="button"
+              role="tab" aria-controls="genral" aria-selected="true">Genral</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pricing-tab" data-toggle="tab" data-target="#pricing" type="button" role="tab"
+              aria-controls="pricing" aria-selected="false">Pricing</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="account-tab" data-toggle="tab" data-target="#account" type="button" role="tab"
+              aria-controls="account" aria-selected="false">Account</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="returns-tab" data-toggle="tab" data-target="#returns" type="button" role="tab"
+              aria-controls="returns" aria-selected="false">Returns Policy</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="support-tab" data-toggle="tab" data-target="#support" type="button" role="tab"
+              aria-controls="support" aria-selected="false">Technical Support</button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent" data-aos="fade-up" data-aos-duration="1500">
+          <div class="tab-pane fade show active" id="genral" role="tabpanel" aria-labelledby="genral-tab">
+            <div class="accordion" id="accordionGenral">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header" id="headingOne">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
+                          data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                          How app will useful for my business ?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
+                      data-parent="#accordionGenral">
+                      <div class="card-body">
+                        Lorem Ipsum is simply dummy text of the printing and typesetting industry lorem Ipsu m has
+                        been
+                        the industrys standard dummy text ever since the when an unknown printer.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header" id="headingTwo">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                          What support i will get in premium package?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionGenral">
+                      <div class="card-body">
+                        Some placeholder content for the second accordion panel. This panel is
+                        hidden by
+                        default.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header" id="headingThree">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                          Can i get update for free ?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
+                      data-parent="#accordionGenral">
+                      <div class="card-body">
+                        And lastly, the placeholder content for the third and final accordion panel.
+                        This
+                        panel is hidden by default.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header" id="headingfour">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapsefour" aria-expanded="false" aria-controls="collapsefour">
+                          How to setup account ?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapsefour" class="collapse" aria-labelledby="headingfour"
+                      data-parent="#accordionGenral">
+                      <div class="card-body">
+                        Some placeholder content for the second accordion panel. This panel is
+                        hidden by
+                        default.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header" id="headingfive">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapsefive" aria-expanded="false" aria-controls="collapsefive">
+                          Is there any hidden cost?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapsefive" class="collapse" aria-labelledby="headingfive"
+                      data-parent="#accordionGenral">
+                      <div class="card-body">
+                        Some placeholder content for the second accordion panel. This panel is
+                        hidden by
+                        default.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header" id="headingsix">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapsesix" aria-expanded="false" aria-controls="collapsesix">
+                          What is process to get refund ?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapsesix" class="collapse" aria-labelledby="headingsix" data-parent="#accordionGenral">
+                      <div class="card-body">
+                        And lastly, the placeholder content for the third and final accordion panel.
+                        This
+                        panel is hidden by default.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header" id="headingseven">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapseseven" aria-expanded="false" aria-controls="collapseseven">
+                          How to setup account ?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseseven" class="collapse" aria-labelledby="headingseven"
+                      data-parent="#accordionGenral">
+                      <div class="card-body">
+                        And lastly, the placeholder content for the third and final accordion panel.
+                        This
+                        panel is hidden by default.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header" id="headingeight">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapseeight" aria-expanded="false" aria-controls="collapseeight">
+                          What is process to get refund ?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseeight" class="collapse" aria-labelledby="headingeight"
+                      data-parent="#accordionGenral">
+                      <div class="card-body">
+                        And lastly, the placeholder content for the third and final accordion panel.
+                        This
+                        panel is hidden by default.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header" id="headingnine">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapsenine" aria-expanded="false" aria-controls="collapsenine">
+                          Is there any discount on packages ?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapsenine" class="collapse" aria-labelledby="headingnine"
+                      data-parent="#accordionGenral">
+                      <div class="card-body">
+                        And lastly, the placeholder content for the third and final accordion panel.
+                        This
+                        panel is hidden by default.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="pricing" role="tabpanel" aria-labelledby="pricing-tab">
+            <div class="accordion" id="accordionPricing">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header" id="headingpricingOne">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
+                          data-target="#collapsepricingOne" aria-expanded="true" aria-controls="collapsepricingOne">
+                          Lorem Ipsum is simply dummy text ?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapsepricingOne" class="collapse show" aria-labelledby="headingpricingOne"
+                      data-parent="#accordionPricing">
+                      <div class="card-body">
+                        Lorem Ipsum is simply dummy text of the printing and typesetting industry lorem Ipsu m has
+                        been
+                        the industrys standard dummy text ever since the when an unknown printer.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header" id="headingpricingTwo">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapsepricingTwo" aria-expanded="false" aria-controls="collapsepricingTwo">
+                          Ever since the when an unknown printer?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapsepricingTwo" class="collapse" aria-labelledby="headingpricingTwo"
+                      data-parent="#accordionPricing">
+                      <div class="card-body">
+                        Some placeholder content for the second accordion panel. This panel is
+                        hidden by
+                        default.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header" id="headingpricingThree">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapsepricingThree" aria-expanded="false"
+                          aria-controls="collapsepricingThree">
+                          Is there any hidden cost?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapsepricingThree" class="collapse" aria-labelledby="headingpricingThree"
+                      data-parent="#accordionPricing">
+                      <div class="card-body">
+                        Some placeholder content for the second accordion panel. This panel is
+                        hidden by
+                        default.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="account" role="tabpanel" aria-labelledby="account-tab">
+            <div class="accordion" id="accordionAccount">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header" id="headingAccountOne">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
+                          data-target="#collapseAccountOne" aria-expanded="true" aria-controls="collapseAccountOne">
+                          Industrys standard dummy text ever since ?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseAccountOne" class="collapse show" aria-labelledby="headingAccountOne"
+                      data-parent="#accordionAccount">
+                      <div class="card-body">
+                        Lorem Ipsum is simply dummy text of the printing and typesetting industry lorem Ipsu m has
+                        been
+                        the industrys standard dummy text ever since the when an unknown printer.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header" id="headingAccountTwo">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapseAccountTwo" aria-expanded="false" aria-controls="collapseAccountTwo">
+                          Placeholder content?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseAccountTwo" class="collapse" aria-labelledby="headingAccountTwo"
+                      data-parent="#accordionAccount">
+                      <div class="card-body">
+                        Some placeholder content for the second accordion panel. This panel is
+                        hidden by
+                        default.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header" id="headingAccountThree">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapseAccountThree" aria-expanded="false"
+                          aria-controls="collapseAccountThree">
+                          Is there any hidden cost?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseAccountThree" class="collapse" aria-labelledby="headingAccountThree"
+                      data-parent="#accordionAccount">
+                      <div class="card-body">
+                        Some placeholder content for the second accordion panel. This panel is
+                        hidden by
+                        default.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="returns" role="tabpanel" aria-labelledby="returns-tab">
+            <div class="accordion" id="accordionRp">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header" id="headingRpOne">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
+                          data-target="#collapseRpOne" aria-expanded="true" aria-controls="collapseRpOne">
+                          Simply dummy text of the printing ?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseRpOne" class="collapse show" aria-labelledby="headingRpOne"
+                      data-parent="#accordionRp">
+                      <div class="card-body">
+                        Lorem Ipsum is simply dummy text of the printing and typesetting industry lorem Ipsu m has
+                        been
+                        the industrys standard dummy text ever since the when an unknown printer.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header" id="headingRpTwo">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapseRpTwo" aria-expanded="false" aria-controls="collapseRpTwo">
+                          What support i will get in premium package?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseRpTwo" class="collapse" aria-labelledby="headingRpTwo" data-parent="#accordionRp">
+                      <div class="card-body">
+                        Some placeholder content for the second accordion panel. This panel is
+                        hidden by
+                        default.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header" id="headingRpThree">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapseRpThree" aria-expanded="false" aria-controls="collapseRpThree">
+                          Content for the second accordion?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseRpThree" class="collapse" aria-labelledby="headingRpThree"
+                      data-parent="#accordionRp">
+                      <div class="card-body">
+                        Some placeholder content for the second accordion panel. This panel is
+                        hidden by
+                        default.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="support" role="tabpanel" aria-labelledby="support-tab">
+            <div class="accordion" id="accordionTechsup">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header" id="headingTechsupOne">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
+                          data-target="#collapseTechsupOne" aria-expanded="true" aria-controls="collapseTechsupOne">
+                          How app will useful for my business ?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseTechsupOne" class="collapse show" aria-labelledby="headingTechsupOne"
+                      data-parent="#accordionTechsup">
+                      <div class="card-body">
+                        Lorem Ipsum is simply dummy text of the printing and typesetting industry lorem Ipsu m has
+                        been
+                        the industrys standard dummy text ever since the when an unknown printer.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header" id="headingTechsupTwo">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapseTechsupTwo" aria-expanded="false" aria-controls="collapseTechsupTwo">
+                          Some placeholder content for?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseTechsupTwo" class="collapse" aria-labelledby="headingTechsupTwo"
+                      data-parent="#accordionTechsup">
+                      <div class="card-body">
+                        Some placeholder content for the second accordion panel. This panel is
+                        hidden by
+                        default.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header" id="headingTechsupThree">
+                      <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                          data-target="#collapseTechsupThree" aria-expanded="false"
+                          aria-controls="collapseTechsupThree">
+                          Is there any hidden cost?
+                          <span class="icons">
+                            <i class="icofont-plus"></i>
+                            <i class="icofont-minus"></i>
+                          </span>
+                        </button>
+                      </h2>
+                    </div>
+                    <div id="collapseTechsupThree" class="collapse" aria-labelledby="headingTechsupThree"
+                      data-parent="#accordionTechsup">
+                      <div class="card-body">
+                        Some placeholder content for the second accordion panel. This panel is
+                        hidden by
+                        default.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- FAQ Tab Section End -->
+
+    <!-- App-Download-Section-Start -->
+    <section class="row_am download_app">
+      <!-- Task Block start -->
+      <div class="task_block" data-aos="fade-up" data-aos-duration="1500">
+        <!-- vertical blure line animation -->
+        <div class='light x1'></div>
+        <div class='light x2'></div>
+        <div class='light x3'></div>
+        <div class='light x4'></div>
+        <div class='light x5'></div>
+        <div class='light x6'></div>
+        <div class='light x7'></div>
+        <div class='light x8'></div>
+        <div class='light x9'></div>
+        <!-- row start -->
+        <div class="row">
+          <div class="col-md-6">
+            <!-- task text -->
+            <div class="task_text">
+              <div class="section_title white_text" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="100">
+                <span class="title_badge">Download</span>
+                <h2>Our app is available for
+                  Android & iOS</h2>
+                <p>
+                  Lorem Ipsum is simply dummy text of the printing
+                  indus orem Ipsum has been the industrys.
+                </p>
+              </div>
+              <!-- app buttons -->
+              <ul class="app_btn" data-aos="fade-up" data-aos-duration="1500">
+                <li>
+                  <a href="#">
+                    <img class="blue_img" src="{% static './home/images/.png' %}" alt="image">
+                  </a>
+                </li>
+                <li>
+                  <a href="#">
+                    <img class="blue_img" src="{% static './home/images/.png' %}" alt="image">
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <!-- task images -->
+            <div class="task_img" data-aos="fade-in" data-aos-duration="1500">
+              <div class="frame_img">
+                <img src="{% static './home/images/.png' %}" alt="image">
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- row end -->
+      </div>
+      <!-- Task Block end -->
+    </section>
+    <!-- App-Download-Section-end -->
+
+<!-- ── Animated Background-Paths CTA ── -->
+<section class="bp-cta">
+  <div class="bp-paths" data-pos="1"><svg viewBox="0 0 696 316" fill="none"><title>Background Paths</title></svg></div>
+  <div class="bp-paths" data-pos="-1"><svg viewBox="0 0 696 316" fill="none"><title>Background Paths</title></svg></div>
+  <div class="bp-content">
+    <h1 class="bp-title">Join our mission</h1>
+    <p class="bp-subtitle">Be part of the movement to eliminate paper waste and revolutionize professional networking with NFC technology.</p>
+    <div class="bp-actions">
+      <div class="bp-btn-wrap">
+        <a href="{% url 'accounts:signup' %}" class="bp-btn">Get Started Free <span class="bp-arrow">&rarr;</span></a>
+      </div>
+      <a href="{% url 'cards:ecommerce_store' %}" class="bp-ghost">Browse NFC Cards</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

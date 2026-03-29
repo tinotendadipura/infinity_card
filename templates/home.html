@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}InfinityCard — One Card. One Tap. Infinite Identity.{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-inner">
+            <div class="hero-text">
+                <h1>Everything you are.<br>In one simple <span class="highlight">link in bio.</span></h1>
+                <p class="hero-subtitle">Replace paper business cards with a living digital profile powered by NFC. One tap shares your entire world — portfolio, menu, listings, links, and more.</p>
+                <div class="hero-actions">
+                    <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg">Get started for free</a>
+                    <a href="{% url 'core:features' %}" class="btn btn-ghost btn-lg">See how it works</a>
+                </div>
+                <div class="hero-social-proof">
+                    <div class="hero-avatars">
+                        <span>JD</span><span>AK</span><span>MR</span><span>SL</span><span>+</span>
+                    </div>
+                    <span>Join 2,000+ professionals already using InfinityCard</span>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-mockup">
+                    <div class="mockup-avatar"></div>
+                    <div class="mockup-name">Sarah Johnson</div>
+                    <div class="mockup-bio">Real Estate Agent · Miami</div>
+                    <div class="mockup-link">My Portfolio</div>
+                    <div class="mockup-link">Book a Viewing</div>
+                    <div class="mockup-link">Featured Listings</div>
+                    <div class="mockup-link">Contact Me</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TRUSTED BY -->
+<section class="trusted-bar">
+    <div class="container">
+        <p>Trusted by professionals worldwide</p>
+        <div class="trusted-logos">
+            <span>TechCorp</span>
+            <span>FoodHaus</span>
+            <span>DesignLab</span>
+            <span>PropVista</span>
+            <span>EventPro</span>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Share everything you create, curate and sell</h2>
+            <p>Make your NFC card work harder with a beautiful profile page that showcases who you are and what you do.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">&#128241;</div>
+                <h3>NFC-Powered Sharing</h3>
+                <p>One tap on any smartphone opens your profile. No app downloads, no QR codes, no friction.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#127912;</div>
+                <h3>Custom Themes</h3>
+                <p>Make it yours with beautiful color themes that match your brand and personality.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128202;</div>
+                <h3>Tap Analytics</h3>
+                <p>See who's tapping your card with real-time analytics on visits, devices, and more.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128279;</div>
+                <h3>Social Links</h3>
+                <p>Connect all your platforms — Instagram, LinkedIn, TikTok, and more — in one place.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#127760;</div>
+                <h3>Your Own Subdomain</h3>
+                <p>Get a unique <strong>username.infinitycard.app</strong> URL that's easy to remember and share.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#9889;</div>
+                <h3>Instant Updates</h3>
+                <p>Change your profile anytime. Your card always points to the latest version of you.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section section-dark">
+    <div class="container">
+        <div class="section-header">
+            <h2>Three steps to go infinite</h2>
+            <p>Getting started takes less than 2 minutes. Seriously.</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>Create your account</h3>
+                <p>Sign up free and choose the category that fits your profession.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>Build your profile</h3>
+                <p>Add your info, photos, links, and pick a theme. Your page is live instantly.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>Tap &amp; share</h3>
+                <p>Get your NFC card and start sharing with a single tap. That's it.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Built for every profession</h2>
+            <p>Purpose-built profile templates for the way you work.</p>
+        </div>
+        <div class="category-tags">
+            <span class="tag">Business / Entrepreneur</span>
+            <span class="tag">Freelancer / Consultant</span>
+            <span class="tag">Real Estate</span>
+            <span class="tag">Restaurant / Food</span>
+            <span class="tag">Creative / Photography</span>
+            <span class="tag">Events / Catering</span>
+            <span class="tag">Personal</span>
+        </div>
+    </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section section-dark">
+    <div class="container">
+        <div class="section-header">
+            <h2>Loved by professionals</h2>
+            <p>Here's what people are saying about InfinityCard.</p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <p class="testimonial-text">"I ditched 500 paper cards for one InfinityCard. People are always impressed when I just tap my card and my entire portfolio appears on their phone."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar"></div>
+                    <div>
+                        <div class="testimonial-name">Alex Rivera</div>
+                        <div class="testimonial-role">Photographer</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <p class="testimonial-text">"The analytics feature is a game-changer. I can see exactly how many people viewed my listings after networking events. My conversion rate doubled."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar"></div>
+                    <div>
+                        <div class="testimonial-name">Priya Patel</div>
+                        <div class="testimonial-role">Real Estate Agent</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <p class="testimonial-text">"We use InfinityCard for our entire restaurant team. Guests tap the card to see our menu, book a table, and follow us on social. It's seamless."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar"></div>
+                    <div>
+                        <div class="testimonial-name">Marcus Chen</div>
+                        <div class="testimonial-role">Restaurant Owner</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to go infinite?</h2>
+            <p>Join thousands of professionals who've replaced paper cards for good. Start free today.</p>
+            <div class="page-actions">
+                <a href="{% url 'accounts:signup' %}" class="btn btn-white btn-lg">Get started — it's free</a>
+                <a href="{% url 'subscriptions:plans' %}" class="btn btn-ghost btn-lg">View pricing</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

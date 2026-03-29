@@ -1,0 +1,85 @@
+{% extends "pages/home/base.html" %}
+
+{% block title %}Features | InfinityCard{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Platform <span class="highlight">Features</span></h2>
+            <p>Everything you need to build, share, and grow your digital identity.</p>
+        </div>
+        <div class="features-showcase">
+            <div class="showcase-item">
+                <div class="showcase-icon">&#128241;</div>
+                <div class="showcase-content">
+                    <h3>NFC-Powered Profiles</h3>
+                    <p>Your NFC card links directly to your personalized profile page. One tap on any smartphone — no app required, no QR codes.</p>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <div class="showcase-icon">&#127912;</div>
+                <div class="showcase-content">
+                    <h3>7 Industry Templates</h3>
+                    <p>Purpose-built profile layouts for Business, Freelancer, Real Estate, Restaurant, Creative, Events, and Personal use cases.</p>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <div class="showcase-icon">&#127752;</div>
+                <div class="showcase-content">
+                    <h3>Custom Themes</h3>
+                    <p>Choose from beautiful preset themes or let your brand colors shine. Every profile is uniquely yours.</p>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <div class="showcase-icon">&#128202;</div>
+                <div class="showcase-content">
+                    <h3>Tap Analytics</h3>
+                    <p>Track who's tapping your card. See real-time stats on visits, locations, and devices from your dashboard.</p>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <div class="showcase-icon">&#128279;</div>
+                <div class="showcase-content">
+                    <h3>Social Links</h3>
+                    <p>Connect all your social media profiles in one place. Facebook, Instagram, LinkedIn, TikTok, and more.</p>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <div class="showcase-icon">&#127760;</div>
+                <div class="showcase-content">
+                    <h3>Your Own Subdomain</h3>
+                    <p>Every user gets a unique <strong>username.inftycard.cc</strong> URL — easy to remember, easy to share.</p>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <div class="showcase-icon">&#128274;</div>
+                <div class="showcase-content">
+                    <h3>Flexible Subscriptions</h3>
+                    <p>Plans from Starter to Pro. Upgrade, downgrade, or renew anytime from your billing dashboard.</p>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <div class="showcase-icon">&#128247;</div>
+                <div class="showcase-content">
+                    <h3>Media Uploads</h3>
+                    <p>Upload property photos, portfolio images, menu items, and event packages directly to your profile.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Start with a free 30-day trial</h2>
+            <p>No credit card required. See why thousands of professionals trust InfinityCard.</p>
+            <div class="page-actions">
+                <a href="{% url 'subscriptions:plans' %}" class="btn btn-white btn-lg">View pricing</a>
+                <a href="{% url 'accounts:signup' %}" class="btn btn-ghost btn-lg">Sign up free</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

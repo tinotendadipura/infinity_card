@@ -1,0 +1,507 @@
+{% extends "subscriptions/admin_base.html" %}
+{% block title %}Payment Approvals{% endblock %}
+{% block nav_approvals %}active{% endblock %}
+{% block page_title %}Payment Approvals{% endblock %}
+
+{% block admin_content %}
+
+<!-- Tab switcher: Personal / Company -->
+<div class="sa-card" style="margin-bottom:20px">
+    <div class="sa-filter">
+        <a class="sa-filter-tab {% if tab == 'personal' %}active{% endif %}" href="{% url 'subscriptions:admin_approvals' %}?tab=personal&status={{ status_filter }}">Personal ({{ personal_pending_count }})</a>
+        <a class="sa-filter-tab {% if tab == 'company' %}active{% endif %}" href="{% url 'subscriptions:admin_approvals' %}?tab=company&status={{ status_filter }}">Company ({{ company_pending_count }})</a>
+        <a class="sa-filter-tab {% if tab == 'subscription' %}active{% endif %}" href="{% url 'subscriptions:admin_approvals' %}?tab=subscription&status={{ status_filter }}">Subscription ({{ subscription_pending_count }})</a>
+        <div style="flex:1"></div>
+        <a class="sa-filter-tab {% if status_filter == 'pending' %}active{% endif %}" href="{% url 'subscriptions:admin_approvals' %}?tab={{ tab }}&status=pending">Pending</a>
+        <a class="sa-filter-tab {% if status_filter == 'approved' %}active{% endif %}" href="{% url 'subscriptions:admin_approvals' %}?tab={{ tab }}&status=approved">Approved</a>
+        <a class="sa-filter-tab {% if status_filter == 'rejected' %}active{% endif %}" href="{% url 'subscriptions:admin_approvals' %}?tab={{ tab }}&status=rejected">Rejected</a>
+        <a class="sa-filter-tab {% if not status_filter %}active{% endif %}" href="{% url 'subscriptions:admin_approvals' %}?tab={{ tab }}&status=">All</a>
+    </div>
+</div>
+
+{% if tab == 'personal' %}
+<!-- Personal Cash Orders (no POP required) -->
+{% for order in personal_cash_orders %}
+<div class="sa-card" style="margin-bottom:16px;border-left:4px solid {% if order.status == 'pending' %}#D97706{% elif order.status == 'cancelled' %}#DC2626{% else %}#16A34A{% endif %}">
+    <div class="sa-card-header">
+        <div class="sa-card-title">
+            Cash Payment &mdash; Order #{{ order.pk }}
+            <span class="sa-badge {% if order.status == 'pending' %}sa-badge-amber{% elif order.status == 'cancelled' %}sa-badge-red{% else %}sa-badge-green{% endif %}" style="margin-left:8px">{{ order.get_status_display }}</span>
+        </div>
+        <div style="font-size:12px;color:#64748B">{{ order.created_at|date:"M d, Y H:i" }}</div>
+    </div>
+    <div class="sa-pop-detail">
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Customer</div>
+            <div class="sa-pop-value">{{ order.user.email }}<br><span style="color:#64748B;font-weight:400">{{ order.user.username }}</span></div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Payment Method</div>
+            <div class="sa-pop-value">Cash Payment</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Order Amount</div>
+            <div class="sa-pop-value" style="color:#16A34A">${{ order.amount }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Product</div>
+            <div class="sa-pop-value">{{ order.card_product.name }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Shipping Address</div>
+            <div class="sa-pop-value">{{ order.shipping_address1 }}, {{ order.shipping_city }}, {{ order.shipping_country }}</div>
+        </div>
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Note</div>
+            <div class="sa-pop-value" style="font-weight:400;color:#64748B">Customer will pay in cash. No proof of payment required. {% if order.status == 'pending' %}Approve when cash is received.{% endif %}</div>
+        </div>
+        {% if order.status == 'cancelled' and order.rejection_reason %}
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Decline Reason</div>
+            <div class="sa-pop-value" style="color:#DC2626;font-weight:400">{{ order.rejection_reason }}</div>
+        </div>
+        {% endif %}
+        {% if order.status == 'pending' %}
+        <div class="sa-pop-actions">
+            <form method="post" action="{% url 'subscriptions:admin_approve_cash_order' order.pk %}">
+                {% csrf_token %}
+                <button class="sa-btn sa-btn-success">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    Approve &amp; Mark Paid
+                </button>
+            </form>
+            <form method="post" action="{% url 'subscriptions:admin_decline_cash_order' order.pk %}" onsubmit="var r=prompt('Reason for declining (will be shown to user):');if(r===null)return false;this.querySelector('[name=reason]').value=r;return true;">
+                {% csrf_token %}
+                <input type="hidden" name="reason" value="">
+                <button class="sa-btn sa-btn-danger">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Decline
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+<!-- Personal POPs -->
+{% for pop in personal_pops %}
+<div class="sa-card" style="margin-bottom:16px;{% if pop.status == 'pending' %}border-left:4px solid #D97706{% elif pop.status == 'approved' %}border-left:4px solid #16A34A{% else %}border-left:4px solid #DC2626{% endif %}">
+    <div class="sa-card-header">
+        <div class="sa-card-title">
+            POP #{{ pop.pk }} &mdash; Order #{{ pop.order.pk }}
+            <span class="sa-badge {% if pop.status == 'pending' %}sa-badge-amber{% elif pop.status == 'approved' %}sa-badge-green{% else %}sa-badge-red{% endif %}" style="margin-left:8px">{{ pop.get_status_display }}</span>
+        </div>
+        <div style="font-size:12px;color:#64748B">{{ pop.created_at|date:"M d, Y H:i" }}</div>
+    </div>
+    <div class="sa-pop-detail">
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Customer</div>
+            <div class="sa-pop-value">{{ pop.order.user.email }}<br><span style="color:#64748B;font-weight:400">{{ pop.order.user.username }}</span></div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Payment Method</div>
+            <div class="sa-pop-value">{{ pop.get_payment_type_display }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Amount Paid</div>
+            <div class="sa-pop-value" style="color:#16A34A">${{ pop.amount_paid }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Order Amount</div>
+            <div class="sa-pop-value">${{ pop.order.amount }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Reference Number</div>
+            <div class="sa-pop-value">{{ pop.reference_number|default:"—" }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Payment Date</div>
+            <div class="sa-pop-value">{{ pop.payment_date|date:"M d, Y" }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Product</div>
+            <div class="sa-pop-value">{{ pop.order.card_product.name }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Uploaded By</div>
+            <div class="sa-pop-value">{{ pop.uploaded_by.email|default:"—" }}</div>
+        </div>
+        {% if pop.notes %}
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Notes</div>
+            <div class="sa-pop-value" style="font-weight:400">{{ pop.notes }}</div>
+        </div>
+        {% endif %}
+        {% if pop.document %}
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Document</div>
+            <a href="{{ pop.document.url }}" target="_blank"><img src="{{ pop.document.url }}" class="sa-pop-doc" style="max-height:300px" alt="Proof of payment"></a>
+        </div>
+        {% endif %}
+        {% if pop.status == 'rejected' and pop.rejection_reason %}
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Rejection Reason</div>
+            <div class="sa-pop-value" style="color:#DC2626;font-weight:400">{{ pop.rejection_reason }}</div>
+        </div>
+        {% endif %}
+        {% if pop.status == 'pending' %}
+        <div class="sa-pop-actions">
+            <form method="post" action="{% url 'subscriptions:admin_approve_personal_pop' pop.pk %}">
+                {% csrf_token %}
+                <button class="sa-btn sa-btn-success">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    Approve &amp; Mark Paid
+                </button>
+            </form>
+            <form method="post" action="{% url 'subscriptions:admin_reject_personal_pop' pop.pk %}" onsubmit="var r=prompt('Rejection reason (optional):');if(r===null)return false;this.querySelector('[name=reason]').value=r;return true;">
+                {% csrf_token %}
+                <input type="hidden" name="reason" value="">
+                <button class="sa-btn sa-btn-danger">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Reject
+                </button>
+            </form>
+        </div>
+        {% endif %}
+        {% if pop.reviewed_by %}
+        <div class="sa-pop-field sa-pop-full" style="margin-top:4px">
+            <div class="sa-pop-label">Reviewed By</div>
+            <div class="sa-pop-value" style="font-weight:400">{{ pop.reviewed_by.email }} on {{ pop.reviewed_at|date:"M d, Y H:i" }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% empty %}
+<div class="sa-card"><div class="sa-empty" style="padding:60px 20px">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <div>No personal payment proofs {% if status_filter %}with status "{{ status_filter }}"{% endif %}</div>
+</div></div>
+{% endfor %}
+
+{% elif tab == 'company' %}
+<!-- Company Cash Orders (no POP required) -->
+{% for order in company_cash_orders %}
+<div class="sa-card" style="margin-bottom:16px;border-left:4px solid {% if order.status == 'pending' %}#D97706{% elif order.status == 'cancelled' %}#DC2626{% else %}#16A34A{% endif %}">
+    <div class="sa-card-header">
+        <div class="sa-card-title">
+            Cash Payment &mdash; Bulk Order #{{ order.pk }}
+            <span class="sa-badge {% if order.status == 'pending' %}sa-badge-amber{% elif order.status == 'cancelled' %}sa-badge-red{% else %}sa-badge-green{% endif %}" style="margin-left:8px">{{ order.get_status_display }}</span>
+        </div>
+        <div style="font-size:12px;color:#64748B">{{ order.created_at|date:"M d, Y H:i" }}</div>
+    </div>
+    <div class="sa-pop-detail">
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Company</div>
+            <div class="sa-pop-value">{{ order.company.name }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Payment Method</div>
+            <div class="sa-pop-value">Cash Payment</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Order Total</div>
+            <div class="sa-pop-value" style="color:#16A34A">${{ order.total_amount }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Product &amp; Qty</div>
+            <div class="sa-pop-value">{{ order.card_product.name }} &times; {{ order.quantity }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Ordered By</div>
+            <div class="sa-pop-value">{{ order.ordered_by.email }}</div>
+        </div>
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Note</div>
+            <div class="sa-pop-value" style="font-weight:400;color:#64748B">Company will pay in cash. No proof of payment required. {% if order.status == 'pending' %}Approve when cash is received.{% endif %}</div>
+        </div>
+        {% if order.status == 'cancelled' and order.rejection_reason %}
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Decline Reason</div>
+            <div class="sa-pop-value" style="color:#DC2626;font-weight:400">{{ order.rejection_reason }}</div>
+        </div>
+        {% endif %}
+        {% if order.status == 'pending' %}
+        <div class="sa-pop-actions">
+            <form method="post" action="{% url 'subscriptions:admin_approve_company_cash_order' order.pk %}">
+                {% csrf_token %}
+                <button class="sa-btn sa-btn-success">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    Approve &amp; Activate
+                </button>
+            </form>
+            <form method="post" action="{% url 'subscriptions:admin_decline_company_cash_order' order.pk %}" onsubmit="var r=prompt('Reason for declining (will be shown to user):');if(r===null)return false;this.querySelector('[name=reason]').value=r;return true;">
+                {% csrf_token %}
+                <input type="hidden" name="reason" value="">
+                <button class="sa-btn sa-btn-danger">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Decline
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% empty %}
+{% if not company_pops %}
+<div class="sa-card"><div class="sa-empty" style="padding:60px 20px">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <div>No pending company cash orders</div>
+</div></div>
+{% endif %}
+{% endfor %}
+
+<!-- Company POPs -->
+{% for pop in company_pops %}
+<div class="sa-card" style="margin-bottom:16px;{% if pop.status == 'pending' %}border-left:4px solid #D97706{% elif pop.status == 'approved' %}border-left:4px solid #16A34A{% else %}border-left:4px solid #DC2626{% endif %}">
+    <div class="sa-card-header">
+        <div class="sa-card-title">
+            POP #{{ pop.pk }} &mdash; Bulk Order #{{ pop.order.pk }}
+            <span class="sa-badge {% if pop.status == 'pending' %}sa-badge-amber{% elif pop.status == 'approved' %}sa-badge-green{% else %}sa-badge-red{% endif %}" style="margin-left:8px">{{ pop.get_status_display }}</span>
+        </div>
+        <div style="font-size:12px;color:#64748B">{{ pop.created_at|date:"M d, Y H:i" }}</div>
+    </div>
+    <div class="sa-pop-detail">
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Company</div>
+            <div class="sa-pop-value">{{ pop.order.company.name }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Payment Method</div>
+            <div class="sa-pop-value">{{ pop.get_payment_type_display }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Amount Paid</div>
+            <div class="sa-pop-value" style="color:#16A34A">${{ pop.amount_paid }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Order Total</div>
+            <div class="sa-pop-value">${{ pop.order.total_amount }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Reference Number</div>
+            <div class="sa-pop-value">{{ pop.reference_number|default:"—" }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Payment Date</div>
+            <div class="sa-pop-value">{{ pop.payment_date|date:"M d, Y" }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Product &amp; Qty</div>
+            <div class="sa-pop-value">{{ pop.order.card_product.name }} &times; {{ pop.order.quantity }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Uploaded By</div>
+            <div class="sa-pop-value">{{ pop.uploaded_by.email|default:"—" }}</div>
+        </div>
+        {% if pop.notes %}
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Notes</div>
+            <div class="sa-pop-value" style="font-weight:400">{{ pop.notes }}</div>
+        </div>
+        {% endif %}
+        {% if pop.document %}
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Document</div>
+            <a href="{{ pop.document.url }}" target="_blank"><img src="{{ pop.document.url }}" class="sa-pop-doc" style="max-height:300px" alt="Proof of payment"></a>
+        </div>
+        {% endif %}
+        {% if pop.status == 'rejected' and pop.rejection_reason %}
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Rejection Reason</div>
+            <div class="sa-pop-value" style="color:#DC2626;font-weight:400">{{ pop.rejection_reason }}</div>
+        </div>
+        {% endif %}
+        {% if pop.status == 'pending' %}
+        <div class="sa-pop-actions">
+            <form method="post" action="{% url 'subscriptions:admin_approve_company_pop' pop.pk %}">
+                {% csrf_token %}
+                <button class="sa-btn sa-btn-success">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    Approve &amp; Activate
+                </button>
+            </form>
+            <form method="post" action="{% url 'subscriptions:admin_reject_company_pop' pop.pk %}" onsubmit="var r=prompt('Rejection reason (optional):');if(r===null)return false;this.querySelector('[name=reason]').value=r;return true;">
+                {% csrf_token %}
+                <input type="hidden" name="reason" value="">
+                <button class="sa-btn sa-btn-danger">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Reject
+                </button>
+            </form>
+        </div>
+        {% endif %}
+        {% if pop.reviewed_by %}
+        <div class="sa-pop-field sa-pop-full" style="margin-top:4px">
+            <div class="sa-pop-label">Reviewed By</div>
+            <div class="sa-pop-value" style="font-weight:400">{{ pop.reviewed_by.email }} on {{ pop.reviewed_at|date:"M d, Y H:i" }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% empty %}
+<div class="sa-card"><div class="sa-empty" style="padding:60px 20px">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <div>No company payment proofs {% if status_filter %}with status "{{ status_filter }}"{% endif %}</div>
+</div></div>
+{% endfor %}
+
+{% elif tab == 'subscription' %}
+<!-- Cash Subscriptions (no POP required) -->
+{% for sub in cash_subscriptions %}
+<div class="sa-card" style="margin-bottom:16px;border-left:4px solid #D97706">
+    <div class="sa-card-header">
+        <div class="sa-card-title">
+            Cash Payment &mdash; Subscription
+            <span class="sa-badge sa-badge-amber" style="margin-left:8px">Pending</span>
+        </div>
+        <div style="font-size:12px;color:#64748B">{{ sub.started_at|date:"M d, Y H:i" }}</div>
+    </div>
+    <div class="sa-pop-detail">
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Customer</div>
+            <div class="sa-pop-value">{{ sub.user.email }}<br><span style="color:#64748B;font-weight:400">{{ sub.user.username }}</span></div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Payment Method</div>
+            <div class="sa-pop-value">Cash Payment</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Plan</div>
+            <div class="sa-pop-value">{{ sub.plan.name }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Billing Period</div>
+            <div class="sa-pop-value">{{ sub.get_billing_period_display }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Amount</div>
+            <div class="sa-pop-value" style="color:#16A34A">${{ sub.plan.price }}/mo{% if sub.billing_period == 'yearly' %} (yearly: ${{ sub.plan.yearly_price }}){% endif %}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Status</div>
+            <div class="sa-pop-value">{{ sub.get_status_display }}</div>
+        </div>
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Note</div>
+            <div class="sa-pop-value" style="font-weight:400;color:#D97706">Customer will pay in cash. No proof of payment required. Approve when cash is received.</div>
+        </div>
+        <div class="sa-pop-actions">
+            <form method="post" action="{% url 'subscriptions:admin_approve_cash_subscription' sub.pk %}">
+                {% csrf_token %}
+                <button class="sa-btn sa-btn-success">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    Approve &amp; Activate
+                </button>
+            </form>
+            <form method="post" action="{% url 'subscriptions:admin_decline_cash_subscription' sub.pk %}" onsubmit="var r=prompt('Reason for declining (will be shown to user):');if(r===null)return false;this.querySelector('[name=reason]').value=r;return true;">
+                {% csrf_token %}
+                <input type="hidden" name="reason" value="">
+                <button class="sa-btn sa-btn-danger">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Decline
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Subscription POPs -->
+{% for pop in subscription_pops %}
+<div class="sa-card" style="margin-bottom:16px;{% if pop.status == 'pending' %}border-left:4px solid #D97706{% elif pop.status == 'approved' %}border-left:4px solid #16A34A{% else %}border-left:4px solid #DC2626{% endif %}">
+    <div class="sa-card-header">
+        <div class="sa-card-title">
+            POP #{{ pop.pk }} &mdash; Subscription
+            <span class="sa-badge {% if pop.status == 'pending' %}sa-badge-amber{% elif pop.status == 'approved' %}sa-badge-green{% else %}sa-badge-red{% endif %}" style="margin-left:8px">{{ pop.get_status_display }}</span>
+        </div>
+        <div style="font-size:12px;color:#64748B">{{ pop.created_at|date:"M d, Y H:i" }}</div>
+    </div>
+    <div class="sa-pop-detail">
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Customer</div>
+            <div class="sa-pop-value">{{ pop.subscription.user.email }}<br><span style="color:#64748B;font-weight:400">{{ pop.subscription.user.username }}</span></div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Plan</div>
+            <div class="sa-pop-value">{{ pop.subscription.plan.name }} ({{ pop.subscription.get_billing_period_display }})</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Payment Method</div>
+            <div class="sa-pop-value">{{ pop.get_payment_type_display }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Amount Paid</div>
+            <div class="sa-pop-value" style="color:#16A34A">${{ pop.amount_paid }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Subscription Status</div>
+            <div class="sa-pop-value">{{ pop.subscription.get_status_display }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Reference Number</div>
+            <div class="sa-pop-value">{{ pop.reference_number|default:"\u2014" }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Payment Date</div>
+            <div class="sa-pop-value">{{ pop.payment_date|date:"M d, Y" }}</div>
+        </div>
+        <div class="sa-pop-field">
+            <div class="sa-pop-label">Uploaded By</div>
+            <div class="sa-pop-value">{{ pop.uploaded_by.email|default:"\u2014" }}</div>
+        </div>
+        {% if pop.notes %}
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Notes</div>
+            <div class="sa-pop-value" style="font-weight:400">{{ pop.notes }}</div>
+        </div>
+        {% endif %}
+        {% if pop.document %}
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Document</div>
+            <a href="{{ pop.document.url }}" target="_blank"><img src="{{ pop.document.url }}" class="sa-pop-doc" style="max-height:300px" alt="Proof of payment"></a>
+        </div>
+        {% endif %}
+        {% if pop.status == 'rejected' and pop.rejection_reason %}
+        <div class="sa-pop-field sa-pop-full">
+            <div class="sa-pop-label">Rejection Reason</div>
+            <div class="sa-pop-value" style="color:#DC2626;font-weight:400">{{ pop.rejection_reason }}</div>
+        </div>
+        {% endif %}
+        {% if pop.status == 'pending' %}
+        <div class="sa-pop-actions">
+            <form method="post" action="{% url 'subscriptions:admin_approve_subscription_pop' pop.pk %}">
+                {% csrf_token %}
+                <button class="sa-btn sa-btn-success">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    Approve &amp; Activate
+                </button>
+            </form>
+            <form method="post" action="{% url 'subscriptions:admin_reject_subscription_pop' pop.pk %}" onsubmit="var r=prompt('Rejection reason (optional):');if(r===null)return false;this.querySelector('[name=reason]').value=r;return true;">
+                {% csrf_token %}
+                <input type="hidden" name="reason" value="">
+                <button class="sa-btn sa-btn-danger">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Reject
+                </button>
+            </form>
+        </div>
+        {% endif %}
+        {% if pop.reviewed_by %}
+        <div class="sa-pop-field sa-pop-full" style="margin-top:4px">
+            <div class="sa-pop-label">Reviewed By</div>
+            <div class="sa-pop-value" style="font-weight:400">{{ pop.reviewed_by.email }} on {{ pop.reviewed_at|date:"M d, Y H:i" }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% empty %}
+<div class="sa-card"><div class="sa-empty" style="padding:60px 20px">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <div>No subscription payment proofs {% if status_filter %}with status "{{ status_filter }}"{% endif %}</div>
+</div></div>
+{% endfor %}
+
+{% endif %}
+
+{% endblock %}

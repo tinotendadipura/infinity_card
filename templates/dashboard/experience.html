@@ -1,0 +1,251 @@
+{% extends "dashboard/_app_shell.html" %}
+
+{% block title %}Experience | InfinityCard{% endblock %}
+
+{% block page_header %}
+<h1 class="app-page-title">Experience</h1>
+<p class="app-page-subtitle">Add your work experience — positions appear on your public profile like a digital CV.</p>
+{% endblock %}
+
+{% block content %}
+
+<!-- ═══ ADD / EDIT EXPERIENCE FORM ═══ -->
+<div class="exp-form-card">
+    <div class="exp-form-header">
+        <div class="exp-form-icon">
+            {% if edit_exp %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+            {% else %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            {% endif %}
+        </div>
+        <div>
+            <h3 class="exp-form-title">{% if edit_exp %}Edit Position{% else %}Add Position{% endif %}</h3>
+            <p class="exp-form-sub">{% if edit_exp %}Update the details below{% else %}Add a new work experience entry{% endif %}</p>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="app-form" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="{% if edit_exp %}edit{% else %}add{% endif %}">
+        {% if edit_exp %}
+        <input type="hidden" name="experience_id" value="{{ edit_exp.pk }}">
+        {% endif %}
+
+        {% if form.errors %}
+        <div class="exp-errors">
+            {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="exp-field-group">
+            <div class="exp-field">
+                <label class="exp-label" for="id_title">Title <span class="exp-req">*</span></label>
+                {{ form.title }}
+            </div>
+            <div class="exp-field">
+                <label class="exp-label" for="id_company">Company <span class="exp-req">*</span></label>
+                {{ form.company }}
+            </div>
+        </div>
+
+        <div class="exp-field">
+            <label class="exp-label" for="id_location">Location</label>
+            {{ form.location }}
+        </div>
+
+        <div class="exp-field" style="margin-bottom:8px">
+            <label class="exp-checkbox-label">
+                {{ form.is_current }}
+                <span>I currently work here</span>
+            </label>
+        </div>
+
+        <div class="exp-field-group">
+            <div class="exp-field">
+                <label class="exp-label" for="id_start_date">Start Date <span class="exp-req">*</span></label>
+                {{ form.start_date }}
+            </div>
+            <div class="exp-field" id="endDateField">
+                <label class="exp-label" for="id_end_date">End Date</label>
+                {{ form.end_date }}
+            </div>
+        </div>
+
+        <div class="exp-field">
+            <label class="exp-label" for="id_description">Description</label>
+            {{ form.description }}
+        </div>
+
+        <div class="exp-field">
+            <label class="exp-label" for="id_company_logo">Company Logo <span style="font-weight:400;color:#94A3B8">(optional)</span></label>
+            {{ form.company_logo }}
+            {% if edit_exp and edit_exp.company_logo %}
+            <div style="margin-top:8px">
+                <img src="{{ edit_exp.company_logo.url }}" alt="" style="width:48px;height:48px;border-radius:10px;object-fit:cover;border:1px solid #E2E8F0">
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="exp-form-actions">
+            <button type="submit" class="btn btn-primary">
+                {% if edit_exp %}
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Update Position
+                {% else %}
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                Add Position
+                {% endif %}
+            </button>
+            {% if edit_exp %}
+            <a href="{% url 'profiles:experience' %}" class="btn btn-outline">Cancel</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- ═══ EXPERIENCE LIST ═══ -->
+{% if experiences %}
+<div class="exp-list-header">
+    <h3 class="exp-list-title">Your Experience</h3>
+    <span class="exp-list-count">{{ experiences|length }} position{{ experiences|length|pluralize }}</span>
+</div>
+
+<div class="exp-list">
+    {% for exp in experiences %}
+    <div class="exp-card">
+        <div class="exp-card-logo">
+            {% if exp.company_logo %}
+            <img src="{{ exp.company_logo.url }}" alt="{{ exp.company }}">
+            {% else %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+            {% endif %}
+        </div>
+        <div class="exp-card-body">
+            <h4 class="exp-card-title">{{ exp.title }}</h4>
+            <p class="exp-card-company">{{ exp.company }}</p>
+            <p class="exp-card-meta">
+                {{ exp.start_date|date:"M Y" }} –
+                {% if exp.is_current %}Present{% elif exp.end_date %}{{ exp.end_date|date:"M Y" }}{% endif %}
+                <span class="exp-card-dot">&middot;</span>
+                {{ exp.duration_display }}
+            </p>
+            {% if exp.location %}<p class="exp-card-location">{{ exp.location }}</p>{% endif %}
+            {% if exp.description %}<p class="exp-card-desc">{{ exp.description|truncatewords:30 }}</p>{% endif %}
+        </div>
+        <div class="exp-card-actions">
+            <a href="{% url 'profiles:experience' %}?edit={{ exp.pk }}" class="exp-action-btn exp-action-edit" title="Edit">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+            </a>
+            <form method="post" style="display:inline" onsubmit="return confirm('Delete this position?')">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="experience_id" value="{{ exp.pk }}">
+                <button type="submit" class="exp-action-btn exp-action-delete" title="Delete">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="exp-empty">
+    <div class="exp-empty-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+    </div>
+    <h3 class="exp-empty-title">No experience yet</h3>
+    <p class="exp-empty-desc">Add your first position above — your work history will appear on your public profile when the Experience toggle is enabled.</p>
+</div>
+{% endif %}
+
+<!-- ═══ TIP ═══ -->
+<div class="exp-tip">
+    <div class="exp-tip-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>
+    </div>
+    <div>
+        <strong>Pro tip:</strong> Enable the <em>Experience</em> toggle in your
+        <a href="{% url 'profiles:settings' %}">Profile Settings</a> to show your work history on your public profile.
+    </div>
+</div>
+
+<style>
+.exp-form-card{background:#fff;border:1px solid #E2E8F0;border-radius:16px;padding:28px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.exp-form-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid #F1F5F9}
+.exp-form-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#3B82F6,#2563EB);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.exp-form-icon svg{width:22px;height:22px;color:#fff}
+.exp-form-title{font-size:16px;font-weight:700;color:#1E293B;margin:0}
+.exp-form-sub{font-size:13px;color:#64748B;margin:2px 0 0}
+.exp-field-group{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.exp-field-group{grid-template-columns:1fr}}
+.exp-field{margin-bottom:16px}
+.exp-label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
+.exp-req{color:#EF4444}
+.exp-field input[type="text"],.exp-field input[type="date"],.exp-field textarea,.exp-field select{width:100%;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;color:#1E293B;background:#FAFBFC;transition:border-color .15s,box-shadow .15s;outline:none;font-family:inherit;box-sizing:border-box}
+.exp-field input:focus,.exp-field textarea:focus{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,.12);background:#fff}
+.exp-field textarea{resize:vertical;min-height:80px}
+.exp-checkbox-label{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#374151;cursor:pointer;font-weight:500}
+.exp-checkbox-label input[type="checkbox"]{width:18px;height:18px;accent-color:#3B82F6}
+.exp-errors{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#DC2626}
+.exp-form-actions{display:flex;gap:10px;margin-top:8px;padding-top:18px;border-top:1px solid #F1F5F9}
+.exp-form-actions .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:.15s;font-family:inherit}
+.exp-form-actions .btn-primary{background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff;box-shadow:0 2px 8px rgba(59,130,246,.25)}
+.exp-form-actions .btn-primary:hover{box-shadow:0 4px 12px rgba(59,130,246,.35)}
+.exp-form-actions .btn-outline{background:#fff;color:#475569;border:1.5px solid #E2E8F0;padding:10px 22px}
+.exp-form-actions .btn-outline:hover{border-color:#94A3B8}
+
+.exp-list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.exp-list-title{font-size:15px;font-weight:700;color:#1E293B;margin:0}
+.exp-list-count{font-size:12px;color:#64748B;background:#F1F5F9;padding:3px 10px;border-radius:20px;font-weight:600}
+.exp-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.exp-card{display:flex;align-items:flex-start;gap:14px;background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:18px;transition:box-shadow .15s,border-color .15s}
+.exp-card:hover{border-color:#CBD5E1;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.exp-card-logo{width:48px;height:48px;border-radius:12px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid #E2E8F0}
+.exp-card-logo img{width:100%;height:100%;object-fit:cover}
+.exp-card-logo svg{width:24px;height:24px;color:#94A3B8}
+.exp-card-body{flex:1;min-width:0}
+.exp-card-title{font-size:15px;font-weight:700;color:#1E293B;margin:0}
+.exp-card-company{font-size:13px;font-weight:600;color:#475569;margin:2px 0 0}
+.exp-card-meta{font-size:12px;color:#94A3B8;margin:4px 0 0}
+.exp-card-dot{margin:0 4px}
+.exp-card-location{font-size:12px;color:#64748B;margin:2px 0 0}
+.exp-card-desc{font-size:13px;color:#64748B;margin:6px 0 0;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.exp-card-actions{display:flex;gap:6px;flex-shrink:0}
+.exp-action-btn{width:34px;height:34px;border-radius:8px;border:1.5px solid #E2E8F0;background:#FAFBFC;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;padding:0}
+.exp-action-btn svg{width:15px;height:15px}
+.exp-action-edit{color:#3B82F6}.exp-action-edit:hover{background:#EFF6FF;border-color:#3B82F6}
+.exp-action-delete{color:#EF4444}.exp-action-delete:hover{background:#FEF2F2;border-color:#EF4444}
+
+.exp-empty{text-align:center;padding:48px 24px;background:#FAFBFC;border:1.5px dashed #E2E8F0;border-radius:16px;margin-bottom:24px}
+.exp-empty-icon{width:64px;height:64px;border-radius:16px;background:#F1F5F9;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px}
+.exp-empty-icon svg{width:32px;height:32px;color:#94A3B8}
+.exp-empty-title{font-size:16px;font-weight:700;color:#1E293B;margin:0 0 6px}
+.exp-empty-desc{font-size:13px;color:#64748B;max-width:360px;margin:0 auto;line-height:1.5}
+
+.exp-tip{display:flex;align-items:flex-start;gap:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:14px 18px;font-size:13px;color:#92400E;line-height:1.5;margin-bottom:24px}
+.exp-tip-icon{flex-shrink:0;margin-top:1px}
+.exp-tip-icon svg{width:18px;height:18px;color:#F59E0B}
+.exp-tip a{color:#D97706;font-weight:600;text-decoration:underline}
+</style>
+
+<script>
+// Toggle end date field based on "currently work here" checkbox
+(function(){
+    var cb = document.getElementById('id_is_current');
+    var endField = document.getElementById('endDateField');
+    if (!cb || !endField) return;
+    function toggle() {
+        endField.style.opacity = cb.checked ? '0.4' : '1';
+        endField.querySelector('input').disabled = cb.checked;
+    }
+    cb.addEventListener('change', toggle);
+    toggle();
+})();
+</script>
+
+{% endblock %}

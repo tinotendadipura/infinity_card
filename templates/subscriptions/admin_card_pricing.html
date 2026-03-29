@@ -1,0 +1,211 @@
+{% extends "subscriptions/admin_base.html" %}
+{% block title %}Card Pricing & Images{% endblock %}
+{% block nav_card_pricing %}active{% endblock %}
+{% block page_title %}Card Pricing &amp; Images{% endblock %}
+
+{% block extra_css %}
+<style>
+.cp-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:28px}
+.cp-stat{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:18px 20px}
+.cp-stat-label{font-size:12px;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.cp-stat-value{font-size:22px;font-weight:700;color:#0F172A}
+.cp-stat-sub{font-size:12px;color:#94A3B8;margin-top:2px}
+
+.cp-product{background:#fff;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;margin-bottom:24px;transition:box-shadow 0.15s}
+.cp-product:hover{box-shadow:0 4px 24px rgba(0,0,0,0.06)}
+.cp-product-head{display:flex;align-items:center;gap:14px;padding:20px 24px;border-bottom:1px solid #F1F5F9}
+.cp-product-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cp-product-icon svg{width:24px;height:24px}
+.cp-product-icon.plastic{background:linear-gradient(135deg,#E0F2FE,#BAE6FD);color:#0284C7}
+.cp-product-icon.plastic_gold{background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#B45309}
+.cp-product-icon.plastic_transparent{background:linear-gradient(135deg,#F1F5F9,#E2E8F0);color:#475569}
+.cp-product-icon.wood{background:linear-gradient(135deg,#FED7AA,#FDBA74);color:#9A3412}
+.cp-product-icon.metal{background:linear-gradient(135deg,#E2E8F0,#CBD5E1);color:#334155}
+.cp-product-info{flex:1;min-width:0}
+.cp-product-name{font-size:18px;font-weight:700;color:#0F172A}
+.cp-product-material{font-size:12px;color:#64748B;margin-top:2px}
+.cp-product-price{font-size:22px;font-weight:800;color:#16A34A;margin-left:auto}
+
+.cp-product-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
+@media(max-width:860px){.cp-product-body{grid-template-columns:1fr}}
+
+/* Left: Pricing */
+.cp-pricing-section{padding:20px 24px;border-right:1px solid #F1F5F9}
+@media(max-width:860px){.cp-pricing-section{border-right:none;border-bottom:1px solid #F1F5F9}}
+.cp-section-title{font-size:13px;font-weight:700;color:#0F172A;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.cp-section-title svg{width:16px;height:16px;color:#64748B}
+.cp-form-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.cp-field{flex:1;min-width:100px}
+.cp-field label{display:block;font-size:11px;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.cp-field input[type="number"]{width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;font-weight:600;color:#1E293B;transition:border-color 0.15s;box-sizing:border-box}
+.cp-field input[type="number"]:focus{outline:none;border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,0.1)}
+.cp-toggle-wrap{display:flex;align-items:center;gap:8px;padding-bottom:4px}
+.cp-toggle-wrap label{font-size:12px;font-weight:600;color:#64748B;margin:0}
+.cp-toggle{position:relative;width:40px;height:22px}
+.cp-toggle input{opacity:0;width:0;height:0}
+.cp-toggle-track{position:absolute;inset:0;background:#CBD5E1;border-radius:11px;cursor:pointer;transition:background 0.2s}
+.cp-toggle-track::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.15)}
+.cp-toggle input:checked+.cp-toggle-track{background:#16A34A}
+.cp-toggle input:checked+.cp-toggle-track::after{transform:translateX(18px)}
+.cp-save-btn{padding:8px 20px;background:#4F46E5;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s;white-space:nowrap}
+.cp-save-btn:hover{background:#4338CA}
+.cp-free-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;font-size:11px;font-weight:600;color:#16A34A;margin-top:10px}
+.cp-free-badge svg{width:14px;height:14px}
+
+/* Right: Images */
+.cp-images-section{padding:20px 24px}
+.cp-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-bottom:14px}
+.cp-gallery-item{position:relative;border-radius:10px;overflow:hidden;border:2px solid #E2E8F0;aspect-ratio:3/2;background:#F8FAFC}
+.cp-gallery-item img{width:100%;height:100%;object-fit:cover}
+.cp-gallery-item.primary{border-color:#4F46E5}
+.cp-gallery-badge{position:absolute;top:4px;left:4px;background:#4F46E5;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:0.3px}
+.cp-gallery-actions{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));padding:4px;display:flex;gap:3px;justify-content:center;opacity:0;transition:opacity 0.15s}
+.cp-gallery-item:hover .cp-gallery-actions{opacity:1}
+.cp-gallery-action{background:rgba(255,255,255,0.9);border:none;border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;cursor:pointer;color:#334155;transition:background 0.1s}
+.cp-gallery-action:hover{background:#fff}
+.cp-gallery-action.delete{color:#DC2626}
+
+.cp-upload-zone{border:2px dashed #E2E8F0;border-radius:10px;padding:16px;text-align:center;transition:border-color 0.15s,background 0.15s}
+.cp-upload-zone:hover{border-color:#4F46E5;background:#F8FAFC}
+.cp-upload-zone svg{width:28px;height:28px;color:#94A3B8;margin-bottom:6px}
+.cp-upload-zone p{font-size:12px;color:#64748B;margin:0 0 8px}
+.cp-upload-row{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.cp-upload-file{font-size:12px}
+.cp-upload-caption{padding:5px 8px;border:1px solid #E2E8F0;border-radius:6px;font-size:12px;width:120px}
+.cp-upload-caption:focus{outline:none;border-color:#4F46E5}
+.cp-upload-btn{padding:5px 14px;background:#0F172A;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer}
+.cp-upload-btn:hover{background:#1E293B}
+.cp-upload-primary{display:flex;align-items:center;gap:4px;font-size:11px;color:#64748B;margin-top:6px;justify-content:center}
+.cp-upload-primary input{margin:0}
+.cp-no-images{font-size:12px;color:#94A3B8;text-align:center;padding:12px;font-style:italic}
+</style>
+{% endblock %}
+
+{% block admin_content %}
+
+<!-- Summary Stats -->
+<div class="cp-summary">
+    <div class="cp-stat">
+        <div class="cp-stat-label">Total Products</div>
+        <div class="cp-stat-value">{{ products|length }}</div>
+        <div class="cp-stat-sub">NFC card types</div>
+    </div>
+    <div class="cp-stat">
+        <div class="cp-stat-label">Available</div>
+        <div class="cp-stat-value">{{ products|dictsort:"is_available"|length }}</div>
+        <div class="cp-stat-sub">currently for sale</div>
+    </div>
+    <div class="cp-stat">
+        <div class="cp-stat-label">Price Range</div>
+        <div class="cp-stat-value" style="font-size:18px">
+            {% for p in products %}{% if forloop.first %}${{ p.price }}{% endif %}{% endfor %}
+            &ndash;
+            {% for p in products %}{% if forloop.last %}${{ p.price }}{% endif %}{% endfor %}
+        </div>
+        <div class="cp-stat-sub">standard pricing</div>
+    </div>
+</div>
+
+<!-- Card Products -->
+{% for product in products %}
+<div class="cp-product">
+    <div class="cp-product-head">
+        <div class="cp-product-icon {{ product.material }}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+        </div>
+        <div class="cp-product-info">
+            <div class="cp-product-name">{{ product.name }}</div>
+            <div class="cp-product-material">{{ product.get_material_display }} &middot; {{ product.gallery_images.count }} image{{ product.gallery_images.count|pluralize }} &middot; {% if product.is_available %}<span style="color:#16A34A">Available</span>{% else %}<span style="color:#DC2626">Unavailable</span>{% endif %}</div>
+        </div>
+        <div class="cp-product-price">${{ product.price }}</div>
+    </div>
+
+    <div class="cp-product-body">
+        <!-- Left: Pricing & Settings -->
+        <div class="cp-pricing-section">
+            <div class="cp-section-title">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Pricing &amp; Settings
+            </div>
+            <form method="post" action="{% url 'subscriptions:admin_update_card_price' product.pk %}">
+                {% csrf_token %}
+                <div class="cp-form-row">
+                    <div class="cp-field">
+                        <label>Price Per Card ($)</label>
+                        <input type="number" name="price" value="{{ product.price }}" min="0" step="0.01" required>
+                    </div>
+                    <div class="cp-toggle-wrap">
+                        <div class="cp-toggle">
+                            <input type="checkbox" name="is_available" id="avail_{{ product.pk }}" {% if product.is_available %}checked{% endif %}>
+                            <span class="cp-toggle-track"></span>
+                        </div>
+                        <label for="avail_{{ product.pk }}">Available</label>
+                    </div>
+                    <button type="submit" class="cp-save-btn">Save</button>
+                </div>
+            </form>
+            <div class="cp-free-badge">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Custom designs included free
+            </div>
+        </div>
+
+        <!-- Right: Image Gallery -->
+        <div class="cp-images-section">
+            <div class="cp-section-title">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.068 2.068M12 6.75h.008v.008H12V6.75z"/></svg>
+                Product Images ({{ product.gallery_images.count }})
+            </div>
+
+            {% if product.gallery_images.all %}
+            <div class="cp-gallery">
+                {% for img in product.gallery_images.all %}
+                <div class="cp-gallery-item {% if img.is_primary %}primary{% endif %}">
+                    <img src="{{ img.image.url }}" alt="{{ img.caption|default:product.name }}">
+                    {% if img.is_primary %}<span class="cp-gallery-badge">Primary</span>{% endif %}
+                    <div class="cp-gallery-actions">
+                        {% if not img.is_primary %}
+                        <form method="post" action="{% url 'subscriptions:admin_set_primary_card_image' img.pk %}" style="display:inline">
+                            {% csrf_token %}
+                            <button type="submit" class="cp-gallery-action" title="Set as primary">&#9733;</button>
+                        </form>
+                        {% endif %}
+                        <form method="post" action="{% url 'subscriptions:admin_delete_card_image' img.pk %}" style="display:inline" onsubmit="return confirm('Delete this image?')">
+                            {% csrf_token %}
+                            <button type="submit" class="cp-gallery-action delete" title="Delete">&times;</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="cp-no-images">No images uploaded yet</div>
+            {% endif %}
+
+            <!-- Upload Form -->
+            <form method="post" action="{% url 'subscriptions:admin_upload_card_image' product.pk %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="cp-upload-zone">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                    <p>Upload a product photo</p>
+                    <div class="cp-upload-row">
+                        <input type="file" name="image" accept="image/*" required class="cp-upload-file">
+                        <input type="text" name="caption" placeholder="Caption (optional)" class="cp-upload-caption">
+                        <button type="submit" class="cp-upload-btn">Upload</button>
+                    </div>
+                    <label class="cp-upload-primary">
+                        <input type="checkbox" name="is_primary"> Set as primary image
+                    </label>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="sa-card"><div class="sa-empty" style="padding:60px 20px">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+    <div>No card products found. Run <code>python manage.py seed_card_products</code> to create them.</div>
+</div></div>
+{% endfor %}
+
+{% endblock %}

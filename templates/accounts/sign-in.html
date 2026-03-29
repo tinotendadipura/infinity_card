@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - InfinityCard</title>
+  <link rel="stylesheet" href="{% static './home/css/icofont.min.css' %}">
+  <link rel="stylesheet" href="{% static './home/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static './home/css/aos.css' %}">
+  <link rel="stylesheet" href="{% static './home/css/style.css' %}">
+  <link rel="stylesheet" href="{% static './home/css/responsive.css' %}">
+  <link rel="shortcut icon" href="{% static './home/images/favicon.png' %}" type="image/x-icon">
+  <style>
+  .form_side { max-width: 520px; }
+  .section_title { margin-bottom: 20px; }
+  .section_title h2 { font-size: 1.6rem; margin-bottom: 4px; }
+  .section_title p { font-size: 13px; opacity: .7; line-height: 1.5; margin: 0; }
+
+  .si-google { display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; padding:11px 16px; background:#fff; border:1.5px solid #E2E8F0;
+    border-radius:10px; font-size:14px; font-weight:600; color:#1E293B;
+    text-decoration:none; transition:all .15s; }
+  .si-google:hover { background:#F8FAFC; border-color:#CBD5E1;
+    box-shadow:0 2px 8px rgba(0,0,0,.05); text-decoration:none; color:#1E293B; }
+  .si-google svg { width:18px; height:18px; flex-shrink:0; }
+
+  .si-divider { display:flex; align-items:center; gap:12px; margin:16px 0;
+    color:#94A3B8; font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.6px; }
+  .si-divider::before,.si-divider::after { content:''; flex:1; height:1px; background:#E2E8F0; }
+
+  .si-alert { padding:10px 14px; border-radius:8px; background:rgba(239,68,68,.06);
+    border:1px solid rgba(239,68,68,.15); margin-bottom:14px; font-size:13px;
+    color:#EF4444; line-height:1.5; }
+
+  .si-field { margin-bottom:16px; }
+  .si-field label { display:block; font-size:12px; font-weight:600; color:#334155;
+    margin-bottom:5px; letter-spacing:.01em; }
+  .si-field input { width:100%; padding:11px 14px; font-size:14px; color:#0F172A;
+    background:#fff; border:1.5px solid #E2E8F0; border-radius:8px;
+    transition:border-color .15s, box-shadow .15s; outline:none; }
+  .si-field input::placeholder { color:#94A3B8; }
+  .si-field input:focus { border-color:#6C63FF; box-shadow:0 0 0 3px rgba(108,99,255,.1); }
+  .si-field.has-error input { border-color:#EF4444; background:rgba(239,68,68,.02); }
+  .si-error { font-size:11px; color:#EF4444; margin-top:3px; font-weight:500; }
+
+  .si-pw { position:relative; }
+  .si-pw input { padding-right:40px; }
+  .si-pw-btn { position:absolute; right:1px; top:1px; bottom:1px; width:38px;
+    display:flex; align-items:center; justify-content:center; background:transparent;
+    border:none; cursor:pointer; color:#94A3B8; border-radius:0 8px 8px 0; transition:color .15s; }
+  .si-pw-btn:hover { color:#475569; }
+  .si-pw-btn svg { width:16px; height:16px; }
+
+  .si-options { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .si-remember { display:flex; align-items:center; gap:6px; font-size:13px; color:#475569; cursor:pointer; }
+  .si-remember input { width:15px; height:15px; accent-color:var(--primery); cursor:pointer; }
+  .si-forgot { font-size:13px; color:var(--primery); font-weight:600; text-decoration:none; }
+  .si-forgot:hover { text-decoration:underline; color:var(--primery); }
+
+  .si-submit { width:100%; padding:11px 20px; font-size:14px; font-weight:700; color:#fff;
+    background:var(--primery); border:none; border-radius:8px; cursor:pointer;
+    transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .si-submit:hover { opacity:.9; transform:translateY(-1px); }
+  .si-submit:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+  .si-footer { margin-top:16px; text-align:center; font-size:13px; color:#64748B; }
+  .si-footer a { color:var(--primery); font-weight:600; text-decoration:none; }
+  .si-footer a:hover { text-decoration:underline; }
+
+  @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+
+<body>
+  <div class="page_wrapper">
+    <div id="preloader"><div id="loader"></div></div>
+
+    <div class="full_bg">
+      <section class="signup_section">
+        <div class="container">
+
+          <div class="top_part">
+            <a href="/" class="back_btn"><i class="icofont-arrow-left"></i> Back to home</a>
+            <a class="navbar-brand" href="/">
+              <img src="{% static './images/logo_colour.png' %}" alt="InfinityCard">
+            </a>
+          </div>
+
+          <div class="form_block" style="display:flex;min-height:600px;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+            <!-- Left Side - Login Form -->
+            <div class="form_side" style="flex:0 0 50%;padding:3rem;display:flex;flex-direction:column;justify-content:center;background:#fff">
+              <div class="section_title">
+                <span class="title_badge">Welcome Back</span>
+                <h2><span>Sign in</span> to your account</h2>
+                <p>Access your dashboard, profile, and cards.</p>
+              </div>
+
+              <!-- Google SSO -->
+              <span class="si-google disabled" style="opacity:0.4;cursor:not-allowed;pointer-events:none">
+                <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Continue with Google
+              </span>
+
+              <div class="si-divider">or</div>
+
+              <!-- Form errors -->
+              {% if form.non_field_errors %}
+              <div class="si-alert">
+                {% for error in form.non_field_errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+              </div>
+              {% endif %}
+
+              <form method="post" id="loginForm" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+
+                <!-- Email / Username -->
+                <div class="si-field {% if form.username.errors %}has-error{% endif %}">
+                  <label for="id_username">Email</label>
+                  <input type="email" name="username" id="id_username"
+                         placeholder="you@example.com" required autofocus
+                         value="{{ form.username.value|default:'' }}">
+                  {% for error in form.username.errors %}<div class="si-error">{{ error }}</div>{% endfor %}
+                </div>
+
+                <!-- Password -->
+                <div class="si-field {% if form.password.errors %}has-error{% endif %}">
+                  <label for="id_password">Password</label>
+                  <div class="si-pw">
+                    <input type="password" name="password" id="id_password"
+                           placeholder="Enter your password" required autocomplete="current-password">
+                    <button type="button" class="si-pw-btn" aria-label="Show password">
+                      <svg class="eye-on" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                      <svg class="eye-off" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                    </button>
+                  </div>
+                  {% for error in form.password.errors %}<div class="si-error">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="si-options">
+                  <label class="si-remember">
+                    <input type="checkbox" name="remember" value="1"> Remember me
+                  </label>
+                  <a href="{% url 'account_reset_password' %}" class="si-forgot">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="si-submit" id="submitBtn">Sign In</button>
+              </form>
+
+              <div class="si-footer">
+                Don't have an account? <a href="{% url 'accounts:signup' %}">Sign up</a>
+              </div>
+            </div>
+
+            <!-- Right Side - Image -->
+            <div class="side_screen" style="flex:0 0 50%;position:relative;overflow:hidden;background:#f8f9fa">
+              <img src="{% static './home/images/login_image.png' %}" alt="InfinityCard Login" 
+                   style="width:100%;height:100%;object-fit:cover;object-position:center">
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="{% static './home/js/jquery.js' %}"></script>
+  <script src="{% static './home/js/bootstrap.min.js' %}"></script>
+  <script src="{% static './home/js/aos.js' %}"></script>
+  <script src="{% static './home/js/main.js' %}"></script>
+  <script>
+  (function(){
+    // Password toggle
+    var btn=document.querySelector('.si-pw-btn');
+    if(btn){
+      btn.addEventListener('click',function(){
+        var inp=document.getElementById('id_password'),show=inp.type==='password';
+        inp.type=show?'text':'password';
+        this.querySelector('.eye-on').style.display=show?'none':'block';
+        this.querySelector('.eye-off').style.display=show?'block':'none';
+      });
+    }
+    // Double-submit guard
+    var form=document.getElementById('loginForm');
+    if(form)form.addEventListener('submit',function(){
+      var btn=document.getElementById('submitBtn');
+      if(btn.disabled)return false;
+      btn.disabled=true;
+      btn.innerHTML='<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .5s linear infinite"></span> Signing in...';
+    });
+  })();
+  </script>
+</body>
+</html>

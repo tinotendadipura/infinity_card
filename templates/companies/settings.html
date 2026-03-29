@@ -1,0 +1,514 @@
+{% extends "companies/company_base.html" %}
+{% load static %}
+{% block title %}Settings — {{ company.name }}{% endblock %}
+{% block nav_settings %}active{% endblock %}
+{% block page_title %}Company Settings{% endblock %}
+
+{% block company_head %}
+<style>
+/* ── Settings Layout ── */
+.cs-wrap { max-width: 680px; }
+.cs-section { margin-bottom: 8px; }
+.cs-section-label {
+    font-size: 11px; font-weight: 700; color: #94A3B8;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 0 4px; margin-bottom: 10px;
+}
+
+/* ── Profile Picture ── */
+.cs-avatar-card {
+    display: flex; align-items: center; gap: 20px;
+    padding: 24px 20px;
+}
+.cs-avatar-wrap {
+    position: relative;
+    width: 96px; height: 96px;
+    flex-shrink: 0;
+}
+.cs-avatar {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    object-fit: cover;
+}
+.cs-avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.cs-avatar-initial {
+    font-size: 32px; font-weight: 800;
+    color: #6366F1;
+    user-select: none;
+}
+.cs-avatar-btn {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #E2E8F0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    transition: all 0.15s;
+    padding: 0;
+}
+.cs-avatar-btn:hover {
+    background: #F8FAFC;
+    border-color: #6366F1;
+    box-shadow: 0 2px 12px rgba(99,102,241,0.18);
+}
+.cs-avatar-btn svg { width: 15px; height: 15px; color: #64748B; }
+.cs-avatar-btn:hover svg { color: #6366F1; }
+.cs-avatar-info { flex: 1; min-width: 0; }
+.cs-avatar-title {
+    font-size: 14px; font-weight: 700; color: #1E293B;
+    margin-bottom: 2px;
+}
+.cs-avatar-hint {
+    font-size: 12px; color: #94A3B8; line-height: 1.4;
+    margin-bottom: 8px;
+}
+.cs-avatar-file { display: none; }
+.cs-avatar-remove {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 600;
+    background: none; border: none;
+    color: #94A3B8; cursor: pointer;
+    font-family: inherit; transition: color 0.15s;
+}
+.cs-avatar-remove:hover { color: #EF4444; }
+
+/* ── Logo Upload ── */
+.cs-logo-area {
+    display: flex; align-items: center; gap: 20px;
+    padding: 20px;
+}
+.cs-logo-preview {
+    width: 80px; height: 80px;
+    border-radius: 16px;
+    background: #F8FAFC;
+    border: 2px dashed #E2E8F0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: border-color 0.2s;
+    position: relative;
+}
+.cs-logo-preview.has-logo {
+    border: 2px solid #E2E8F0;
+    border-style: solid;
+}
+.cs-logo-preview img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    display: block;
+    padding: 6px;
+}
+.cs-logo-preview svg {
+    width: 28px; height: 28px;
+    color: #CBD5E1;
+}
+.cs-logo-info { flex: 1; min-width: 0; }
+.cs-logo-title {
+    font-size: 14px; font-weight: 700; color: #1E293B;
+    margin-bottom: 2px;
+}
+.cs-logo-hint {
+    font-size: 12px; color: #94A3B8; line-height: 1.4;
+    margin-bottom: 10px;
+}
+.cs-logo-actions { display: flex; gap: 8px; align-items: center; }
+.cs-logo-upload-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 7px 14px; border-radius: 8px;
+    font-size: 12px; font-weight: 700;
+    background: #F8FAFC; border: 1.5px solid #E2E8F0;
+    color: #475569; cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+}
+.cs-logo-upload-btn:hover {
+    background: #F1F5F9; border-color: #CBD5E1;
+}
+.cs-logo-upload-btn svg { width: 14px; height: 14px; }
+.cs-logo-remove-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 7px 12px; border-radius: 8px;
+    font-size: 12px; font-weight: 600;
+    background: none; border: none;
+    color: #94A3B8; cursor: pointer;
+    font-family: inherit;
+    transition: color 0.15s;
+}
+.cs-logo-remove-btn:hover { color: #EF4444; }
+.cs-logo-file { display: none; }
+
+/* ── Form Grid ── */
+.cs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.cs-grid .cp-form-group { padding: 0 20px; }
+.cs-full { grid-column: 1 / -1; }
+
+/* ── Divider ── */
+.cs-divider {
+    height: 1px;
+    background: #F1F5F9;
+    margin: 4px 0;
+}
+
+/* ── Info Grid ── */
+.cs-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 20px;
+}
+.cs-info-item { min-width: 0; }
+.cs-info-label {
+    font-size: 11px; font-weight: 700; color: #94A3B8;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 4px;
+}
+.cs-info-val {
+    font-size: 13px; font-weight: 600; color: #1E293B;
+    word-break: break-word;
+}
+.cs-info-val code {
+    background: #F1F5F9; padding: 2px 8px; border-radius: 6px;
+    font-size: 12px; font-family: 'SF Mono', Menlo, monospace;
+    color: #475569;
+}
+
+/* ── Save Bar ── */
+.cs-save-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 16px 20px;
+    border-top: 1px solid #F1F5F9;
+    background: #FAFBFE;
+    border-radius: 0 0 16px 16px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+    .cs-avatar-card { flex-direction: column; text-align: center; }
+    .cs-logo-area { flex-direction: column; text-align: center; align-items: center; }
+    .cs-logo-actions { justify-content: center; }
+    .cs-grid { grid-template-columns: 1fr; }
+    .cs-info-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block company_content %}
+
+<form method="post" enctype="multipart/form-data" id="settingsForm">
+{% csrf_token %}
+<div class="cs-wrap">
+
+    <!-- ═══ PROFILE PICTURE ═══ -->
+    <div class="cs-section">
+        <div class="cs-section-label">Profile Picture</div>
+        <div class="cp-card">
+            <div class="cs-avatar-card">
+                <div class="cs-avatar-wrap">
+                    <div class="cs-avatar" id="avatarCircle">
+                        {% if company.profile_picture %}
+                        <img src="{{ company.profile_picture.url }}" alt="{{ company.name }}" id="avatarImg">
+                        {% else %}
+                        <span class="cs-avatar-initial" id="avatarInitial">{{ company.name|first|upper }}</span>
+                        {% endif %}
+                    </div>
+                    <label class="cs-avatar-btn" for="id_profile_picture" title="Change profile picture">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
+                    </label>
+                </div>
+                <div class="cs-avatar-info">
+                    <div class="cs-avatar-title">{{ company.name }}</div>
+                    <div class="cs-avatar-hint">Click the camera icon to upload a profile picture. Square image recommended.</div>
+                    {{ form.profile_picture }}
+                    {% if company.profile_picture %}
+                    <button type="button" class="cs-avatar-remove" id="avatarRemoveBtn">Remove picture</button>
+                    {% endif %}
+                    {% if form.profile_picture.errors %}
+                    {% for error in form.profile_picture.errors %}
+                    <div class="cp-form-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ BRANDING ═══ -->
+    <div class="cs-section">
+        <div class="cs-section-label">Branding</div>
+        <div class="cp-card">
+            <!-- Logo Upload -->
+            <div class="cs-logo-area">
+                <div class="cs-logo-preview {% if company.logo %}has-logo{% endif %}" id="logoPreview">
+                    {% if company.logo %}
+                    <img src="{{ company.logo.url }}" alt="{{ company.name }}" id="logoImg">
+                    {% else %}
+                    <svg id="logoPlaceholder" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21zM10.5 8.25a1.125 1.125 0 11-2.25 0 1.125 1.125 0 012.25 0z"/></svg>
+                    {% endif %}
+                </div>
+                <div class="cs-logo-info">
+                    <div class="cs-logo-title">Company Logo</div>
+                    <div class="cs-logo-hint">Square image recommended. PNG or JPG, max 2 MB.</div>
+                    <div class="cs-logo-actions">
+                        <label class="cs-logo-upload-btn" for="id_logo">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                            Upload Logo
+                        </label>
+                        {{ form.logo }}
+                        {% if company.logo %}
+                        <button type="button" class="cs-logo-remove-btn" id="logoRemoveBtn">Remove</button>
+                        {% endif %}
+                    </div>
+                    {% if form.logo.errors %}
+                    {% for error in form.logo.errors %}
+                    <div class="cp-form-error" style="margin-top:6px">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="cs-divider"></div>
+
+            <!-- Company Name -->
+            <div style="padding:16px 20px 20px">
+                <div class="cp-form-group" style="margin-bottom:0">
+                    <label for="{{ form.name.id_for_label }}">Company Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    {% for error in form.name.errors %}
+                    <div class="cp-form-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ CONTACT INFORMATION ═══ -->
+    <div class="cs-section">
+        <div class="cs-section-label">Contact Information</div>
+        <div class="cp-card">
+            <div class="cs-grid" style="padding-top:20px;padding-bottom:20px">
+                <div class="cp-form-group">
+                    <label for="{{ form.email.id_for_label }}">Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    {% for error in form.email.errors %}
+                    <div class="cp-form-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="cp-form-group">
+                    <label for="{{ form.phone.id_for_label }}">Phone Number</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                    {% for error in form.phone.errors %}
+                    <div class="cp-form-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="cp-form-group">
+                    <label for="{{ form.website.id_for_label }}">Website</label>
+                    {{ form.website }}
+                    {% if form.website.errors %}
+                    {% for error in form.website.errors %}
+                    <div class="cp-form-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="cp-form-group">
+                    <label for="{{ form.industry.id_for_label }}">Industry</label>
+                    {{ form.industry }}
+                    {% if form.industry.errors %}
+                    {% for error in form.industry.errors %}
+                    <div class="cp-form-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="cp-form-group cs-full">
+                    <label for="{{ form.address.id_for_label }}">Address</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                    {% for error in form.address.errors %}
+                    <div class="cp-form-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SAVE ═══ -->
+    <div class="cp-card">
+        <div class="cs-save-bar">
+            <button type="submit" class="cp-btn cp-btn--primary">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Save Changes
+            </button>
+            <a href="{% url 'companies:dashboard' %}" class="cp-btn cp-btn--secondary">Cancel</a>
+        </div>
+    </div>
+
+    <!-- ═══ COMPANY INFO ═══ -->
+    <div class="cs-section" style="margin-top:8px">
+        <div class="cs-section-label">Account Details</div>
+        <div class="cp-card">
+            <div class="cs-info-grid">
+                <div class="cs-info-item">
+                    <div class="cs-info-label">URL Slug</div>
+                    <div class="cs-info-val"><code>{{ company.slug }}</code></div>
+                </div>
+                <div class="cs-info-item">
+                    <div class="cs-info-label">Created By</div>
+                    <div class="cs-info-val">{{ company.created_by.email|default:"—" }}</div>
+                </div>
+                <div class="cs-info-item">
+                    <div class="cs-info-label">Created</div>
+                    <div class="cs-info-val">{{ company.created_at|date:"M d, Y" }}</div>
+                </div>
+                <div class="cs-info-item">
+                    <div class="cs-info-label">Team Size</div>
+                    <div class="cs-info-val">{{ company.member_count }} member{{ company.member_count|pluralize }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</form>
+
+<script>
+(function(){
+    /* ── Profile Picture ── */
+    var ppInput = document.getElementById('id_profile_picture');
+    var avatarCircle = document.getElementById('avatarCircle');
+    var avatarRemoveBtn = document.getElementById('avatarRemoveBtn');
+    if (ppInput) {
+        /* Hide Django ClearableFileInput artifacts */
+        var ppWrapper = ppInput.parentNode;
+        var ppNodes = ppWrapper.childNodes;
+        for (var i = 0; i < ppNodes.length; i++) {
+            var n = ppNodes[i];
+            if (n === ppInput) continue;
+            if (n.nodeType === 1) n.style.display = 'none';
+            else if (n.nodeType === 3) n.textContent = '';
+        }
+        ppInput.classList.add('cs-avatar-file');
+
+        /* Live preview */
+        ppInput.addEventListener('change', function(){
+            if (ppInput.files && ppInput.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e){
+                    var existing = avatarCircle.querySelector('img');
+                    var initial = avatarCircle.querySelector('.cs-avatar-initial');
+                    if (initial) initial.style.display = 'none';
+                    if (existing) {
+                        existing.src = e.target.result;
+                    } else {
+                        var img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Profile picture';
+                        avatarCircle.appendChild(img);
+                    }
+                };
+                reader.readAsDataURL(ppInput.files[0]);
+            }
+        });
+
+        /* Remove button */
+        var ppClearCheck = document.getElementById('profile_picture-clear_id');
+        if (avatarRemoveBtn) {
+            avatarRemoveBtn.addEventListener('click', function(){
+                if (ppClearCheck) ppClearCheck.checked = true;
+                var img = avatarCircle.querySelector('img');
+                if (img) img.remove();
+                var initial = avatarCircle.querySelector('.cs-avatar-initial');
+                if (initial) initial.style.display = '';
+                else {
+                    var span = document.createElement('span');
+                    span.className = 'cs-avatar-initial';
+                    span.id = 'avatarInitial';
+                    span.textContent = '{{ company.name|first|upper }}';
+                    avatarCircle.appendChild(span);
+                }
+                ppInput.value = '';
+                avatarRemoveBtn.style.display = 'none';
+            });
+        }
+    }
+
+    /* ── Logo ── */
+    var fileInput = document.getElementById('id_logo');
+    var preview = document.getElementById('logoPreview');
+    var removeBtn = document.getElementById('logoRemoveBtn');
+    if (!fileInput) return;
+
+    /* Hide all Django ClearableFileInput artifacts (link, checkbox, labels, text nodes) */
+    var wrapper = fileInput.parentNode;
+    var nodes = wrapper.childNodes;
+    for (var i = 0; i < nodes.length; i++) {
+        var n = nodes[i];
+        if (n === fileInput) continue;
+        if (n.nodeType === 1) n.style.display = 'none';       /* elements */
+        else if (n.nodeType === 3) n.textContent = '';          /* text nodes like "Currently:", "Change:", <br> */
+    }
+
+    /* Style the file input to be hidden — triggered by the label */
+    fileInput.classList.add('cs-logo-file');
+
+    /* Live preview on file select */
+    fileInput.addEventListener('change', function(){
+        if (fileInput.files && fileInput.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e){
+                preview.classList.add('has-logo');
+                var existing = preview.querySelector('img');
+                var placeholder = preview.querySelector('svg');
+                if (placeholder) placeholder.style.display = 'none';
+                if (existing) {
+                    existing.src = e.target.result;
+                } else {
+                    var img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = 'Logo preview';
+                    preview.appendChild(img);
+                }
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+    });
+
+    /* Remove button — triggers Django's clear checkbox */
+    var clearCheck = document.getElementById('logo-clear_id');
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function(){
+            if (clearCheck) clearCheck.checked = true;
+            preview.classList.remove('has-logo');
+            var img = preview.querySelector('img');
+            if (img) img.remove();
+            var ph = preview.querySelector('svg');
+            if (ph) ph.style.display = '';
+            else {
+                preview.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21zM10.5 8.25a1.125 1.125 0 11-2.25 0 1.125 1.125 0 012.25 0z"/></svg>';
+            }
+            fileInput.value = '';
+            removeBtn.style.display = 'none';
+        });
+    }
+})();
+</script>
+
+{% endblock %}

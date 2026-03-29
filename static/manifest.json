@@ -1,0 +1,22 @@
+{
+    "name": "InfinityCard",
+    "short_name": "InfinityCard",
+    "description": "One card. One tap. Infinite identity.",
+    "start_url": "/dashboard/",
+    "display": "standalone",
+    "background_color": "#FFFFFF",
+    "theme_color": "#2EC4B6",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/static/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

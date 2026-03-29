@@ -1,0 +1,98 @@
+{% extends "pages/home/base.html" %}
+
+{% block title %}FAQ | InfinityCard{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Frequently asked <span class="highlight">questions</span></h2>
+            <p>Everything you need to know about InfinityCard.</p>
+        </div>
+
+    <div class="faq-list">
+        <details class="faq-item" open>
+            <summary class="faq-question">What is InfinityCard?</summary>
+            <div class="faq-answer">
+                <p>InfinityCard is an NFC-powered digital identity platform. You receive a physical NFC card that, when tapped on any smartphone, instantly opens your personalized profile page — no app required.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-question">How does the NFC card work?</summary>
+            <div class="faq-answer">
+                <p>Your NFC card contains a unique chip linked to your profile. When someone taps their phone on it, the phone's browser opens your profile URL automatically. Works with most modern smartphones.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-question">Do people need an app to view my profile?</summary>
+            <div class="faq-answer">
+                <p>No. Your profile is a regular web page. It opens directly in the phone's browser — no downloads, no QR scanning, no friction.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-question">What profile categories are available?</summary>
+            <div class="faq-answer">
+                <p>We offer 7 industry-specific templates: Business/Entrepreneur, Freelancer/Consultant, Real Estate Agent, Restaurant/Food Business, Creative (Photo/Video), Events (Catering/Decor), and General Personal. Each has custom fields and layouts for your industry.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-question">Can I change my profile after creating it?</summary>
+            <div class="faq-answer">
+                <p>Absolutely. Your profile is fully editable from your dashboard at any time. Update your info, photos, theme, social links — your NFC card always points to the latest version.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-question">What subscription plans do you offer?</summary>
+            <div class="faq-answer">
+                <p>We offer three plans: <strong>Starter</strong> ($3/mo), <strong>Business</strong> ($5/mo), and <strong>Pro</strong> ($10/mo). Every new account starts with a free 30-day trial. <a href="{% url 'subscriptions:plans' %}">View plans</a>.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-question">What happens when my subscription expires?</summary>
+            <div class="faq-answer">
+                <p>Your profile page becomes temporarily unavailable to visitors. Your data is preserved — simply renew your subscription from the dashboard to reactivate everything.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-question">Can I customize the look of my profile?</summary>
+            <div class="faq-answer">
+                <p>Yes. You can choose from several preset themes, each with its own color scheme. Pro plan users get access to all themes including dark mode options.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-question">How do I get an NFC card?</summary>
+            <div class="faq-answer">
+                <p>After signing up and setting up your profile, you can order an NFC card from your dashboard. Cards are shipped with your unique profile link pre-programmed.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-question">Is my data secure?</summary>
+            <div class="faq-answer">
+                <p>Yes. We use HTTPS encryption, CSRF protection, secure password hashing, and follow Django security best practices. Your data is stored in a secure PostgreSQL database.</p>
+            </div>
+        </details>
+    </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Still have questions?</h2>
+            <p>We're happy to help. Reach out anytime.</p>
+            <div class="page-actions">
+                <a href="{% url 'core:contact' %}" class="btn btn-white btn-lg">Contact us</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

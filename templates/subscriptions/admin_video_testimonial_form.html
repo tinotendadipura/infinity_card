@@ -1,0 +1,242 @@
+{% extends "subscriptions/admin_base.html" %}
+{% block title %}{% if mode == 'edit' %}Edit{% else %}Add{% endif %} Testimonial{% endblock %}
+{% block nav_video_testimonials %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+.vtf-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.vtf-header h1{font-size:20px;font-weight:800;color:#0F172A;margin:0;letter-spacing:-.3px}
+.vtf-header p{font-size:13px;color:#64748B;margin:4px 0 0}
+.vtf-back{display:inline-flex;align-items:center;gap:5px;color:#536471;font-size:13px;font-weight:600;text-decoration:none;padding:8px 14px;border-radius:20px;border:1px solid #EFF3F4;transition:.15s}
+.vtf-back:hover{background:#F7F9F9;color:#0F172A;text-decoration:none}
+.vtf-back svg{width:15px;height:15px}
+
+.vtf-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+
+.vtf-card{background:#fff;border:1px solid #EFF3F4;border-radius:12px;padding:24px;margin-bottom:16px}
+.vtf-card:last-child{margin-bottom:0}
+.vtf-card-title{font-size:14px;font-weight:700;color:#0F172A;margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid #EFF3F4;display:flex;align-items:center;gap:8px}
+.vtf-card-title svg{width:16px;height:16px;color:#536471}
+
+.vtf-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vtf-field{margin-bottom:14px}
+.vtf-field:last-child{margin-bottom:0}
+.vtf-label{display:block;font-size:12px;font-weight:600;color:#536471;margin-bottom:6px}
+.vtf-input{width:100%;padding:10px 12px;background:#fff;border:1.5px solid #EFF3F4;border-radius:8px;color:#0F172A;font-size:14px;font-family:inherit;transition:.15s}
+.vtf-input:focus{outline:none;border-color:#1D9BF0;box-shadow:0 0 0 3px rgba(29,155,240,.1)}
+.vtf-input::placeholder{color:#A0AEC0}
+textarea.vtf-input{resize:vertical;line-height:1.5}
+select.vtf-input{cursor:pointer}
+
+.vtf-file-area{border:2px dashed #EFF3F4;border-radius:10px;padding:20px;text-align:center;transition:.15s;cursor:pointer;position:relative}
+.vtf-file-area:hover{border-color:#1D9BF0;background:#F7FBFF}
+.vtf-file-area input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.vtf-file-area svg{width:28px;height:28px;color:#CFD9DE;margin:0 auto 8px;display:block}
+.vtf-file-area p{font-size:13px;color:#536471;margin:0}
+.vtf-file-area .vtf-file-hint{font-size:11px;color:#8899A6;margin-top:4px}
+
+.vtf-current{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#F7F9F9;border-radius:8px;margin-bottom:12px;border:1px solid #EFF3F4}
+.vtf-current img{width:56px;height:72px;object-fit:cover;border-radius:6px}
+.vtf-current-info{font-size:12px;color:#536471}
+.vtf-current-check{width:16px;height:16px;color:#00BA7C;flex-shrink:0}
+
+.vtf-source-tabs{display:flex;gap:8px;margin-bottom:14px}
+.vtf-source-tab{display:flex;align-items:center;gap:6px;padding:9px 16px;border:1.5px solid #EFF3F4;border-radius:20px;font-size:13px;font-weight:600;color:#536471;cursor:pointer;transition:.15s;background:#fff}
+.vtf-source-tab:hover{border-color:#CFD9DE}
+.vtf-source-tab input{display:none}
+.vtf-source-tab.active{border-color:#1D9BF0;color:#1D9BF0;background:#F0F9FF}
+.vtf-source-tab svg{width:15px;height:15px}
+
+.vtf-sidebar-card{background:#fff;border:1px solid #EFF3F4;border-radius:12px;padding:24px;position:sticky;top:80px}
+
+.vtf-toggle{display:flex;align-items:center;gap:12px;padding:12px 0;cursor:pointer}
+.vtf-toggle+.vtf-toggle{border-top:1px solid #EFF3F4}
+.vtf-toggle-switch{width:40px;height:22px;border-radius:11px;background:#CFD9DE;position:relative;transition:.2s;flex-shrink:0}
+.vtf-toggle-switch::after{content:'';width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.vtf-toggle input{display:none}
+.vtf-toggle input:checked+.vtf-toggle-switch{background:#1D9BF0}
+.vtf-toggle input:checked+.vtf-toggle-switch::after{left:20px}
+.vtf-toggle-text{flex:1}
+.vtf-toggle-title{font-size:13px;font-weight:600;color:#0F172A}
+.vtf-toggle-desc{font-size:11px;color:#8899A6;margin-top:1px}
+
+.vtf-submit{width:100%;padding:11px;background:#1D9BF0;color:#fff;border:none;border-radius:20px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit;margin-top:20px}
+.vtf-submit:hover{background:#1A8CD8}
+.vtf-cancel{display:block;width:100%;padding:11px;text-align:center;color:#536471;font-size:13px;font-weight:600;text-decoration:none;border-radius:20px;border:1px solid #EFF3F4;margin-top:8px;transition:.15s}
+.vtf-cancel:hover{background:#F7F9F9;text-decoration:none}
+
+@media(max-width:768px){
+    .vtf-layout{grid-template-columns:1fr}
+    .vtf-row{grid-template-columns:1fr}
+    .vtf-sidebar-card{position:static}
+}
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Header -->
+<div class="vtf-header">
+    <div>
+        <h1>{% if mode == 'edit' %}Edit{% else %}Add{% endif %} Testimonial</h1>
+        <p>{% if mode == 'edit' %}Update testimonial from {{ testimonial.name }}{% else %}Add a new video testimonial to the homepage{% endif %}</p>
+    </div>
+    <a href="{% url 'subscriptions:admin_video_testimonials' %}" class="vtf-back">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
+        Back
+    </a>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+<div class="vtf-layout">
+    <!-- Main Column -->
+    <div>
+        <!-- Reviewer Info -->
+        <div class="vtf-card">
+            <h3 class="vtf-card-title">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+                Reviewer Info
+            </h3>
+            <div class="vtf-row">
+                <div class="vtf-field">
+                    <label class="vtf-label">Name *</label>
+                    <input type="text" name="name" value="{% if testimonial %}{{ testimonial.name }}{% endif %}" required class="vtf-input" placeholder="e.g. Daniel M.">
+                </div>
+                <div class="vtf-field">
+                    <label class="vtf-label">Date Label</label>
+                    <input type="text" name="date_label" value="{% if testimonial %}{{ testimonial.date_label }}{% endif %}" class="vtf-input" placeholder="e.g. 02/2026">
+                </div>
+            </div>
+            <div class="vtf-field">
+                <label class="vtf-label">Review Text *</label>
+                <textarea name="review" rows="4" required class="vtf-input" placeholder="What did they say about InfinityCard?">{% if testimonial %}{{ testimonial.review }}{% endif %}</textarea>
+            </div>
+            <div class="vtf-row">
+                <div class="vtf-field">
+                    <label class="vtf-label">Rating</label>
+                    <select name="rating" class="vtf-input">
+                        {% for i in "54321" %}
+                        <option value="{{ i }}" {% if testimonial and testimonial.rating|stringformat:"s" == i %}selected{% elif not testimonial and i == "5" %}selected{% endif %}>{{ i }} Star{{ i|pluralize }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="vtf-field">
+                    <label class="vtf-label">Sort Order</label>
+                    <input type="number" name="sort_order" value="{% if testimonial %}{{ testimonial.sort_order }}{% else %}0{% endif %}" min="0" class="vtf-input">
+                </div>
+            </div>
+        </div>
+
+        <!-- Thumbnail -->
+        <div class="vtf-card">
+            <h3 class="vtf-card-title">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+                Thumbnail
+            </h3>
+            {% if testimonial and testimonial.thumbnail %}
+            <div class="vtf-current">
+                <img src="{{ testimonial.thumbnail.url }}" alt="Current thumbnail">
+                <div class="vtf-current-info">Current thumbnail uploaded</div>
+            </div>
+            {% endif %}
+            <div class="vtf-file-area">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+                <p>{% if testimonial and testimonial.thumbnail %}Replace thumbnail{% else %}Upload thumbnail image{% endif %}</p>
+                <div class="vtf-file-hint">Portrait orientation (9:16). Used as the carousel slide.</div>
+                <input type="file" name="thumbnail" accept="image/*" {% if not testimonial %}required{% endif %}>
+            </div>
+        </div>
+
+        <!-- Video -->
+        <div class="vtf-card">
+            <h3 class="vtf-card-title">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+                Video
+            </h3>
+
+            <div class="vtf-source-tabs">
+                <label class="vtf-source-tab{% if not testimonial or testimonial.video_source == 'upload' %} active{% endif %}" id="tabUpload" onclick="switchSource('upload')">
+                    <input type="radio" name="video_source" value="upload" {% if not testimonial or testimonial.video_source == 'upload' %}checked{% endif %}>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+                    Upload
+                </label>
+                <label class="vtf-source-tab{% if testimonial and testimonial.video_source == 'link' %} active{% endif %}" id="tabLink" onclick="switchSource('link')">
+                    <input type="radio" name="video_source" value="link" {% if testimonial and testimonial.video_source == 'link' %}checked{% endif %}>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m9.86-3.022a4.5 4.5 0 0 0-1.242-7.244l-4.5-4.5a4.5 4.5 0 0 0-6.364 6.364L5.25 9.5"/></svg>
+                    External Link
+                </label>
+            </div>
+
+            <!-- Upload section -->
+            <div id="uploadSection" style="{% if testimonial and testimonial.video_source == 'link' %}display:none{% endif %}">
+                {% if testimonial and testimonial.video_file %}
+                <div class="vtf-current">
+                    <svg class="vtf-current-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                    <div class="vtf-current-info">{{ testimonial.video_file.name|truncatechars:40 }}</div>
+                </div>
+                {% endif %}
+                <div class="vtf-file-area">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+                    <p>{% if testimonial and testimonial.video_file %}Replace video file{% else %}Upload video file{% endif %}</p>
+                    <div class="vtf-file-hint">MP4, WebM, or MOV. Under 50MB recommended.</div>
+                    <input type="file" name="video_file" accept="video/mp4,video/webm,video/quicktime">
+                </div>
+            </div>
+
+            <!-- Link section -->
+            <div id="linkSection" style="{% if not testimonial or testimonial.video_source != 'link' %}display:none{% endif %}">
+                <div class="vtf-field">
+                    <label class="vtf-label">Video URL</label>
+                    <input type="url" name="video_url" value="{% if testimonial %}{{ testimonial.video_url }}{% endif %}" class="vtf-input" placeholder="https://youtube.com/watch?v=... or direct video URL">
+                </div>
+                <p style="font-size:11px;color:#8899A6;margin:4px 0 0">YouTube, Vimeo, or direct MP4 links work best for inline playback.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <div class="vtf-sidebar-card">
+            <h3 class="vtf-card-title" style="border:none;padding:0;margin-bottom:4px">Settings</h3>
+
+            <label class="vtf-toggle">
+                <input type="checkbox" name="is_active" {% if not testimonial or testimonial.is_active %}checked{% endif %}>
+                <span class="vtf-toggle-switch"></span>
+                <div class="vtf-toggle-text">
+                    <div class="vtf-toggle-title">Active</div>
+                    <div class="vtf-toggle-desc">Show on homepage</div>
+                </div>
+            </label>
+
+            <label class="vtf-toggle">
+                <input type="checkbox" name="is_verified" {% if not testimonial or testimonial.is_verified %}checked{% endif %}>
+                <span class="vtf-toggle-switch"></span>
+                <div class="vtf-toggle-text">
+                    <div class="vtf-toggle-title">Verified Badge</div>
+                    <div class="vtf-toggle-desc">Show checkmark next to name</div>
+                </div>
+            </label>
+
+            <button type="submit" class="vtf-submit">
+                {% if mode == 'edit' %}Update Testimonial{% else %}Create Testimonial{% endif %}
+            </button>
+            {% if mode == 'edit' %}
+            <a href="{% url 'subscriptions:admin_video_testimonials' %}" class="vtf-cancel">Cancel</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchSource(type) {
+    var isUpload = type === 'upload';
+    document.getElementById('uploadSection').style.display = isUpload ? '' : 'none';
+    document.getElementById('linkSection').style.display = isUpload ? 'none' : '';
+    document.getElementById('tabUpload').classList.toggle('active', isUpload);
+    document.getElementById('tabLink').classList.toggle('active', !isUpload);
+}
+</script>
+{% endblock %}

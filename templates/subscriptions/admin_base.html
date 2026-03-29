@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Admin{% endblock %} | InfinityCard</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F8FAFC;color:#1E293B;min-height:100vh;display:flex}
+a{color:#4F46E5;text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ── Sidebar ── */
+.sa-sidebar{width:240px;background:#0F172A;height:100vh;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sa-brand{padding:20px 20px 16px;border-bottom:1px solid #1E293B;flex-shrink:0}
+.sa-brand-name{font-size:16px;font-weight:800;color:#F1F5F9;letter-spacing:-0.3px}
+.sa-brand-name span{color:#818CF8}
+.sa-brand-sub{font-size:11px;color:#64748B;margin-top:2px}
+.sa-nav{flex:1;padding:12px 0;overflow-y:auto;min-height:0}
+.sa-nav::-webkit-scrollbar{width:5px}
+.sa-nav::-webkit-scrollbar-track{background:transparent}
+.sa-nav::-webkit-scrollbar-thumb{background:#334155;border-radius:4px}
+.sa-nav::-webkit-scrollbar-thumb:hover{background:#475569}
+.sa-nav-section{padding:0 12px;margin-bottom:4px}
+.sa-nav-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.8px;padding:8px 12px 4px}
+.sa-nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:500;color:#94A3B8;transition:all 0.15s;cursor:pointer;text-decoration:none;margin-bottom:1px}
+.sa-nav-item:hover{background:#1E293B;color:#E2E8F0;text-decoration:none}
+.sa-nav-item.active{background:#4F46E520;color:#818CF8;font-weight:600}
+.sa-nav-item svg{width:18px;height:18px;flex-shrink:0}
+.sa-nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center}
+.sa-sidebar-footer{padding:16px 20px;border-top:1px solid #1E293B;font-size:12px;color:#64748B;flex-shrink:0}
+.sa-sidebar-footer a{color:#94A3B8;font-size:12px}
+
+/* ── Main ── */
+.sa-main{margin-left:240px;flex:1;min-height:100vh}
+
+/* ── Topbar ── */
+.sa-topbar{background:#fff;border-bottom:1px solid #E2E8F0;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.sa-topbar-title{font-size:18px;font-weight:700;color:#0F172A}
+.sa-topbar-actions{display:flex;align-items:center;gap:12px}
+.sa-topbar-user{font-size:12px;color:#64748B}
+
+/* ── Content ── */
+.sa-content{padding:24px 28px;max-width:1400px}
+
+/* ── Messages ── */
+.sa-msg-list{margin-bottom:16px}
+.sa-msg{padding:10px 16px;border-radius:8px;font-size:13px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sa-msg-success{background:#F0FDF4;border:1px solid #BBF7D0;color:#166534}
+.sa-msg-error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
+.sa-msg-info{background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF}
+
+/* ── Stats ── */
+.sa-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.sa-stat{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:20px;display:flex;align-items:flex-start;gap:14px}
+.sa-stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sa-stat-icon svg{width:20px;height:20px}
+.sa-stat-icon.blue{background:#EEF2FF;color:#4F46E5}
+.sa-stat-icon.green{background:#F0FDF4;color:#16A34A}
+.sa-stat-icon.amber{background:#FFFBEB;color:#D97706}
+.sa-stat-icon.red{background:#FEF2F2;color:#DC2626}
+.sa-stat-icon.purple{background:#F5F3FF;color:#7C3AED}
+.sa-stat-label{font-size:12px;color:#64748B;margin-bottom:2px}
+.sa-stat-value{font-size:24px;font-weight:700;color:#0F172A}
+
+/* ── Card / Section ── */
+.sa-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;margin-bottom:20px;overflow:hidden}
+.sa-card-header{padding:16px 20px;border-bottom:1px solid #F1F5F9;display:flex;align-items:center;justify-content:space-between}
+.sa-card-title{font-size:14px;font-weight:700;color:#0F172A;display:flex;align-items:center;gap:8px}
+.sa-card-title svg{width:18px;height:18px;color:#64748B}
+.sa-card-body{padding:0}
+.sa-card-footer{padding:12px 20px;border-top:1px solid #F1F5F9;background:#FAFBFE;font-size:12px;color:#64748B}
+
+/* ── Tables ── */
+.sa-table{width:100%;border-collapse:collapse;font-size:13px}
+.sa-table thead th{text-align:left;padding:10px 16px;color:#64748B;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #E2E8F0;background:#FAFBFE}
+.sa-table tbody td{padding:12px 16px;border-bottom:1px solid #F1F5F9;vertical-align:middle}
+.sa-table tbody tr:hover{background:#F8FAFC}
+.sa-table tbody tr:last-child td{border-bottom:none}
+
+/* ── Badges ── */
+.sa-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.2px}
+.sa-badge-green{background:#F0FDF4;color:#166534;border:1px solid #BBF7D0}
+.sa-badge-red{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA}
+.sa-badge-amber{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+.sa-badge-blue{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE}
+.sa-badge-purple{background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE}
+.sa-badge-gray{background:#F8FAFC;color:#475569;border:1px solid #E2E8F0}
+
+/* ── Buttons ── */
+.sa-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all 0.15s;text-decoration:none;font-family:inherit}
+.sa-btn:hover{filter:brightness(0.95);text-decoration:none}
+.sa-btn-primary{background:#4F46E5;color:#fff}
+.sa-btn-success{background:#16A34A;color:#fff}
+.sa-btn-danger{background:#DC2626;color:#fff}
+.sa-btn-warning{background:#D97706;color:#fff}
+.sa-btn-ghost{background:#F1F5F9;color:#475569;border:1px solid #E2E8F0}
+.sa-btn-ghost:hover{background:#E2E8F0}
+.sa-btn-sm{padding:5px 10px;font-size:11px}
+.sa-btn svg{width:14px;height:14px}
+
+/* ── Action cell ── */
+.sa-actions{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.sa-actions form{display:inline}
+
+/* ── Empty ── */
+.sa-empty{text-align:center;padding:40px 20px;color:#94A3B8;font-size:14px}
+.sa-empty svg{width:40px;height:40px;margin-bottom:12px;color:#CBD5E1}
+
+/* ── User row ── */
+.sa-user-cell{display:flex;align-items:center;gap:10px}
+.sa-user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#E0E7FF,#C7D2FE);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#4F46E5;flex-shrink:0}
+.sa-user-info{min-width:0}
+.sa-user-name{font-weight:600;color:#0F172A;font-size:13px}
+.sa-user-email{font-size:11px;color:#94A3B8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+
+/* ── POP detail ── */
+.sa-pop-detail{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px}
+.sa-pop-field{min-width:0}
+.sa-pop-label{font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.sa-pop-value{font-size:13px;font-weight:600;color:#1E293B;word-break:break-word}
+.sa-pop-doc{max-width:100%;border-radius:8px;border:1px solid #E2E8F0;margin-top:12px}
+.sa-pop-full{grid-column:1/-1}
+.sa-pop-actions{grid-column:1/-1;display:flex;gap:8px;padding-top:8px;border-top:1px solid #F1F5F9;margin-top:8px}
+
+/* ── Filter bar ── */
+.sa-filter{display:flex;gap:8px;align-items:center;padding:12px 20px;border-bottom:1px solid #F1F5F9;flex-wrap:wrap}
+.sa-filter-tab{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;color:#64748B;border:1px solid transparent;transition:0.15s;cursor:pointer;text-decoration:none}
+.sa-filter-tab:hover{color:#4F46E5;background:#EEF2FF;text-decoration:none}
+.sa-filter-tab.active{color:#4F46E5;background:#EEF2FF;border-color:#C7D2FE}
+.sa-search{background:#F8FAFC;border:1px solid #E2E8F0;padding:7px 12px;border-radius:8px;font-size:13px;color:#1E293B;min-width:220px;font-family:inherit}
+.sa-search:focus{outline:none;border-color:#4F46E5;box-shadow:0 0 0 3px #4F46E520}
+
+/* ── Mobile ── */
+.sa-mobile-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px}
+.sa-mobile-toggle svg{width:24px;height:24px;color:#0F172A}
+@media(max-width:768px){
+    .sa-sidebar{transform:translateX(-100%);transition:transform 0.2s;width:260px}
+    .sa-sidebar.open{transform:translateX(0)}
+    .sa-main{margin-left:0}
+    .sa-mobile-toggle{display:block}
+    .sa-content{padding:16px}
+    .sa-stats{grid-template-columns:repeat(2,1fr)}
+    .sa-table{display:block;overflow-x:auto;white-space:nowrap}
+    .sa-pop-detail{grid-template-columns:1fr}
+}
+
+{% block extra_css %}{% endblock %}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sa-sidebar" id="saSidebar">
+    <div class="sa-brand">
+        <div class="sa-brand-name"><span>Infinity</span>Card</div>
+        <div class="sa-brand-sub">Administration</div>
+    </div>
+    <nav class="sa-nav">
+        <div class="sa-nav-section">
+            <div class="sa-nav-label">Overview</div>
+            <a class="sa-nav-item {% block nav_dashboard %}{% endblock %}" href="{% url 'subscriptions:admin_dashboard' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+                Dashboard
+            </a>
+            <a class="sa-nav-item {% block nav_analytics %}{% endblock %}" href="{% url 'subscriptions:admin_analytics' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+                Analytics
+            </a>
+        </div>
+        <div class="sa-nav-section">
+            <div class="sa-nav-label">Orders & Payments</div>
+            <a class="sa-nav-item {% block nav_orders %}{% endblock %}" href="{% url 'subscriptions:admin_orders' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
+                Card Orders
+            </a>
+            <a class="sa-nav-item {% block nav_bulk_orders %}{% endblock %}" href="{% url 'subscriptions:admin_bulk_orders' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+                Bulk Orders
+            </a>
+            <a class="sa-nav-item {% block nav_approvals %}{% endblock %}" href="{% url 'subscriptions:admin_approvals' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Payment Approvals
+                {% if pending_pop_count %}<span class="sa-nav-badge">{{ pending_pop_count }}</span>{% endif %}
+            </a>
+            <a class="sa-nav-item {% block nav_payment_methods %}{% endblock %}" href="{% url 'subscriptions:admin_payment_methods' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
+                Payment Methods
+            </a>
+            <a class="sa-nav-item {% block nav_banking_details %}{% endblock %}" href="{% url 'subscriptions:admin_banking_details' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/></svg>
+                Banking Details
+            </a>
+        </div>
+        <div class="sa-nav-section">
+            <div class="sa-nav-label">Subscriptions</div>
+            <a class="sa-nav-item {% block nav_subscriptions %}{% endblock %}" href="{% url 'subscriptions:admin_subscriptions' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+                Subscriptions
+            </a>
+            <a class="sa-nav-item {% block nav_plans %}{% endblock %}" href="{% url 'subscriptions:admin_plans' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/></svg>
+                Plans
+            </a>
+        </div>
+        <div class="sa-nav-section">
+            <div class="sa-nav-label">Users</div>
+            <a class="sa-nav-item {% block nav_users %}{% endblock %}" href="{% url 'subscriptions:admin_users' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128H5.636a8.954 8.954 0 01-1.4-.104M12 6.75a3 3 0 11-6 0 3 3 0 016 0zm8.25 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+                Users
+            </a>
+        </div>
+        <div class="sa-nav-section">
+            <div class="sa-nav-label">NFC Cards</div>
+            <a class="sa-nav-item {% block nav_card_pricing %}{% endblock %}" href="{% url 'subscriptions:admin_card_pricing' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Card Pricing
+            </a>
+            <a class="sa-nav-item {% block nav_nfc_urls %}{% endblock %}" href="{% url 'subscriptions:admin_nfc_urls' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-3.022a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L5.25 9.5"/></svg>
+                NFC Card URLs
+            </a>
+        </div>
+        <div class="sa-nav-section">
+            <div class="sa-nav-label">Content</div>
+            <a class="sa-nav-item {% block nav_blog %}{% endblock %}" href="{% url 'subscriptions:admin_blog_list' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z"/></svg>
+                Blog Posts
+            </a>
+            <a class="sa-nav-item {% block nav_blog_create %}{% endblock %}" href="{% url 'subscriptions:admin_blog_create' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                New Post
+            </a>
+            <a class="sa-nav-item {% block nav_blog_comments %}{% endblock %}" href="{% url 'subscriptions:admin_blog_comments' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+                Comments
+            </a>
+            <a class="sa-nav-item {% block nav_video_testimonials %}{% endblock %}" href="{% url 'subscriptions:admin_video_testimonials' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+                Testimonials
+            </a>
+            <a class="sa-nav-item {% block nav_partner_logos %}{% endblock %}" href="{% url 'subscriptions:admin_partner_logos' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+                Partner Logos
+            </a>
+        </div>
+    </nav>
+    <div class="sa-sidebar-footer">
+        <a href="{% url 'admin:index' %}">Django Admin</a> &middot;
+        <a href="/">Site Home</a>
+    </div>
+</aside>
+
+<!-- Main -->
+<div class="sa-main">
+    <div class="sa-topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+            <button class="sa-mobile-toggle" onclick="document.getElementById('saSidebar').classList.toggle('open')">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+            </button>
+            <div class="sa-topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
+        </div>
+        <div class="sa-topbar-actions">
+            <span class="sa-topbar-user">{{ request.user.email }}</span>
+        </div>
+    </div>
+
+    <div class="sa-content">
+        {% if messages %}
+        <div class="sa-msg-list">
+            {% for message in messages %}
+            <div class="sa-msg {% if message.tags == 'success' %}sa-msg-success{% elif message.tags == 'error' %}sa-msg-error{% else %}sa-msg-info{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block admin_content %}{% endblock %}
+    </div>
+</div>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

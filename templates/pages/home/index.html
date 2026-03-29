@@ -1,0 +1,1476 @@
+{% extends 'pages/home/base.html' %}
+{% load static %}
+
+{% block title %}InfinityCard - Smart NFC Business Cards{% endblock %}
+
+{% block content %}
+<style>
+/* ═══════════════════════════════════════════════════
+   DARK THEME — Landing Page
+   Mirrors the ecommerce store dark design
+   ═══════════════════════════════════════════════════ */
+
+/* ── Base ── */
+body{background-color:#0A0A0A!important;color:#E2E8F0!important}
+a{color:#C4B5FD}
+a:hover{color:#A78BFA}
+h3{color:#F1F5F9}
+.section_title h2{color:#F1F5F9}
+.section_title h2 span{color:#A78BFA}
+.white_text p,.white_text .section_title h2,.white_text span,.white_text h3{color:#fff}
+p{color:rgba(255,255,255,.65)}
+
+/* ── Header — handled by floating pill navbar in base.html ── */
+
+/* ── Banner / Hero ── */
+.banner_section{background:#030303!important;overflow:hidden;position:relative}
+.banner_section .banner_text h1{color:#F1F5F9}
+.banner_section .banner_text p{color:rgba(255,255,255,.6)}
+.banner_section .btn_block .puprple_btn{background:#A78BFA!important;color:#fff!important;border:none!important}
+.banner_section .btn_block .btn_bottom{border-color:rgba(167,139,250,.3)!important}
+.banner_section .used_app ul li img{border-color:rgba(255,255,255,.2)!important}
+
+/* Hero floating shapes — uses shared .hero-shape styles from base.html */
+
+/* Banner gradient overlays */
+.banner_section::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 20%,rgba(139,92,246,.12) 0%,transparent 60%),
+             radial-gradient(ellipse at 70% 80%,rgba(79,70,229,.08) 0%,transparent 50%);
+  pointer-events:none;z-index:0}
+.banner_section .container{position:relative;z-index:1}
+
+/* Hide the default vertical blur lines on banner since we use shapes */
+.banner_section .light{opacity:.03!important}
+
+/* Hero image section */
+.hero_image img{filter:drop-shadow(0 20px 60px rgba(139,92,246,.15))}
+
+/* ── Title Badge ── */
+.title_badge{background:rgba(167,139,250,.12)!important;color:#A78BFA!important;
+  border:1px solid rgba(167,139,250,.2)!important}
+
+/* ── Our Value Section ── */
+.our_value_section{background:#0A0A0A!important}
+.our_value_innner{background:#0A0A0A!important;border-color:rgba(255,255,255,.06)!important}
+.our_value_section .our_value_innner .value_slider .value_block{background:#111111!important}
+.value_block{background:#111111!important;border:1px solid rgba(255,255,255,.06)!important}
+.value_block .text h3{color:#A78BFA!important}
+.value_block .text p{color:rgba(255,255,255,.55)!important}
+.value_block .icon{background:rgba(167,139,250,.15)!important;border-radius:16px}
+.our_value_section .owl-nav button{border-color:rgba(255,255,255,.15)!important}
+.our_value_section .owl-nav button span{color:rgba(255,255,255,.4)!important}
+.our_value_section .owl-nav button:hover{background:rgba(255,255,255,.08)!important;
+  border-color:rgba(255,255,255,.2)!important}
+.our_value_section .owl-nav button:hover span{color:#fff!important}
+
+/* ── Service Section Video Fix ── */
+.service_blocks .inner_block .img::before{display:none!important}
+
+/* ── About Section ── */
+.about_section .abtImg img{max-width:none!important}
+.about_section .container{overflow:visible!important}
+.about_section{background:transparent!important}
+.about_section .app_statstic li .text{
+  background:#111111!important;border-color:rgba(167,139,250,.25)!important}
+.about_section .app_statstic li .text p{color:rgba(255,255,255,.65)!important}
+.about_section .app_statstic li .text p span{color:#A78BFA!important}
+.about_section .section_title h2{color:#F1F5F9}
+.about_section p{color:rgba(255,255,255,.6)}
+.about_section .video_block .playBtn{background:rgba(139,92,246,.3)!important}
+.about_section .abtImg img{filter:drop-shadow(0 10px 40px rgba(139,92,246,.15))}
+
+/* ── Text List Flow ── */
+.text_list_section .slider_block{background:#111111!important}
+.text_list_section .down_fix{color:#A78BFA!important}
+.text_list_section .down_fix::after{filter:brightness(0) invert(1)}
+
+/* ── Service Section ── */
+.service_section .service_badge{background:rgba(167,139,250,.1)!important;
+  color:#A78BFA!important;border:1px solid rgba(167,139,250,.2)!important}
+.service_section .service_text h2{color:#F1F5F9!important}
+.service_section .service_text h2 span{color:#A78BFA!important}
+.service_section .service_text p{color:rgba(255,255,255,.6)!important}
+.service_section .service_text .listing_block li .icon span{
+  background:#A78BFA!important;color:#fff!important}
+.service_section .service_text .listing_block li .text h3{color:#F1F5F9!important}
+.service_section .service_text .listing_block li .text p{color:rgba(255,255,255,.55)!important}
+.service_section .service_text .feature_list li .icon span{color:#A78BFA!important}
+.service_section .service_text .feature_list li p{color:rgba(255,255,255,.6)!important}
+.service_blocks .inner_block{background:#111111!important;border:1px solid rgba(255,255,255,.06)!important}
+.service_blocks .inner_block .img::before{background:#7C3AED!important;opacity:.8}
+.service_blocks .inner_block .img img{border-color:rgba(255,255,255,.1)!important}
+.service_blocks .inner_block .star_img img{filter:brightness(0) invert(1);opacity:.3}
+
+/* ── How It Works Section ── */
+.how_it_inner{background:#111111!important;border:1px solid rgba(255,255,255,.06)!important}
+.how_it_inner .section_title h2{color:#F1F5F9!important}
+.how_it_inner .steps_block .icon{background:#7C3AED!important}
+.how_it_inner .steps_block .text h3{color:#F1F5F9!important}
+.how_it_inner .steps_block .text p{color:rgba(255,255,255,.55)!important}
+.how_it_inner .steps_block .text .tag_text{color:#A78BFA!important}
+.how_it_inner .steps_block .text .social li a{
+  border-color:rgba(255,255,255,.12)!important;color:#A78BFA!important}
+.how_it_inner .steps_block .text .social li a:hover{
+  background:#7C3AED!important;border-color:#7C3AED!important;color:#fff!important}
+.how_it_inner .steps_block .step{border-color:rgba(255,255,255,.15)!important;color:rgba(255,255,255,.3)!important}
+.how_it_inner .steps_block.step_border::after{border-bottom-color:rgba(255,255,255,.1)!important}
+
+/* ── Review Section ── */
+.review_section .positive_inner{border-bottom-color:rgba(255,255,255,.08)!important}
+.review_section .sidebar_text .section_title h2{color:#F1F5F9!important;text-align:left}
+.review_section .google_rating p{color:#F1F5F9!important}
+.review_section .user_review p{color:rgba(255,255,255,.6)!important}
+.review_section .user_review p a{color:#A78BFA!important}
+.review_section .review_side .review_block{
+  background:#111111!important;border:1px solid rgba(255,255,255,.06)!important}
+.review_section .review_side .review_block p{color:rgba(255,255,255,.6)!important}
+.review_section .coustomer_info .avtar .text h3{color:#F1F5F9!important}
+.review_section .coustomer_info .avtar .text span{color:rgba(255,255,255,.45)!important}
+
+/* ── Our Client Section ── */
+.our_client .section_title h2{color:#F1F5F9!important}
+.our_client .client_list .client_logo{
+  background:#111111!important;border:1px solid rgba(255,255,255,.06)!important}
+.our_client .client_list .client_logo img{filter:brightness(0) invert(1);opacity:.5;
+  transition:opacity .3s}
+.our_client .client_list .client_logo:hover img{opacity:.8}
+
+/* ── Pricing Section ── */
+.pricing_inner{background:#111111!important;border:1px solid rgba(255,255,255,.06)!important}
+.pricing_inner .title_badge{background:rgba(167,139,250,.12)!important;color:#A78BFA!important;
+  border:1px solid rgba(167,139,250,.2)!important}
+.pricing_inner .section_title h2{color:#F1F5F9!important}
+.pricing_inner .nav-tabs{background:rgba(255,255,255,.06)!important}
+.pricing_inner .nav-tabs button{color:rgba(255,255,255,.5)!important}
+.pricing_inner .nav-tabs button.active{background:#7C3AED!important;color:#fff!important}
+.pricing_inner .pannel_block{background:#1A1A1A!important;border:1px solid rgba(255,255,255,.06)!important}
+.pricing_inner .pannel_block:not(.highlited_block) span,
+.pricing_inner .pannel_block:not(.highlited_block) p,
+.pricing_inner .pannel_block:not(.highlited_block) h3{color:rgba(255,255,255,.7)!important}
+.pricing_inner .pannel_block .heading h3{color:#F1F5F9!important}
+.pricing_inner .pannel_block .pricing{border-bottom-color:rgba(255,255,255,.08)!important}
+.pricing_inner .pannel_block .pricing h3{color:#A78BFA!important}
+.pricing_inner .pannel_block .pricing h3 span{color:#A78BFA!important}
+.pricing_inner .pannel_block .features li .icon .icofont-check-circled{color:#A78BFA!important}
+.pricing_inner .pannel_block .features li .icon .icofont-close-circled{color:rgba(255,255,255,.2)!important}
+.pricing_inner .pannel_block.highlited_block{
+  background:#7C3AED!important;border-color:#A78BFA!important}
+.pricing_inner .pannel_block.highlited_block .heading h3,
+.pricing_inner .pannel_block.highlited_block .heading span{color:#fff!important}
+.pricing_inner .pannel_block.highlited_block .pricing h3,
+.pricing_inner .pannel_block.highlited_block .pricing h3 span{color:#fff!important}
+.pricing_inner .pannel_block.highlited_block .pricing{border-bottom-color:rgba(255,255,255,.2)!important}
+.pricing_inner .pannel_block.highlited_block .features li p{color:rgba(255,255,255,.85)!important}
+.pricing_inner .pannel_block.highlited_block .features li .icon .icofont-check-circled{color:#fff!important}
+.pricing_inner .pannel_block.highlited_block .offer{background:#fff!important;color:#7C3AED!important}
+.pricing_inner .pannel_block.highlited_block .btn_block .puprple_btn{
+  background:#fff!important;color:#7C3AED!important}
+.pricing_inner .contact_text{color:rgba(255,255,255,.5)!important}
+.pricing_inner .contact_text a{color:#C4B5FD!important}
+/* Pricing vertical blur lines */
+.pricing_section .light{opacity:.03!important}
+
+/* ── Offer Badge Styling ── */
+.pricing_inner .pannel_block .heading .offer{
+  background:linear-gradient(135deg,#A78BFA,#7C3AED)!important;
+  color:#fff!important;
+  padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;
+  display:inline-block;margin-top:8px;text-transform:uppercase;
+  letter-spacing:0.5px;box-shadow:0 2px 8px rgba(167,139,250,.3);
+  animation:offerPulse 3s ease-in-out infinite}
+@keyframes offerPulse{
+  0%,100%{transform:scale(1);box-shadow:0 2px 8px rgba(167,139,250,.3)}
+  50%{transform:scale(1.05);box-shadow:0 4px 12px rgba(167,139,250,.5)}
+}
+
+/* ── Video Testimonials Section ── */
+.interface_section .section_title h2{color:#F1F5F9!important}
+.interface_section .section_title h2 span{color:#A78BFA!important}
+.vt-nav-btn{background:#1A1A1A!important;color:#F1F5F9!important;
+  border:1px solid rgba(255,255,255,.1)!important;box-shadow:0 4px 16px rgba(0,0,0,.4)!important}
+.vt-nav-btn:hover{background:#222!important;box-shadow:0 4px 20px rgba(0,0,0,.5)!important}
+.vt-modal{background:#1A1A1A!important;border:1px solid rgba(255,255,255,.08)}
+.vt-modal-reviewer{color:#F1F5F9!important}
+.vt-modal-text{color:rgba(255,255,255,.6)!important}
+.vt-modal-cta{background:rgba(167,139,250,.1)!important;color:#A78BFA!important;
+  border-color:rgba(167,139,250,.2)!important}
+.vt-modal-cta:hover{background:rgba(167,139,250,.2)!important;color:#C4B5FD!important}
+.vt-modal-date{color:rgba(255,255,255,.35)!important}
+
+/* ── Floating Cards Animation ── */
+.cards-float-anim{width:100%;max-width:644px;display:inline-block;
+  filter:drop-shadow(0 12px 32px rgba(0,0,0,.4));
+  animation:cardsFloat 4s ease-in-out infinite}
+@keyframes cardsFloat{
+  0%,100%{transform:translateY(0) rotate(0deg);filter:drop-shadow(0 12px 32px rgba(0,0,0,.4))}
+  50%{transform:translateY(-14px) rotate(1.5deg);filter:drop-shadow(0 20px 40px rgba(124,58,237,.25))}
+}
+
+/* ── CTA Buttons (replacing app store images) ── */
+.cta-btn-styled{display:flex!important;align-items:center;gap:12px;padding:14px 28px!important;
+  background:#000!important;border:1px solid rgba(255,255,255,.15)!important;border-radius:12px!important;
+  color:#fff!important;text-decoration:none!important;transition:.3s all!important;min-width:180px}
+.cta-btn-styled:hover{background:#7C3AED!important;border-color:#7C3AED!important;
+  color:#fff!important;text-decoration:none!important;transform:translateY(-2px)}
+.cta-btn-styled svg{flex-shrink:0;opacity:.85}
+.cta-btn-styled:hover svg{opacity:1}
+.cta-btn-text{display:flex;flex-direction:column;line-height:1.2}
+.cta-btn-text small{font-size:11px;opacity:.7;font-weight:400;letter-spacing:.3px}
+.cta-btn-text strong{font-size:16px;font-weight:600;letter-spacing:-.2px}
+footer .cta-btn-styled{background:rgba(167,139,250,.1)!important;border-color:rgba(167,139,250,.2)!important}
+footer .cta-btn-styled:hover{background:rgba(167,139,250,.25)!important;border-color:rgba(167,139,250,.4)!important}
+
+/* ── Mobile Card Animation ── */
+.mobile-card-anim{max-width:1019px;width:100%;
+  filter:drop-shadow(0 30px 50px rgba(0,0,0,.5)) drop-shadow(0 10px 20px rgba(124,58,237,.25));
+  animation:mobileCardFloat 5s ease-in-out infinite}
+@keyframes mobileCardFloat{
+  0%{transform:rotateX(8deg) rotateY(-4deg) scale(1.05) translateY(0);
+    filter:drop-shadow(0 30px 50px rgba(0,0,0,.5)) drop-shadow(0 10px 20px rgba(124,58,237,.2))}
+  25%{transform:rotateX(5deg) rotateY(2deg) scale(1.07) translateY(-12px);
+    filter:drop-shadow(0 40px 60px rgba(0,0,0,.45)) drop-shadow(0 15px 30px rgba(124,58,237,.35))}
+  50%{transform:rotateX(10deg) rotateY(-6deg) scale(1.04) translateY(-6px);
+    filter:drop-shadow(0 25px 45px rgba(0,0,0,.5)) drop-shadow(0 8px 18px rgba(124,58,237,.15))}
+  75%{transform:rotateX(6deg) rotateY(0deg) scale(1.06) translateY(-16px);
+    filter:drop-shadow(0 45px 65px rgba(0,0,0,.4)) drop-shadow(0 18px 35px rgba(124,58,237,.4))}
+  100%{transform:rotateX(8deg) rotateY(-4deg) scale(1.05) translateY(0);
+    filter:drop-shadow(0 30px 50px rgba(0,0,0,.5)) drop-shadow(0 10px 20px rgba(124,58,237,.2))}
+}
+
+/* ── Download / CTA Section ── */
+.download_app{overflow:visible!important}
+.download_app .task_block{background:#111111!important;border:1px solid rgba(255,255,255,.06);overflow:visible!important}
+.download_app .task_block .light{opacity:.02!important}
+.download_app .frame_img::before{display:none!important}
+
+/* ── Blog Section ── */
+.blog_section .section_title h2{color:#F1F5F9!important}
+.blog_section .section_title h2 span{color:#A78BFA!important}
+.blog_section .blog_listing .blog_post{
+  background:#111111!important;border:1px solid rgba(255,255,255,.06)!important}
+.blog_section .blog_listing .blog_post h3{color:#F1F5F9!important}
+.blog_section .blog_listing .blog_post h3 a{color:#F1F5F9!important}
+.blog_section .blog_listing .blog_post h3 a:hover{color:#A78BFA!important}
+.blog_section .blog_listing .blog_post .blog_info{color:rgba(255,255,255,.4)!important}
+.blog_section .blog_listing .blog_post .blog_info li{color:rgba(255,255,255,.4)!important}
+.blog_section .blog_listing .blog_post .tag_more .tag{
+  color:#A78BFA!important;border-color:rgba(167,139,250,.3)!important}
+.blog_section .blog_listing .blog_post .tag_more a{color:#A78BFA!important}
+.blog_section .blog_listing .blog_post .tag_more a:hover{color:#C4B5FD!important}
+
+/* ── Footer ── */
+footer{background:#080808!important;margin-top:0!important}
+footer .news_letter form .form-group .form-control{background:rgba(255,255,255,.06)!important;
+  border-color:rgba(255,255,255,.1)!important}
+footer .news_letter form .form-group button{background:#7C3AED!important}
+footer .news_letter form .form-group button:hover{background:#fff!important;color:#7C3AED!important}
+footer .social_media li a{border-color:rgba(255,255,255,.12)!important}
+footer .social_media li a:hover{background:rgba(255,255,255,.1)!important;
+  border-color:rgba(255,255,255,.2)!important;color:#fff!important}
+footer .download_side .app_btn li a{background:rgba(167,139,250,.1)!important;
+  border-color:rgba(167,139,250,.2)!important}
+footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!important;
+  border-color:rgba(167,139,250,.3)!important}
+.footer_bottom{background:rgba(255,255,255,.04)!important}
+
+/* ── Buttons — purple theme ── */
+.puprple_btn{background:#7C3AED!important;color:#fff!important;border:none!important}
+.puprple_btn:hover{background:#6D28D9!important;color:#fff!important}
+.btn_block .btn_bottom{border-color:rgba(124,58,237,.3)!important}
+
+/* ── Go Top — handled by base.html ── */
+
+/* ── Preloader ── */
+#preloader{background:#0A0A0A!important}
+
+/* ── Owl Carousel dots ── */
+.owl-carousel .owl-dots .owl-dot{border-color:#7C3AED!important;background:transparent!important}
+.owl-carousel .owl-dots .owl-dot.active{background:#7C3AED!important}
+
+/* ── Mobile nav — handled by floating pill navbar in base.html ── */
+</style>
+
+<!-- Banner-Section-Start -->
+  <section class="banner_section">
+    
+    <!-- Floating geometric shapes -->
+    <div class="hero-shapes">
+      <div class="hero-shape hero-shape-1" style="--r:12deg"><div class="hero-shape-inner"></div></div>
+      <div class="hero-shape hero-shape-2" style="--r:-15deg"><div class="hero-shape-inner"></div></div>
+      <div class="hero-shape hero-shape-3" style="--r:-8deg"><div class="hero-shape-inner"></div></div>
+      <div class="hero-shape hero-shape-4" style="--r:20deg"><div class="hero-shape-inner"></div></div>
+      <div class="hero-shape hero-shape-5" style="--r:-25deg"><div class="hero-shape-inner"></div></div>
+    </div>
+
+    <!-- vertical blure line animation -->
+    <div class='light x1'></div>
+    <div class='light x2'></div>
+    <div class='light x3'></div>
+    <div class='light x4'></div>
+    <div class='light x5'></div>
+    <div class='light x6'></div>
+    <div class='light x7'></div>
+    <div class='light x8'></div>
+    <div class='light x9'></div>
+
+    <!-- container start -->
+    <div class="container">
+      <!-- row start -->
+      <div class="row">
+        <div class="col-lg-9 col-md-12 " data-aos="fade-up" data-aos-duration="1500">
+          <!-- banner text -->
+          <div class="banner_text">
+            <!-- typed text -->
+            <div class="type-wrap">
+              <!-- add static words/sentences here (i.e. text that you don't want to be removed)-->
+              <span id="typed" style="white-space:pre;" class="typed">
+              </span>
+            </div>
+            <!-- h1 -->
+            <h1>Smart NFC business cards
+                that grow your network</h1>
+            <!-- p -->
+            <p>
+              Share your contact details, portfolio, and social links with a single tap.
+              The modern way to network for professionals, startups, and enterprises.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-lg-3 col-md-12 " data-aos="fade-up" data-aos-duration="1500">
+
+          <!-- users -->
+          <div class="used_app">
+            <ul>
+              <li><img src="{% static './home/images/banavt1.png' %}" alt="image"></li>
+              <li><img src="{% static './home/images/banavt2.png' %}" alt="image"></li>
+              <li><img src="{% static './home/images/banavt3.png' %}" alt="image"></li>
+              <li>
+                <span class="play-button disabled" style="opacity:0.3;cursor:not-allowed;pointer-events:none"><img src="{% static './home/images/play.png' %}" alt="img"></span>
+              </li>
+            </ul>
+            <h3>10K+ Cards Tapped</h3>
+            <p>Professionals and businesses networking <br> smarter every day</p>
+          </div>
+
+          <!-- app buttons -->
+          <div class="btn_block">
+                <a href="{% url 'cards:ecommerce_store' %}" class="btn puprple_btn ml-0">Order Your Card</a>
+                <div class="btn_bottom"></div>
+          </div>
+        </div>
+
+        <!-- banner slides start -->
+        <div class="col-lg-12 col-md-12" >
+          <div class="hero_image"> 
+            <img src="{% static './home/images/hero_image.png' %}" alt="image">
+          </div>
+        </div>
+        <!-- banner slides end -->
+
+      </div>
+      <!-- row end -->
+    </div>
+    <!-- container end -->
+  </section>
+  <!-- Banner-Section-end -->
+
+  <!-- Our Value Section Start -->
+  <section class="our_value_section home_page row_am">
+      <div class="our_value_innner">
+        <div class="container">
+          <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+            <span class="title_badge">Why NFC Cards</span>
+            <h2><span>Why businesses</span> choose InfinityCard</h2>
+          </div>
+          <!-- Value Slider Start -->
+          <div class="value_slider" data-aos="fade-in" data-aos-duration="1500">
+            <div class="owl-carousel owl-theme" id="value_slider">
+              <div class="item">
+                <div class="value_block">
+                  <div class="icon">
+                    <img src="{% static './home/images/ourvalue_1.png' %}" alt="image">
+                  </div>
+                  <div class="text">
+                    <h3>Instant Sharing</h3>
+                    <p>One tap is all it takes. Share your full digital
+                      profile, contact info, and links instantly with anyone.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="item">
+                <div class="value_block">
+                  <div class="icon">
+                    <img src="{% static './home/images/ourvalue_2.png' %}" alt="image">
+                  </div>
+                  <div class="text">
+                    <h3>Eco-Friendly</h3>
+                    <p>Eliminate paper waste. One NFC card replaces thousands
+                      of traditional business cards over its lifetime.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="item">
+                <div class="value_block">
+                  <div class="icon">
+                    <img src="{% static './home/images/ourvalue_3.png' %}" alt="image">
+                  </div>
+                  <div class="text">
+                    <h3>Always Current</h3>
+                    <p>Update your profile anytime. Your card never goes
+                      out of date — change roles, companies, or details in seconds.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="item">
+                <div class="value_block">
+                  <div class="icon">
+                    <img src="{% static './home/images/ourvalue_1.png' %}" alt="image">
+                  </div>
+                  <div class="text">
+                    <h3>Enterprise Ready</h3>
+                    <p>Equip your entire team with branded NFC cards.
+                      Manage all employees from one company dashboard.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Value Slider End -->
+        </div>
+      </div>
+  </section>
+  <!-- Our Value Section End -->
+
+  <!-- Page Wraper -->
+  <div class="page_wrapper">
+
+    <!-- About Us Start-->
+    <section class="about_section row_am" style="overflow:visible">
+      <div class="container">
+        <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+          <span class="title_badge mb-1">About us</span>
+          <h2>The smart card that turns <img src="{% static './home/images/mobileicon.png' %}" alt="image"> every <br>
+            handshake into a <span><img src="{% static './home/images/usericon.png' %}" alt="image"> lasting</span> <span><img
+                src="{% static './home/images/magnet.png' %}" alt="image"> connection</span></h2>
+        </div>
+        <div class="row" style="overflow:visible">
+          <div class="col-lg-4 col-md-6">
+            <ul class="app_statstic" id="counter" data-aos="fade-in" data-aos-duration="1500">
+              <li data-aos="fade-up" data-aos-duration="1500">
+                <div class="text">
+                  <p><span class="counter-value" data-count="10">0</span><span>K+</span></p>
+                  <p>Cards Delivered</p>
+                </div>
+              </li>
+              <li data-aos="fade-up" data-aos-duration="1500">
+                <div class="text">
+                  <p><span class="counter-value" data-count="2300">1500</span><span>+</span></p>
+                  <p>Happy Users</p>
+                </div>
+              </li>
+              <li data-aos="fade-up" data-aos-duration="1500">
+                <div class="text">
+                  <p><span class="counter-value" data-count="150">0</span><span>+</span></p>
+                  <p>Businesses Served</p>
+                </div>
+              </li>
+              <li data-aos="fade-up" data-aos-duration="1500">
+                <div class="text">
+                  <p><span class="counter-value" data-count="50">0 </span><span>K+</span></p>
+                  <p>Profile Taps</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="col-lg-4 col-md-6" style="overflow:visible">
+            <div class="abtImg text-center" data-aos="fade-up" data-aos-duration="1500" style="overflow:visible;position:relative">
+              <img src="{% static './home/images/front_mobile_screen.png' %}" alt="image" style="max-width:1512px!important;width:100%!important">
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <p data-aos="fade-up" data-aos-duration="1500">InfinityCard bridges the gap between physical and digital networking.
+              Whether you're a freelancer, a growing startup, or a Fortune 500 company,
+              our NFC business cards help you make memorable first impressions
+              and capture every connection effortlessly.</p>
+            <div class="cards_showcase" data-aos="fade-up" data-aos-duration="1500" style="text-align:center;overflow:visible">
+              <img src="{% static './home/images/layered_cards.png' %}" alt="InfinityCard NFC cards" class="cards-float-anim">
+            </div>
+                      </div>
+        </div>
+      </div>
+    </section>
+    <!-- About Us End -->
+
+    <!-- Text List flow Section Start -->
+    <div class="text_list_section row_am" data-aos="fade-in" data-aos-duration="1500">
+      <div class="container">
+        <span class="title_badge down_fix">Why choose InfinityCard</span>
+      </div>
+      <div class="slider_block">
+        <div class="owl-carousel owl-theme" id="text_list_flow">
+          <div class="item">
+            <div class="text_block">
+              <span>Tap to share </span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span>Digital profiles</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span>NFC technology </span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span> Zero paper waste</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span> Custom branding</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span> Team management</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span>Instant connections</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="text_block">
+              <span>Works with any phone</span>
+              <span class="mark_star">•</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Text List flow Section End -->
+
+    <!-- Service Section Start -->
+    <section class="row_am service_section">
+      <div class="container">
+        <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+          <span class="title_badge mb-1">Solutions</span>
+          <h2>Powerful <span>features</span> for <br>
+            every professional</h2>
+        </div>
+        <div class="row service_blocks">
+          <div class="col-md-6">
+            <div class="service_text" data-aos="fade-up" data-aos-duration="1500">
+              <div class="service_badge"><i class="icofont-tasks-alt"></i>
+                <span>For Individuals</span>
+              </div>
+              <h2><span>Personal branding</span> made <br>
+                effortless and memorable</h2>
+              <p>Stand out at every networking event, meeting, or conference.
+                Your InfinityCard carries your complete digital identity
+                and shares it instantly with a single tap.</p>
+              <ul class="listing_block">
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-ui-check"></i></span>
+                  </div>
+                  <div class="text">
+                    <h3>Custom digital profile</h3>
+                    <p>Showcase your bio, portfolio, skills, and social
+                      links on a beautifully designed profile page.</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-ui-check"></i></span>
+                  </div>
+                  <div class="text">
+                    <h3>Works with any smartphone</h3>
+                    <p>No app needed. Just tap your card to any NFC-enabled
+                      phone and your profile opens instantly.</p>
+                  </div>
+                </li>
+              </ul>
+              <div class="btn_block">
+                <a href="{% url 'accounts:signup' %}" class="btn puprple_btn ml-0">Get Started</a>
+                <div class="btn_bottom"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="inner_block" data-aos="fade-up" data-aos-duration="1500">
+              <div class="star_img">
+                <img src="{% static './home/images/bigstar.png' %}" alt="" srcset="">
+                <img src="{% static './home/images/smallStar.png' %}" alt="" srcset="">
+              </div>
+              <div class="img">
+                <video autoplay muted loop playsinline style="width:100%;height:auto;border-radius:20px">
+                    <source src="{% static './home/images/customization.mp4' %}" type="video/mp4">
+                  </video>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row service_blocks flex-row-reverse">
+          <div class="col-md-6">
+            <div class="service_text right_side" data-aos="fade-up" data-aos-duration="1500">
+              <div class="service_badge"><i class="icofont-ui-clock"></i>
+                <span>For Businesses</span>
+              </div>
+              <h2><span>Equip your team</span> with
+                smart company cards</h2>
+              <p>Give every employee a branded NFC card that links
+                to their professional profile. Manage your entire
+                team from one centralized dashboard.</p>
+              <ul class="feature_list">
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>Bulk order cards for your whole team at a discount</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>Company-branded profiles with consistent identity</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>Admin dashboard to manage all employee cards and profiles</p>
+                  </div>
+                </li>
+              </ul>
+              <div class="btn_block">
+                <a href="{% url 'accounts:signup' %}" class="btn puprple_btn ml-0">Get Started</a>
+                <div class="btn_bottom"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="inner_block rotate_right" data-aos="fade-up" data-aos-duration="1500">
+              <div class="star_img">
+                <img src="{% static './home/images/bigstar.png' %}" alt="" srcset="">
+                <img src="{% static './home/images/smallStar.png' %}" alt="" srcset="">
+              </div>
+              <div class="img">
+                <img src="{% static './home/images/infinity_card_1.png' %}" alt="">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row service_blocks">
+          <div class="col-md-6">
+            <div class="service_text" data-aos="fade-up" data-aos-duration="1500">
+              <div class="service_badge"><i class="icofont-list"></i> <span>For Corporates</span></div>
+              <h2><span>Enterprise-grade</span> networking
+                at scale</h2>
+              <p>Large organizations trust InfinityCard to equip hundreds
+                of employees with smart NFC cards, ensuring consistent
+                branding and seamless contact sharing across all teams.</p>
+              <ul class="feature_list">
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>Volume pricing for 50+ cards with dedicated account support</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>Centralized team management with role-based access</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="icon">
+                    <span><i class="icofont-check-circled"></i></span>
+                  </div>
+                  <div class="text">
+                    <p>Analytics and insights on card usage across your organization</p>
+                  </div>
+                </li>
+              </ul>
+              <div class="btn_block">
+                <a href="{% url 'core:contact' %}" class="btn puprple_btn ml-0">Contact Sales</a>
+                <div class="btn_bottom"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="inner_block" data-aos="fade-up" data-aos-duration="1500">
+              <div class="star_img">
+                <img src="{% static './home/images/bigstar.png' %}" alt="" srcset="">
+                <img src="{% static './home/images/smallStar.png' %}" alt="" srcset="">
+              </div>
+              <div class="img">
+                <video autoplay muted loop playsinline style="width:100%;height:auto;border-radius:20px">
+                    <source src="{% static './home/images/food_showcase.mp4' %}" type="video/mp4">
+                  </video>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Service Section End -->
+
+    <!-- How It Work Section Start -->
+    <section class="how_it_section">
+      <div class="how_it_inner" data-aos="fade-in" data-aos-duration="1500">
+        <div class="container">
+          <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+            <span class="title_badge">Quick & easy</span>
+            <h2>Get your NFC card in 3 steps</h2>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="steps_block step_border" data-aos="fade-up" data-aos-duration="1500">
+                <div class="steps">
+                  <div class="icon">
+                    <img src="{% static './home/images/howstep1.png' %}" alt="image">
+                  </div>
+                  <div class="text">
+                    <h3>Order your card</h3>
+                    <ul class="social">
+                      <li><a href="#"><i class="icofont-credit-card"></i></a></li>
+                      <li><a href="#"><i class="icofont-box"></i></a></li>
+                      <li><a href="#"><i class="icofont-fast-delivery"></i></a></li>
+                    </ul>
+                    <p>Choose your card design and <br> place your order.
+                      Delivered to your door.</p>
+                  </div>
+                </div>
+                <span class="step">01</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="steps_block step_border" data-aos="fade-up" data-aos-duration="1500">
+                <div class="steps">
+                  <div class="icon">
+                    <img src="{% static './home/images/howstep2.png' %}" alt="image">
+                  </div>
+                  <div class="text">
+                    <h3>Set up your profile</h3>
+                    <span class="tag_text">Takes 2 minutes</span>
+                    <p>Create your digital profile with your <br> bio, links,
+                      portfolio
+                      & contact info</p>
+                  </div>
+                </div>
+                <span class="step">02</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="steps_block" data-aos="fade-up" data-aos-duration="1500">
+                <div class="steps">
+                  <div class="icon">
+                    <img src="{% static './home/images/howstep3.png' %}" alt="image">
+                  </div>
+                  <div class="text">
+                    <h3>Tap & share</h3>
+                    <span class="tag_text">No app needed</span>
+                    <p>Tap your card on any phone & <br> instantly share your full profile</p>
+                  </div>
+                </div>
+                <span class="step">03</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-center">
+            <div class="btn_block">
+              <a href="{% url 'accounts:signup' %}" class="btn puprple_btn ml-0">Get started now</a>
+              <div class="btn_bottom"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- How It Work Section End -->
+  </div>
+  <!-- Wraper End -->
+
+  <!-- Positive Reviews Section Start -->
+  <section class="review_section row_am">
+    <div class="container">
+      <div class="positive_inner">
+        <div class="row">
+          <div class="col-md-6 sticky-top">
+            <div class="sidebar_text" >
+              <div class="section_title text-left">
+                <span class="title_badge">Reviews</span>
+                <h2><span>What our users </span> <br>
+                  are saying</h2>
+              </div>
+              <div class="google_rating">
+                <div class="star">
+                  <span><i class="icofont-star"></i></span>
+                  <span><i class="icofont-star"></i></span>
+                  <span><i class="icofont-star"></i></span>
+                  <span><i class="icofont-star"></i></span>
+                  <span><i class="icofont-star"></i></span>
+                </div>
+                <p>4.8/5.0 Rated on <img class="img-fluid" src="{% static './home/images/google.png' %}" alt="image"></p>
+              </div>
+              <div class="user_review">
+                <p>2300+ <a href="#">Total user reviews <i class="icofont-arrow-right"></i></a></p>
+              </div>
+              <div class="smiley_icon"><img src="{% static './home/images/smily.png' %}" alt="image"></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="review_side">
+              {% for testimonial in homepage_testimonials %}
+              <div class="review_block" data-aos="fade-up" data-aos-duration="1500">
+                <div class="coustomer_info">
+                  <div class="avtar">
+                    {% if testimonial.author_photo %}
+                    <img src="{{ testimonial.author_photo.url }}" alt="{{ testimonial.author_name }}">
+                    {% else %}
+                    <img src="{% static './home/images/review1.png' %}" alt="{{ testimonial.author_name }}">
+                    {% endif %}
+                    <div class="text">
+                      <h3>{{ testimonial.author_name }}</h3>
+                      <span>{{ testimonial.author_role }}{% if testimonial.author_company %}, {{ testimonial.author_company }}{% endif %}</span>
+                    </div>
+                  </div>
+                  <div class="star">
+                    <span><i class="icofont-star"></i></span>
+                    <span><i class="icofont-star"></i></span>
+                    <span><i class="icofont-star"></i></span>
+                    <span><i class="icofont-star"></i></span>
+                    <span><i class="icofont-star"></i></span>
+                  </div>
+                </div>
+                <p>{{ testimonial.content|linebreaks }}</p>
+              </div>
+              {% empty %}
+              <!-- Fallback testimonials if none in database -->
+              <div class="review_block" data-aos="fade-up" data-aos-duration="1500">
+                <div class="coustomer_info">
+                  <div class="avtar">
+                    <img src="{% static './home/images/review1.png' %}" alt="image">
+                    <div class="text">
+                      <h3>Tendai Moyo</h3>
+                      <span>Founder, Kuza Digital</span>
+                    </div>
+                  </div>
+                  <div class="star">
+                    <span><i class="icofont-star"></i></span>
+                    <span><i class="icofont-star"></i></span>
+                    <span><i class="icofont-star"></i></span>
+                    <span><i class="icofont-star"></i></span>
+                    <span><i class="icofont-star"></i></span>
+                  </div>
+                </div>
+                <p>InfinityCard completely changed how our team networks at events.
+                  We ordered 30 cards for the sales team and the response
+                  from prospects has been incredible. People are genuinely impressed
+                  when we tap and share
+                  our profiles instantly. It's a conversation starter on its own.</p>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Positive Reviews Section End -->
+
+  <!-- Page Wraper -->
+  <div class="page_wrapper">
+
+    <!-- Our Client -->
+    <section class="row_am our_client">
+      <div class="container">
+        <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+          <span class="title_badge">Trusted by</span>
+          <h2>
+            <span class="d-block">Businesses worldwide</span>
+            trust InfinityCard
+          </h2>
+        </div>
+        <!-- Our Client List -->
+        <ul class="client_list">
+          {% for logo in partner_logos %}
+          <li>
+            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
+              {% if logo.website_url %}
+              <a href="{{ logo.website_url }}" target="_blank" rel="noopener noreferrer">
+                <img src="{{ logo.logo.url }}" alt="{{ logo.name }}">
+              </a>
+              {% else %}
+              <img src="{{ logo.logo.url }}" alt="{{ logo.name }}">
+              {% endif %}
+            </div>
+          </li>
+          {% empty %}
+          <li>
+            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
+              <img src="{% static './home/images/paypal.png' %}" alt="image">
+            </div>
+          </li>
+          <li>
+            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
+              <img src="{% static './home/images/spoty.png' %}" alt="image">
+            </div>
+          </li>
+          <li>
+            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
+              <img src="{% static './home/images/shopboat.png' %}" alt="image">
+            </div>
+          </li>
+          <li>
+            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
+              <img src="{% static './home/images/slack.png' %}" alt="image">
+            </div>
+          </li>
+          <li>
+            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
+              <img src="{% static './home/images/envato.png' %}" alt="image">
+            </div>
+          </li>
+          <li>
+            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
+              <img src="{% static './home/images/jquery.png' %}" alt="image">
+            </div>
+          </li>
+          <li>
+            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
+              <img src="{% static './home/images/woocommerce.png' %}" alt="image">
+            </div>
+          </li>
+          <li>
+            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
+              <img src="{% static './home/images/themeforest.png' %}" alt="image">
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Pricing-Section -->
+    <section class="row_am pricing_section white_text" data-aos="fade-in" data-aos-duration="1500">
+      <div class="pricing_inner">
+        <!-- vertical blure line animation -->
+        <div class='light x1'></div>
+        <div class='light x2'></div>
+        <div class='light x3'></div>
+        <div class='light x4'></div>
+        <div class='light x5'></div>
+        <div class='light x6'></div>
+        <div class='light x7'></div>
+        <div class='light x8'></div>
+        <div class='light x9'></div>
+        <!-- container start -->
+        <div class="container">
+          <div class="section_title" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="300">
+            <span class="title_badge">Pricing</span>
+            <h2>Simple, transparent pricing</h2>
+          </div>
+
+          <!-- Pricing Table Tabs -->
+          <ul class="nav nav-tabs" id="myTab" role="tablist" data-aos="fade-up" data-aos-duration="1500">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="monthly-tab" data-toggle="tab" data-target="#monthly" type="button"
+                role="tab" aria-controls="monthly" aria-selected="true">Monthly</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="yearly-tab" data-toggle="tab" data-target="#yearly" type="button" role="tab"
+                aria-controls="yearly" aria-selected="false">Yearly</button>
+            </li>
+          </ul>
+
+          <!-- Tabing Details -->
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="monthly" role="tabpanel" aria-labelledby="monthly-tab">
+              <!-- pricing box monthly start -->
+              <div class="pricing_pannel">
+                <div class="row">
+                  {% for plan in plans %}
+                  <div class="col-md-4">
+                    <div class="pannel_block{% if plan.is_highlighted %} highlited_block{% endif %}" data-aos="fade-up" data-aos-duration="1500">
+                      <div class="heading">
+                        <h3>{{ plan.name }}</h3>
+                        {% if plan.subtitle %}<span>{{ plan.subtitle }}</span>{% endif %}
+                        {% if plan.badge_label %}<span class="offer">{{ plan.badge_label }}</span>{% endif %}
+                      </div>
+                      <div class="pricing">
+                        <h3>${{ plan.price|floatformat:0 }} <span>/month</span></h3>
+                      </div>
+                      <ul class="features">
+                        {% for feat in plan.display_features %}
+                        <li>
+                          <span class="icon"><i class="icofont-{% if feat.included %}check{% else %}close{% endif %}-circled"></i></span>
+                          <p>{{ feat.text }}</p>
+                        </li>
+                        {% endfor %}
+                      </ul>
+                      <div class="btn_block{% if plan.is_highlighted %} white_btn{% endif %}">
+                        <a href="{% url 'accounts:signup' %}" class="btn puprple_btn ml-0">Get Started</a>
+                        <div class="btn_bottom"></div>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <!-- pricing box monthly end -->
+            <!-- pricing box yearly start -->
+            <div class="tab-pane fade" id="yearly" role="tabpanel" aria-labelledby="yearly-tab">
+              <div class="row">
+                {% for plan in plans %}
+                <div class="col-md-4">
+                  <div class="pannel_block{% if plan.is_highlighted %} highlited_block{% endif %}">
+                    <div class="heading">
+                      <h3>{{ plan.name }}</h3>
+                      {% if plan.subtitle %}<span>{{ plan.subtitle }}</span>{% endif %}
+                      {% if plan.is_highlighted and plan.yearly_discount_percent %}<span class="offer">Save {{ plan.yearly_discount_percent }}%</span>{% endif %}
+                    </div>
+                    <div class="pricing">
+                      <h3>${{ plan.yearly_price|floatformat:0 }} <span>/year</span></h3>
+                    </div>
+                    <ul class="features">
+                      {% for feat in plan.display_features %}
+                      <li>
+                        <span class="icon"><i class="icofont-{% if feat.included %}check{% else %}close{% endif %}-circled"></i></span>
+                        <p>{{ feat.text }}</p>
+                      </li>
+                      {% endfor %}
+                    </ul>
+                    <div class="btn_block{% if plan.is_highlighted %} white_btn{% endif %}">
+                      <a href="{% url 'accounts:signup' %}" class="btn puprple_btn ml-0">Get Started</a>
+                      <div class="btn_bottom"></div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <!-- pricing box yearly end -->
+
+            <p class="contact_text text-center" >Need a
+              custom solution? <a href="{% url 'core:contact' %}">Contact us</a> for tailored enterprise packages</p>
+          </div>
+        </div>
+      </div>
+      <!-- container start end -->
+    </section>
+    <!-- Pricing-Section end -->
+
+    <!-- Video Testimonials Section start -->
+    <section class="row_am interface_section">
+      <div class="container-fluid">
+        <div class="section_title" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="300">
+          <span class="title_badge">Testimonials</span>
+          <h2>Real <span>customers</span> who love InfinityCard</h2>
+        </div>
+
+        <!-- Spotlight Video Carousel -->
+        <div class="vt-spotlight-wrap" data-aos="fade-up" data-aos-duration="1500">
+          <div class="vt-spotlight" id="vtSpotlight">
+            {% if testimonials %}
+            {% for t in testimonials %}
+            <div class="vt-slide" data-video="{{ t.video_display_url }}" data-name="{{ t.name }}" data-review="{{ t.review }}" data-date="{{ t.date_label }}">
+              <div class="vt-slide-inner">
+                {% if t.thumbnail %}<img src="{{ t.thumbnail.url }}" alt="{{ t.name }}">{% else %}<img src="{% static './home/images/intrscrn1.png' %}" alt="{{ t.name }}">{% endif %}
+                <div class="vt-play-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 20,12 8,19"/></svg></div>
+                <div class="vt-slide-info"><p class="vt-sname">{{ t.name }} {% if t.is_verified %}<span class="vt-vbadge">&#10003;</span>{% endif %}</p><span class="vt-sstars">{% for i in "12345" %}{% if forloop.counter <= t.rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}</span></div>
+              </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="vt-slide" data-video="" data-name="Daniel M." data-review="The NFC card from InfinityCard has completely transformed how I network. I just tap my card and my entire portfolio is shared instantly. People are always impressed!" data-date="02/2026">
+              <div class="vt-slide-inner">
+                <img src="{% static './home/images/intrscrn1.png' %}" alt="Daniel M.">
+                <div class="vt-play-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 20,12 8,19"/></svg></div>
+                <div class="vt-slide-info"><p class="vt-sname">Daniel M. <span class="vt-vbadge">&#10003;</span></p><span class="vt-sstars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+              </div>
+            </div>
+            <div class="vt-slide" data-video="" data-name="Sarah K." data-review="We ordered 20 cards for our sales team and the results have been phenomenal. Our conversion rate from networking events jumped by 35%. Best investment we've made this year." data-date="01/2026">
+              <div class="vt-slide-inner">
+                <img src="{% static './home/images/intrscrn2.png' %}" alt="Sarah K.">
+                <div class="vt-play-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 20,12 8,19"/></svg></div>
+                <div class="vt-slide-info"><p class="vt-sname">Sarah K. <span class="vt-vbadge">&#10003;</span></p><span class="vt-sstars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+              </div>
+            </div>
+            <div class="vt-slide" data-video="" data-name="Tendai C." data-review="As a freelance designer, first impressions are everything. My InfinityCard lets me share my full portfolio, socials, and contact info with one tap. I've landed 3 new clients since getting it!" data-date="03/2026">
+              <div class="vt-slide-inner">
+                <img src="{% static './home/images/intrscrn3.png' %}" alt="Tendai C.">
+                <div class="vt-play-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 20,12 8,19"/></svg></div>
+                <div class="vt-slide-info"><p class="vt-sname">Tendai C. <span class="vt-vbadge">&#10003;</span></p><span class="vt-sstars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+              </div>
+            </div>
+            <div class="vt-slide" data-video="" data-name="Andrea L." data-review="I run a real estate agency and all my agents now carry InfinityCards. Clients love the modern, professional touch. We stand out from every other agent at open houses." data-date="02/2026">
+              <div class="vt-slide-inner">
+                <img src="{% static './home/images/intrscrn4.png' %}" alt="Andrea L.">
+                <div class="vt-play-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 20,12 8,19"/></svg></div>
+                <div class="vt-slide-info"><p class="vt-sname">Andrea L. <span class="vt-vbadge">&#10003;</span></p><span class="vt-sstars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+              </div>
+            </div>
+            <div class="vt-slide" data-video="" data-name="Chloe B." data-review="Switched from paper cards to InfinityCard and never looked back. It's eco-friendly, always up-to-date, and the tap-to-share feature blows everyone's mind at conferences." data-date="01/2026">
+              <div class="vt-slide-inner">
+                <img src="{% static './home/images/intrscrn5.png' %}" alt="Chloe B.">
+                <div class="vt-play-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 20,12 8,19"/></svg></div>
+                <div class="vt-slide-info"><p class="vt-sname">Chloe B. <span class="vt-vbadge">&#10003;</span></p><span class="vt-sstars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          <button class="vt-nav-btn vt-nav-prev" id="vtPrev" aria-label="Previous">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="14 4 6 10 14 16"/></svg>
+          </button>
+          <button class="vt-nav-btn vt-nav-next" id="vtNext" aria-label="Next">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 4 16 10 8 16"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Video Testimonial Modal -->
+    <div class="vt-modal-overlay" id="vtModal">
+      <div class="vt-modal">
+        <button class="vt-modal-close" id="vtModalClose">&times;</button>
+        <div class="vt-modal-body">
+          <div class="vt-modal-video">
+            <video id="vtVideo" playsinline controls></video>
+            <div class="vt-modal-novideo" id="vtNoVideo">
+              <svg width="64" height="64" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="8,5 20,12 8,19" fill="none"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
+              <p>Video coming soon</p>
+            </div>
+          </div>
+          <div class="vt-modal-review">
+            <div class="vt-modal-review-header">
+              <span class="vt-modal-reviewer" id="vtReviewer"></span>
+              <span class="vt-modal-verified"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" fill="none" stroke="#4F46E5" stroke-width="2"/><path d="M9 12l2 2 4-4" fill="none" stroke="#4F46E5" stroke-width="2"/></svg> Verified</span>
+              <span class="vt-modal-date" id="vtDate"></span>
+            </div>
+            <div class="vt-modal-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <p class="vt-modal-text" id="vtReviewText"></p>
+            <a href="{% url 'cards:ecommerce_store' %}" class="vt-modal-cta">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              View product
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Testimonial Styles -->
+    <style>
+    .vt-spotlight-wrap{position:relative;max-width:1200px;margin:48px auto 0;padding:0 60px;overflow:hidden}
+    .vt-spotlight{position:relative;width:255px;height:460px;margin:0 auto}
+    .vt-slide{position:absolute;top:0;left:0;width:255px;height:460px;transition:transform .5s ease,opacity .5s ease;
+      transform-origin:center center;cursor:pointer;border-radius:20px;overflow:hidden;will-change:transform,opacity}
+    .vt-slide-inner{position:relative;width:100%;height:100%;border-radius:20px;overflow:hidden;background:#111}
+    .vt-slide-inner img{width:100%;height:100%;object-fit:cover;display:block}
+    .vt-play-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;
+      background:rgba(0,0,0,.45);border:2.5px solid rgba(255,255,255,.8);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);transition:all .25s}
+    .vt-play-icon svg{margin-left:3px}
+    .vt-slide:hover .vt-play-icon{background:rgba(79,70,229,.7);border-color:#fff;transform:translate(-50%,-50%) scale(1.1)}
+    .vt-slide-info{position:absolute;bottom:0;left:0;right:0;padding:14px 12px;
+      background:linear-gradient(transparent,rgba(0,0,0,.7));text-align:center}
+    .vt-sname{margin:0;font-size:14px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;gap:4px}
+    .vt-vbadge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;
+      border-radius:50%;background:#4F46E5;color:#fff;font-size:10px;font-weight:700;line-height:1}
+    .vt-sstars{color:#FBBF24;font-size:13px;letter-spacing:2px}
+
+    .vt-nav-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:20;width:44px;height:44px;
+      border-radius:50%;border:1px solid rgba(255,255,255,.1);background:#1A1A1A;box-shadow:0 4px 16px rgba(0,0,0,.4);
+      cursor:pointer;display:flex;align-items:center;justify-content:center;color:#F1F5F9;transition:all .2s}
+    .vt-nav-btn:hover{box-shadow:0 4px 20px rgba(0,0,0,.5);transform:translateY(-50%) scale(1.08);background:#222}
+    .vt-nav-prev{left:0}
+    .vt-nav-next{right:0}
+
+    /* Modal */
+    .vt-modal-overlay{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.75);
+      backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px}
+    .vt-modal-overlay.active{display:flex}
+    .vt-modal{background:#1A1A1A;border-radius:20px;max-width:820px;width:100%;max-height:90vh;
+      overflow:hidden;position:relative;box-shadow:0 32px 64px rgba(0,0,0,.5);display:flex;border:1px solid rgba(255,255,255,.08)}
+    .vt-modal-close{position:absolute;top:12px;right:16px;z-index:10;width:36px;height:36px;
+      border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;font-size:22px;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background .2s}
+    .vt-modal-close:hover{background:rgba(0,0,0,.8)}
+    .vt-modal-body{display:flex;width:100%;min-height:420px}
+    .vt-modal-video{flex:0 0 52%;background:#000;position:relative;display:flex;align-items:center;justify-content:center}
+    .vt-modal-video video{width:100%;height:100%;object-fit:cover}
+    .vt-modal-novideo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;gap:12px;color:rgba(255,255,255,.5);font-size:15px;background:#111}
+    .vt-modal-novideo.hidden{display:none}
+    .vt-modal-review{flex:1;padding:32px 28px;display:flex;flex-direction:column;gap:16px}
+    .vt-modal-review-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .vt-modal-reviewer{font-size:18px;font-weight:800;color:#F1F5F9}
+    .vt-modal-verified{display:flex;align-items:center;gap:3px;font-size:12px;font-weight:600;color:#A78BFA}
+    .vt-modal-date{font-size:12px;color:rgba(255,255,255,.35);margin-left:auto}
+    .vt-modal-stars{color:#FBBF24;font-size:18px;letter-spacing:3px}
+    .vt-modal-text{font-size:15px;line-height:1.75;color:rgba(255,255,255,.6);flex:1}
+    .vt-modal-cta{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;
+      background:rgba(167,139,250,.1);color:#A78BFA;font-size:13px;font-weight:700;text-decoration:none;
+      border:1px solid rgba(167,139,250,.2);transition:all .2s;align-self:flex-start}
+    .vt-modal-cta:hover{background:rgba(167,139,250,.2);border-color:rgba(167,139,250,.3);color:#C4B5FD;text-decoration:none}
+
+    @media(max-width:992px){
+      .vt-spotlight-wrap{padding:0 48px}
+      .vt-spotlight{width:220px;height:396px}
+      .vt-slide{width:220px;height:396px}
+      .vt-modal{flex-direction:column;max-width:480px}
+      .vt-modal-body{flex-direction:column}
+      .vt-modal-video{flex:0 0 auto;aspect-ratio:9/12;max-height:50vh}
+    }
+    @media(max-width:600px){
+      .vt-spotlight-wrap{padding:0 36px}
+      .vt-spotlight{width:180px;height:324px}
+      .vt-slide{width:180px;height:324px}
+      .vt-nav-btn{width:36px;height:36px}
+    }
+    </style>
+
+    <!-- Video Testimonial JS -->
+    <script>
+    (function(){
+      var slides=Array.prototype.slice.call(document.querySelectorAll('.vt-slide'));
+      var total=slides.length;
+      var activeIdx=0;
+      var autoTimer=null;
+      var AUTO_DELAY=3000;
+      var SCALE_STEP=0.106275;
+      var TRANSLATE_STEP=0.85;
+
+      function layout(){
+        var sw=slides[0].offsetWidth;
+        var gap=sw*TRANSLATE_STEP;
+        for(var i=0;i<total;i++){
+          var offset=i-activeIdx;
+          if(offset>Math.floor(total/2)) offset-=total;
+          if(offset<-Math.floor(total/2)) offset+=total;
+          var absOff=Math.abs(offset);
+          var sc=Math.max(0,1-absOff*SCALE_STEP);
+          var tx=offset*gap;
+          var op=absOff>4?0:1;
+          var z=total-absOff;
+          slides[i].style.transform='translate('+tx+'px,0) scale('+sc.toFixed(4)+')';
+          slides[i].style.opacity=op;
+          slides[i].style.zIndex=z;
+          slides[i].style.pointerEvents=(absOff<=1)?'auto':'none';
+        }
+      }
+
+      function goTo(idx){
+        activeIdx=((idx%total)+total)%total;
+        layout();
+      }
+
+      function autoSlide(){
+        autoTimer=setInterval(function(){goTo(activeIdx+1)},AUTO_DELAY);
+      }
+
+      function stopAuto(){if(autoTimer){clearInterval(autoTimer);autoTimer=null;}}
+      function restartAuto(){stopAuto();autoSlide();}
+
+      document.getElementById('vtPrev').addEventListener('click',function(){stopAuto();goTo(activeIdx-1);autoSlide();});
+      document.getElementById('vtNext').addEventListener('click',function(){stopAuto();goTo(activeIdx+1);autoSlide();});
+
+      layout();
+      autoSlide();
+
+      /* Modal */
+      var modal=document.getElementById('vtModal');
+      var video=document.getElementById('vtVideo');
+      var noVid=document.getElementById('vtNoVideo');
+      var reviewer=document.getElementById('vtReviewer');
+      var reviewText=document.getElementById('vtReviewText');
+      var vtDate=document.getElementById('vtDate');
+      var closeBtn=document.getElementById('vtModalClose');
+
+      slides.forEach(function(slide){
+        slide.addEventListener('click',function(){
+          var src=slide.getAttribute('data-video');
+          var name=slide.getAttribute('data-name');
+          var review=slide.getAttribute('data-review');
+          var date=slide.getAttribute('data-date');
+          reviewer.textContent=name;
+          reviewText.textContent=review;
+          vtDate.textContent=date;
+          if(src){
+            video.src=src;video.style.display='block';
+            noVid.classList.add('hidden');video.play();
+          }else{
+            video.style.display='none';video.src='';
+            noVid.classList.remove('hidden');
+          }
+          modal.classList.add('active');
+          document.body.style.overflow='hidden';
+          stopAuto();
+        });
+      });
+
+      function closeModal(){
+        modal.classList.remove('active');
+        video.pause();video.src='';
+        document.body.style.overflow='';
+        restartAuto();
+      }
+      closeBtn.addEventListener('click',closeModal);
+      modal.addEventListener('click',function(e){if(e.target===modal)closeModal()});
+      document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.classList.contains('active'))closeModal()});
+    })();
+    </script>
+    <!-- Video Testimonials Section end -->
+
+    <!-- App-Download-Section-Start -->
+    <section class="row_am download_app">
+      <!-- Task Block start -->
+      <div class="task_block" data-aos="fade-up" data-aos-duration="1500">
+        <!-- vertical blure line animation -->
+        <div class='light x1'></div>
+        <div class='light x2'></div>
+        <div class='light x3'></div>
+        <div class='light x4'></div>
+        <div class='light x5'></div>
+        <div class='light x6'></div>
+        <div class='light x7'></div>
+        <div class='light x8'></div>
+        <div class='light x9'></div>
+        <!-- row start -->
+        <div class="row">
+          <div class="col-md-6">
+            <!-- task text -->
+            <div class="task_text">
+              <div class="section_title white_text" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="100">
+                <span class="title_badge">Get started</span>
+                <h2>Ready to upgrade your
+                  networking game?</h2>
+                <p>
+                  Order your InfinityCard today and start making connections
+                  that last. Available for individuals and teams of all sizes.
+                </p>
+              </div>
+              <!-- CTA buttons -->
+              <div class="btn_block">
+                <a href="{% url 'accounts:signup' %}" class="btn puprple_btn ml-0">Get Started</a>
+                <div class="btn_bottom"></div>
+              </div>
+              <div class="btn_block">
+                <a href="{% url 'subscriptions:plans' %}" class="btn puprple_btn ml-0">See Pricing</a>
+                <div class="btn_bottom"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <!-- task images -->
+            <div class="task_img" data-aos="fade-in" data-aos-duration="1500" style="perspective:1000px;display:flex;align-items:flex-end;justify-content:center;overflow:visible">
+              <div class="frame_img" style="text-align:center;position:relative;bottom:-60px">
+                <img src="{% static './home/images/mobile_card.png' %}" alt="InfinityCard NFC tap" class="mobile-card-anim">
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- row end -->
+      </div>
+      <!-- Task Block end -->
+    </section>
+    <!-- App-Download-Section-end -->
+
+    <!-- Blog Section Start -->
+    <section class="blog_section row_am">
+      <div class="container">
+        <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
+          <span class="title_badge">Latest insights</span>
+          <h2>From the <span>InfinityCard</span> blog</h2>
+        </div>
+        <div class="blog_listing">
+          {% for post in blog_posts %}
+          <div class="blog_post" data-aos="fade-up" data-aos-duration="1500" {% if forloop.counter > 1 %}data-aos-delay="200"{% endif %}>
+            <a href="{% url 'core:blog_detail' post.slug %}" class="img">
+              {% if post.cover_image and post.cover_image.name %}
+              <img src="{{ post.cover_image.url }}" alt="{{ post.title }}">
+              {% else %}
+              <img src="{% static './home/images/blog' %}{{ forloop.counter }}.png" alt="{{ post.title }}">
+              {% endif %}
+            </a>
+            <div class="text">
+              <ul class="blog_info">
+                <li>{{ post.published_at|date:"M j, Y" }}</li>
+                <li>{{ post.get_category_display }}</li>
+                <li>{{ post.comments_count }} Comment{{ post.comments_count|pluralize }}</li>
+              </ul>
+              <h3><a href="{% url 'core:blog_detail' post.slug %}">{{ post.title }}</a></h3>
+              <div class="tag_more">
+                <span class="tag">{{ post.get_category_display }}</span>
+                <a href="{% url 'core:blog_detail' post.slug %}">Read more <i class="icofont-arrow-right"></i></a>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="blog_post" data-aos="fade-up" data-aos-duration="1500">
+            <a href="#" class="img">
+              <img src="{% static './home/images/blog1.png' %}" alt="image">
+            </a>
+            <div class="text">
+              <ul class="blog_info">
+                <li>Mar 5, 2026</li>
+                <li>Networking</li>
+                <li>12 Comments</li>
+              </ul>
+              <h3><a href="#">Why NFC business cards are replacing paper cards in 2026</a></h3>
+              <div class="tag_more">
+                <span class="tag">NFC Technology</span>
+                <a href="#">Read more <i class="icofont-arrow-right"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="blog_post" data-aos="fade-up" data-aos-duration="1500">
+            <a href="#" class="img">
+              <img src="{% static './home/images/blog2.png' %}" alt="image">
+            </a>
+            <div class="text">
+              <ul class="blog_info">
+                <li>Feb 20, 2026</li>
+                <li>Business Growth</li>
+                <li>8 Comments</li>
+              </ul>
+              <h3><a href="#">How small businesses use NFC cards to grow their client base by 40%</a></h3>
+              <div class="tag_more">
+                <span class="tag">Business Growth</span>
+                <a href="#">Read more <i class="icofont-arrow-right"></i></a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+    <!-- Blog Section End -->
+{% endblock %}

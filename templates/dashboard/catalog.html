@@ -1,0 +1,148 @@
+{% extends "dashboard/_app_shell.html" %}
+
+{% block title %}Catalog | InfinityCard{% endblock %}
+
+{% block page_header %}
+<h1 class="app-page-title">Catalog</h1>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Categories chip bar ── -->
+<div class="cat-section">
+    <div class="cat-chips">
+        {% for cat in categories %}
+        <div class="cat-chip">
+            <span>{{ cat.name }}</span>
+            <form method="post" style="display:inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete_category">
+                <input type="hidden" name="cat_id" value="{{ cat.id }}">
+                <button type="submit" class="cat-chip-x" aria-label="Remove {{ cat.name }}">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+        <button type="button" class="cat-chip cat-chip--add" id="addCatBtn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            <span>Category</span>
+        </button>
+    </div>
+    <form method="post" class="cat-chip-form" id="addCatForm" style="display:none">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_category">
+        <input type="text" name="cat_name" placeholder="Category name" class="cat-chip-input" required autocomplete="off">
+        <button type="submit" class="cat-chip-save">Add</button>
+    </form>
+</div>
+
+<!-- ── Items by category ── -->
+{% for cat in categories %}
+{% if cat.items.all %}
+<div class="cat-group">
+    <div class="cat-group-label">{{ cat.name }}</div>
+    <div class="cat-grid">
+        {% for item in cat.items.all %}
+        <a href="{% url 'profiles:catalog_item_detail' item.id %}" class="cat-item">
+            <div class="cat-item-img">
+                <img src="{{ item.image.url }}" alt="{{ item.title }}" loading="lazy">
+                {% if item.extra_images.count %}<span class="cat-item-badge">+{{ item.extra_images.count }}</span>{% endif %}
+            </div>
+            <div class="cat-item-body">
+                <h3 class="cat-item-title">{{ item.title }}</h3>
+                {% if item.price %}<span class="cat-item-price">{{ item.price }}</span>{% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+{% if uncategorized %}
+<div class="cat-group">
+    {% if categories %}<div class="cat-group-label">Other</div>{% endif %}
+    <div class="cat-grid">
+        {% for item in uncategorized %}
+        <a href="{% url 'profiles:catalog_item_detail' item.id %}" class="cat-item">
+            <div class="cat-item-img">
+                <img src="{{ item.image.url }}" alt="{{ item.title }}" loading="lazy">
+                {% if item.extra_images.count %}<span class="cat-item-badge">+{{ item.extra_images.count }}</span>{% endif %}
+            </div>
+            <div class="cat-item-body">
+                <h3 class="cat-item-title">{{ item.title }}</h3>
+                {% if item.price %}<span class="cat-item-price">{{ item.price }}</span>{% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if not total_items %}
+<div class="cat-empty">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
+    <p>Your catalog is empty</p>
+</div>
+{% endif %}
+
+<!-- ── Add item ── -->
+<form method="post" enctype="multipart/form-data" class="cat-add-card" id="addItemForm" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="action" value="add_item">
+
+    <div class="cat-add-img-picker">
+        <label for="id_image" class="cat-add-img-label" id="catImgLabel">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            <img id="catImgPreview" style="display:none" alt="Preview">
+        </label>
+        {{ form.image }}
+    </div>
+
+    <div class="cat-add-fields">
+        <div class="cat-add-row">
+            {{ form.title }}
+            {{ form.price }}
+        </div>
+        {{ form.category }}
+    </div>
+
+    <button type="submit" class="btn btn-primary cat-add-btn">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Add Item
+    </button>
+</form>
+
+<script>
+(function() {
+    // Main image preview
+    var input = document.getElementById('id_image');
+    var preview = document.getElementById('catImgPreview');
+    var label = document.getElementById('catImgLabel');
+    if (input) {
+        input.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    label.classList.add('has-image');
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+
+    // Toggle add category inline form
+    var addBtn = document.getElementById('addCatBtn');
+    var addForm = document.getElementById('addCatForm');
+    if (addBtn && addForm) {
+        addBtn.addEventListener('click', function() {
+            addForm.style.display = addForm.style.display === 'none' ? 'flex' : 'none';
+            if (addForm.style.display === 'flex') addForm.querySelector('input[type=text]').focus();
+        });
+    }
+})();
+</script>
+{% endblock %}

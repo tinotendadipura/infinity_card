@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Profile Suspended | InfinityCard</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  background:#F8FAFC;
+  color:#334155;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:24px 16px;
+  line-height:1.5;
+}
+
+/* ── Card ── */
+.sp-card{
+  width:100%;
+  max-width:420px;
+  background:#fff;
+  border-radius:20px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);
+  overflow:hidden;
+  text-align:center;
+}
+
+/* ── Top accent bar ── */
+.sp-accent{
+  height:5px;
+  background:linear-gradient(90deg,#F59E0B 0%,#EF4444 100%);
+}
+
+/* ── Icon area ── */
+.sp-icon-wrap{
+  padding:32px 24px 0;
+}
+.sp-icon{
+  width:64px;height:64px;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.sp-icon.warn{background:#FEF3C7;}
+.sp-icon.err{background:#FEE2E2;}
+.sp-icon svg{width:30px;height:30px;}
+.sp-icon.warn svg{color:#D97706;}
+.sp-icon.err svg{color:#DC2626;}
+
+/* ── Body ── */
+.sp-body{
+  padding:20px 28px 28px;
+}
+.sp-title{
+  font-size:20px;
+  font-weight:800;
+  color:#0F172A;
+  margin-bottom:6px;
+  letter-spacing:-0.02em;
+}
+.sp-subtitle{
+  font-size:13px;
+  font-weight:600;
+  color:#94A3B8;
+  margin-bottom:16px;
+}
+.sp-message{
+  font-size:14px;
+  color:#475569;
+  line-height:1.65;
+  margin-bottom:20px;
+}
+.sp-message strong{color:#0F172A;font-weight:700;}
+
+/* ── Reason badge ── */
+.sp-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+  padding:5px 14px;
+  border-radius:20px;
+  margin-bottom:20px;
+}
+.sp-badge.warn{background:#FEF3C7;color:#B45309;}
+.sp-badge.err{background:#FEE2E2;color:#DC2626;}
+.sp-badge-dot{
+  width:6px;height:6px;
+  border-radius:50%;
+  background:currentColor;
+}
+
+/* ── Divider ── */
+.sp-divider{
+  height:1px;
+  background:#F1F5F9;
+  margin:0 0 20px;
+}
+
+/* ── Info box ── */
+.sp-info{
+  background:#F8FAFC;
+  border-radius:12px;
+  padding:14px 16px;
+  margin-bottom:20px;
+  text-align:left;
+}
+.sp-info-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:12px;
+}
+.sp-info-row+.sp-info-row{margin-top:8px;}
+.sp-info-label{color:#94A3B8;font-weight:600;}
+.sp-info-value{color:#1E293B;font-weight:700;}
+
+/* ── CTA ── */
+.sp-cta{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:11px 28px;
+  font-size:13px;
+  font-weight:700;
+  color:#fff;
+  background:#4F46E5;
+  border:none;
+  border-radius:12px;
+  text-decoration:none;
+  cursor:pointer;
+  transition:background .15s;
+}
+.sp-cta:hover{background:#4338CA;}
+.sp-cta svg{width:14px;height:14px;}
+
+/* ── Footer ── */
+.sp-footer{
+  margin-top:24px;
+  text-align:center;
+}
+.sp-footer-logo{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  font-weight:700;
+  color:#CBD5E1;
+  text-decoration:none;
+  letter-spacing:-0.01em;
+}
+.sp-footer-logo svg{width:16px;height:16px;color:#CBD5E1;}
+.sp-footer-sub{
+  font-size:10px;
+  color:#CBD5E1;
+  margin-top:4px;
+}
+
+/* ── Responsive ── */
+@media(max-width:480px){
+  .sp-card{border-radius:16px;}
+  .sp-body{padding:18px 20px 24px;}
+  .sp-title{font-size:18px;}
+}
+</style>
+</head>
+<body>
+
+<div class="sp-card">
+  <!-- Top accent gradient -->
+  <div class="sp-accent"></div>
+
+  <!-- Icon -->
+  <div class="sp-icon-wrap">
+    {% if reason == 'cancelled' %}
+    <div class="sp-icon warn">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+    </div>
+    {% elif reason == 'suspended' %}
+    <div class="sp-icon warn">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    {% else %}
+    <div class="sp-icon err">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="sp-body">
+    <!-- Title -->
+    <div class="sp-title">Profile Suspended</div>
+    <div class="sp-subtitle">
+      {% if profile.display_name %}{{ profile.display_name }}{% else %}This profile{% endif %}
+    </div>
+
+    <!-- Status badge -->
+    {% if reason == 'cancelled' %}
+    <div class="sp-badge warn"><span class="sp-badge-dot"></span> Subscription Cancelled</div>
+    {% elif reason == 'suspended' %}
+    <div class="sp-badge warn"><span class="sp-badge-dot"></span> Pending Payment</div>
+    {% elif reason == 'expired' %}
+    <div class="sp-badge err"><span class="sp-badge-dot"></span> Subscription Expired</div>
+    {% else %}
+    <div class="sp-badge err"><span class="sp-badge-dot"></span> No Active Subscription</div>
+    {% endif %}
+
+    <!-- Contextual message -->
+    <div class="sp-message">
+      {% if is_company %}
+        {% if reason == 'cancelled' %}
+          The subscription for <strong>{{ owner_name }}</strong> has been cancelled. All profiles managed by this organization are temporarily suspended.
+        {% elif reason == 'suspended' %}
+          The subscription for <strong>{{ owner_name }}</strong> is awaiting payment confirmation. Profiles will be restored once payment is verified.
+        {% elif reason == 'expired' %}
+          The subscription for <strong>{{ owner_name }}</strong> has expired. All profiles managed by this organization are temporarily suspended.
+        {% else %}
+          <strong>{{ owner_name }}</strong> does not have an active billing plan. Profiles will be available once a subscription is activated.
+        {% endif %}
+      {% else %}
+        {% if reason == 'cancelled' %}
+          This profile's subscription has been cancelled and is no longer active. The profile owner can reactivate it at any time.
+        {% elif reason == 'suspended' %}
+          This profile is temporarily on hold while a payment is being verified. It will be restored shortly.
+        {% elif reason == 'expired' %}
+          This profile's subscription has expired. The profile owner can renew it to restore access.
+        {% else %}
+          This profile does not have an active subscription. The profile owner needs to subscribe to make it available.
+        {% endif %}
+      {% endif %}
+    </div>
+
+    <div class="sp-divider"></div>
+
+    <!-- Info box -->
+    <div class="sp-info">
+      <div class="sp-info-row">
+        <span class="sp-info-label">Profile</span>
+        <span class="sp-info-value">{% if profile.display_name %}{{ profile.display_name }}{% else %}Unavailable{% endif %}</span>
+      </div>
+      {% if is_company %}
+      <div class="sp-info-row">
+        <span class="sp-info-label">Organization</span>
+        <span class="sp-info-value">{{ owner_name }}</span>
+      </div>
+      {% endif %}
+      <div class="sp-info-row">
+        <span class="sp-info-label">Status</span>
+        <span class="sp-info-value" style="color:{% if reason == 'cancelled' or reason == 'suspended' %}#D97706{% else %}#DC2626{% endif %};">
+          {% if reason == 'cancelled' %}Cancelled{% elif reason == 'suspended' %}Pending Payment{% elif reason == 'expired' %}Expired{% else %}Inactive{% endif %}
+        </span>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <a href="/" class="sp-cta">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+      Visit InfinityCard
+    </a>
+  </div>
+</div>
+
+<!-- Footer branding -->
+<div class="sp-footer">
+  <a href="/" class="sp-footer-logo">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+    InfinityCard
+  </a>
+  <div class="sp-footer-sub">Smart NFC Business Cards</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,159 @@
+{% extends "dashboard/_app_shell.html" %}
+
+{% block title %}Plans & Pricing | InfinityCard{% endblock %}
+
+{% block page_header %}
+<h1 class="app-page-title">Plans</h1>
+<p class="app-page-subtitle">Simple pricing. No hidden fees. Cancel anytime.</p>
+{% endblock %}
+
+{% block content %}
+
+<!-- ─── Current Plan Banner ─── -->
+{% if subscription %}
+<div class="bl-current">
+    <div class="bl-current-top">
+        <div class="bl-current-info">
+            <div class="bl-current-label">Current Plan</div>
+            <div class="bl-current-name">{{ subscription.plan.name }}</div>
+        </div>
+        <div class="bl-current-right">
+            <span class="bl-status {% if subscription.is_active %}active{% else %}expired{% endif %}">
+                <span class="bl-status-dot"></span>
+                {% if subscription.is_active %}Active{% else %}{{ subscription.get_status_display }}{% endif %}
+            </span>
+        </div>
+    </div>
+    <div class="bl-current-price-row">
+        <div class="bl-current-price">${{ subscription.plan.price }}<span class="bl-current-period">/mo</span></div>
+        {% if subscription.is_active %}
+        <div class="bl-current-remaining">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {{ subscription.days_remaining }} days remaining
+        </div>
+        {% else %}
+        <div class="bl-current-remaining expired">Expired {{ subscription.expires_at|date:"M d, Y" }}</div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ─── Plans Grid ─── -->
+<div class="bl-plans-header">
+    <div class="bl-plans-title">{% if subscription %}Switch Plan{% else %}Choose a Plan{% endif %}</div>
+    <div class="bl-plans-subtitle">Every plan includes a public profile, NFC card linking, and catalog.</div>
+</div>
+
+<div class="bl-plans-toggle" id="billingToggle">
+    <button class="bl-toggle-btn active" data-period="monthly" onclick="switchPeriod('monthly')">Monthly</button>
+    <button class="bl-toggle-btn" data-period="yearly" onclick="switchPeriod('yearly')">
+        Yearly <span class="bl-toggle-save">Save up to 20%</span>
+    </button>
+</div>
+
+<div class="bl-plans-grid">
+    {% for plan in plans %}
+    <div class="bl-plan {% if plan.is_highlighted %}bl-plan-featured{% endif %} {% if subscription and plan.slug == subscription.plan.slug %}bl-plan-active{% endif %}">
+        {% if plan.badge_label %}
+        <div class="bl-plan-badge">{{ plan.badge_label }}</div>
+        {% endif %}
+        <div class="bl-plan-head">
+            <div class="bl-plan-name">{{ plan.name }}</div>
+            {% if plan.description %}
+            <div class="bl-plan-desc">{{ plan.description }}</div>
+            {% else %}
+            <div class="bl-plan-desc">
+                {% if plan.slug == 'starter' %}Perfect for getting started{% elif plan.slug == 'business' %}For growing professionals{% elif plan.slug == 'pro' %}For power users & teams{% else %}{{ plan.name }} plan{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="bl-plan-price">
+            <span class="bl-plan-currency">$</span>
+            <span class="bl-plan-amount" data-monthly="{{ plan.price }}" data-yearly="{{ plan.yearly_monthly_price }}">{{ plan.price }}</span>
+            <span class="bl-plan-period">/mo</span>
+        </div>
+        <div class="bl-plan-features">
+            {% if plan.features.max_images %}
+            <div class="bl-feature">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Up to {{ plan.features.max_images }} images
+            </div>
+            {% endif %}
+            {% if plan.features.analytics %}
+            <div class="bl-feature">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Tap analytics &amp; insights
+            </div>
+            {% else %}
+            <div class="bl-feature disabled">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                No tap analytics
+            </div>
+            {% endif %}
+            {% if plan.features.custom_theme %}
+            <div class="bl-feature">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Custom theme colors
+            </div>
+            {% endif %}
+            <div class="bl-feature">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Public profile page
+            </div>
+            <div class="bl-feature">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                NFC card linking
+            </div>
+            {% if plan.slug == 'pro' %}
+            <div class="bl-feature">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Priority support
+            </div>
+            {% endif %}
+        </div>
+        <div class="bl-plan-cta">
+            {% if subscription and plan.slug == subscription.plan.slug %}
+            <span class="bl-btn bl-btn-current">Current Plan</span>
+            {% else %}
+                {% if plan.paypal_plan_id %}
+                <a href="{% url 'subscriptions:paypal_subscribe' plan.slug %}" class="bl-btn bl-plan-link {% if plan.is_highlighted %}bl-btn-primary{% else %}bl-btn-outline{% endif %}" data-paypal="1" data-paypal-url="{% url 'subscriptions:paypal_subscribe' plan.slug %}" data-direct-url="{% url 'subscriptions:subscribe' plan.slug %}">
+                    <svg fill="none" viewBox="0 0 24 24" width="15" height="15" style="vertical-align:-2px;margin-right:4px;"><path fill="currentColor" d="M19.554 9.488c.121.563.106 1.246-.04 2.063-.582 2.816-2.577 4.376-5.582 4.376h-.376a.68.68 0 00-.67.574l-.04.223-.518 3.283-.026.158a.68.68 0 01-.67.574H9.148a.406.406 0 01-.4-.467l.008-.052.536-3.393.007-.042a.68.68 0 01.67-.574h.45c2.742 0 4.888-1.113 5.516-4.333.262-1.343.126-2.465-.568-3.255a2.76 2.76 0 00-.813-.635zm-2.14-1.868a5.03 5.03 0 00-.622-.107 7.9 7.9 0 00-1.254-.098H11.37a.68.68 0 00-.67.574l-.862 5.468-.025.158a.68.68 0 01.67-.574h1.395c2.742 0 4.888-1.113 5.516-4.333.02-.095.037-.188.052-.279a3.3 3.3 0 00-.508-.254 4.6 4.6 0 00-.524-.175z"/><path fill="currentColor" d="M10.7 8.562a.68.68 0 01.67-.574h4.168c.494 0 .955.032 1.377.098.12.019.238.041.352.067a4.6 4.6 0 01.803.283c.298-1.903-.002-3.2-.976-4.354C16.1 2.852 14.218 2.25 11.745 2.25H6.504a.68.68 0 00-.67.574L3.69 18.17a.563.563 0 00.556.65h4.05l1.017-6.436.387-2.454-.001-.002 1.001-1.366z"/></svg>
+                    {% if subscription %}Switch to {{ plan.name }}{% else %}Get Started{% endif %}
+                </a>
+                {% else %}
+                <a href="{% url 'subscriptions:subscribe' plan.slug %}" class="bl-btn bl-plan-link {% if plan.is_highlighted %}bl-btn-primary{% else %}bl-btn-outline{% endif %}" data-paypal="0" data-direct-url="{% url 'subscriptions:subscribe' plan.slug %}">
+                    {% if subscription %}Switch to {{ plan.name }}{% else %}Get Started{% endif %}
+                </a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div style="height: 2rem;"></div>
+
+<script>
+var currentPeriod = 'monthly';
+function switchPeriod(period) {
+    currentPeriod = period;
+    document.querySelectorAll('.bl-toggle-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-period') === period);
+    });
+    document.querySelectorAll('.bl-plan-amount').forEach(function(el) {
+        var price = period === 'yearly' ? el.getAttribute('data-yearly') : el.getAttribute('data-monthly');
+        el.textContent = price;
+    });
+    document.querySelectorAll('.bl-plan-period').forEach(function(el) {
+        el.textContent = period === 'yearly' ? '/mo (billed yearly)' : '/mo';
+    });
+    document.querySelectorAll('.bl-plan-link').forEach(function(link) {
+        var baseUrl = link.getAttribute('data-paypal') === '1'
+            ? link.getAttribute('data-paypal-url')
+            : link.getAttribute('data-direct-url');
+        link.href = baseUrl + '?period=' + period;
+    });
+}
+</script>
+
+{% endblock %}

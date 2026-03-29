@@ -1,0 +1,539 @@
+{% extends 'pages/home/base.html' %}
+{% load static %}
+
+{% block title %}Features - InfinityCard{% endblock %}
+
+{% block content %}
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --ft-primary:#6366F1;--ft-primary-h:#4F46E5;--ft-accent:#8B5CF6;
+  --ft-bg:#0A0A0A;--ft-surface:#111111;--ft-border:rgba(255,255,255,.08);
+  --ft-text:#F1F5F9;--ft-text2:rgba(255,255,255,.55);--ft-text3:rgba(255,255,255,.3);
+  --ft-radius:16px;
+  --ft-shadow:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);
+  --ft-shadow-lg:0 20px 40px rgba(0,0,0,.4),0 8px 16px rgba(0,0,0,.3);
+}
+
+/* ── Hero ── */
+.ft-hero{
+  background:#030303;
+  color:#fff;padding:0 2rem 5rem;text-align:center;position:relative;overflow:hidden;
+  padding-top:120px;border-radius:0 0 32px 32px;
+}
+.ft-hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,.05) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(244,63,94,.05) 0%,transparent 50%);
+  pointer-events:none;z-index:0}
+.ft-hero::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,#030303,transparent 40%,rgba(3,3,3,.8));
+  pointer-events:none;z-index:1}
+.ft-hero-inner{position:relative;z-index:2;max-width:760px;margin:0 auto}
+.ft-hero-inner > *{opacity:0;transform:translateY(30px);animation:hero-fadeup 1s cubic-bezier(.25,.4,.25,1) forwards}
+.ft-hero-inner > *:nth-child(1){animation-delay:.5s}
+.ft-hero-inner > *:nth-child(2){animation-delay:.7s}
+.ft-hero-inner > *:nth-child(3){animation-delay:.9s}
+.ft-hero-inner > *:nth-child(4){animation-delay:1.1s}
+.ft-hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:100px;
+  font-size:13px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:24px}
+.ft-hero-badge svg{flex-shrink:0}
+.ft-hero h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;line-height:1.15;
+  letter-spacing:-.03em;margin-bottom:20px}
+.ft-hero h1 .ft-h1-line1{display:block;
+  background:linear-gradient(to bottom,#fff,rgba(255,255,255,.8));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ft-hero h1 .ft-h1-line2{display:block;
+  background:linear-gradient(to right,#A5B4FC,rgba(255,255,255,.9),#FDA4AF);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ft-hero p{font-size:clamp(1rem,2vw,1.25rem);line-height:1.7;color:rgba(255,255,255,.4);
+  margin-bottom:32px;max-width:560px;margin-left:auto;margin-right:auto;font-weight:300;letter-spacing:.01em}
+.ft-hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.ft-hero-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:12px;
+  font-size:15px;font-weight:700;text-decoration:none;transition:all .2s;cursor:pointer;border:none;font-family:inherit}
+.ft-hero-btn.primary{background:#4F46E5;color:#fff;box-shadow:0 4px 16px rgba(79,70,229,.35)}
+.ft-hero-btn.primary:hover{background:#4338CA;transform:translateY(-1px);color:#fff;text-decoration:none}
+.ft-hero-btn.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15)}
+.ft-hero-btn.ghost:hover{background:rgba(255,255,255,.14);color:#fff;text-decoration:none}
+
+/* ── Stats bar ── */
+.ft-stats{background:var(--ft-surface);border-bottom:1px solid var(--ft-border);padding:32px 2rem}
+.ft-stats-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap}
+.ft-stat{display:flex;flex-direction:column;align-items:center;gap:4px}
+.ft-stat-val{font-size:1.8rem;font-weight:800;color:var(--ft-primary);letter-spacing:-.02em}
+.ft-stat-label{font-size:13px;color:var(--ft-text3);font-weight:500}
+.ft-stat-divider{width:1px;height:40px;background:var(--ft-border)}
+
+/* ── Section headings ── */
+.ft-section-label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.5px;color:var(--ft-primary);text-align:center;margin-bottom:12px}
+.ft-section-title{font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;text-align:center;
+  color:var(--ft-text);margin-bottom:12px;letter-spacing:-.02em}
+.ft-section-sub{text-align:center;color:var(--ft-text2);font-size:1rem;margin-bottom:56px;
+  max-width:560px;margin-left:auto;margin-right:auto;line-height:1.65}
+
+/* ── Core features grid ── */
+.ft-core{padding:72px 2rem 80px;background:var(--ft-bg)}
+.ft-core-inner{max-width:1100px;margin:0 auto}
+.ft-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+@media(max-width:900px){.ft-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.ft-grid{grid-template-columns:1fr}}
+
+/* ── Feature card ── */
+.ft-card{background:var(--ft-surface);border-radius:var(--ft-radius);border:1.5px solid var(--ft-border);
+  padding:32px 28px;transition:all .3s cubic-bezier(.23,1,.32,1);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.ft-card:hover{transform:translateY(-4px);box-shadow:var(--ft-shadow-lg);border-color:#C7D2FE}
+.ft-card-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px;flex-shrink:0}
+.ft-card-icon svg{width:26px;height:26px;color:#fff}
+.ft-card-icon.ic-indigo{background:linear-gradient(135deg,#818CF8,#6366F1)}
+.ft-card-icon.ic-violet{background:linear-gradient(135deg,#A78BFA,#7C3AED)}
+.ft-card-icon.ic-cyan{background:linear-gradient(135deg,#22D3EE,#06B6D4)}
+.ft-card-icon.ic-emerald{background:linear-gradient(135deg,#34D399,#10B981)}
+.ft-card-icon.ic-amber{background:linear-gradient(135deg,#FBBF24,#F59E0B)}
+.ft-card-icon.ic-rose{background:linear-gradient(135deg,#FB7185,#F43F5E)}
+.ft-card-icon.ic-blue{background:linear-gradient(135deg,#60A5FA,#3B82F6)}
+.ft-card-icon.ic-orange{background:linear-gradient(135deg,#FB923C,#F97316)}
+.ft-card-icon.ic-teal{background:linear-gradient(135deg,#2DD4BF,#14B8A6)}
+.ft-card h3{font-size:17px;font-weight:700;color:var(--ft-text);margin-bottom:10px;line-height:1.3}
+.ft-card p{font-size:14px;color:var(--ft-text2);line-height:1.7;flex:1}
+.ft-card-tag{display:inline-flex;align-items:center;gap:4px;margin-top:16px;padding:4px 12px;
+  border-radius:100px;font-size:11px;font-weight:600;background:rgba(79,70,229,.06);color:var(--ft-primary)}
+
+/* ── How it works ── */
+.ft-how{padding:72px 2rem 80px;background:var(--ft-surface)}
+.ft-how-inner{max-width:900px;margin:0 auto}
+.ft-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;position:relative}
+@media(max-width:700px){.ft-steps{grid-template-columns:1fr;gap:24px}}
+.ft-step{text-align:center;position:relative}
+.ft-step-num{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 20px;
+  font-size:20px;font-weight:800;color:var(--ft-primary);border:2px solid #C7D2FE}
+.ft-step h3{font-size:16px;font-weight:700;color:var(--ft-text);margin-bottom:8px}
+.ft-step p{font-size:14px;color:var(--ft-text2);line-height:1.65;max-width:260px;margin:0 auto}
+.ft-step-connector{display:none}
+@media(min-width:701px){
+  .ft-step-connector{display:block;position:absolute;top:28px;left:calc(50% + 36px);width:calc(100% - 72px);
+    height:2px;background:repeating-linear-gradient(90deg,#C7D2FE 0,#C7D2FE 6px,transparent 6px,transparent 12px)}
+}
+
+/* ── Highlight feature (alternating rows) ── */
+.ft-highlight{padding:72px 2rem;background:var(--ft-bg)}
+.ft-highlight:nth-child(even){background:var(--ft-surface)}
+.ft-highlight-inner{max-width:1060px;margin:0 auto;display:flex;align-items:center;gap:64px}
+.ft-highlight-inner.reverse{flex-direction:row-reverse}
+@media(max-width:800px){.ft-highlight-inner,.ft-highlight-inner.reverse{flex-direction:column;gap:32px}}
+.ft-highlight-visual{flex:0 0 420px;max-width:420px;position:relative}
+@media(max-width:800px){.ft-highlight-visual{flex:none;max-width:100%;width:100%}}
+.ft-highlight-mockup{width:100%;border-radius:20px;background:linear-gradient(160deg,#0F172A,#1E293B);
+  border:1.5px solid rgba(255,255,255,.08);padding:24px;box-shadow:0 24px 48px rgba(0,0,0,.12);overflow:hidden}
+.ft-mockup-bar{display:flex;gap:6px;margin-bottom:16px}
+.ft-mockup-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.15)}
+.ft-mockup-content{display:flex;flex-direction:column;gap:10px}
+.ft-mockup-line{height:10px;border-radius:6px;background:rgba(255,255,255,.08)}
+.ft-mockup-line.w60{width:60%}
+.ft-mockup-line.w80{width:80%}
+.ft-mockup-line.w45{width:45%}
+.ft-mockup-line.accent{background:linear-gradient(90deg,rgba(79,70,229,.4),rgba(124,58,237,.3));height:12px}
+.ft-mockup-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.ft-mockup-box{height:48px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06)}
+.ft-highlight-text{flex:1;min-width:0}
+.ft-highlight-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:100px;
+  font-size:12px;font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:.5px}
+.ft-highlight-tag.tag-indigo{background:rgba(79,70,229,.08);color:#4F46E5}
+.ft-highlight-tag.tag-emerald{background:rgba(16,185,129,.08);color:#059669}
+.ft-highlight-tag.tag-amber{background:rgba(245,158,11,.08);color:#D97706}
+.ft-highlight-text h2{font-size:clamp(1.5rem,2.5vw,2rem);font-weight:800;color:var(--ft-text);
+  margin-bottom:14px;letter-spacing:-.02em;line-height:1.2}
+.ft-highlight-text>p{font-size:15px;color:var(--ft-text2);line-height:1.7;margin-bottom:24px}
+.ft-check-list{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
+.ft-check-list li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--ft-text2);line-height:1.6}
+.ft-check-icon{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#D1FAE5,#A7F3D0);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.ft-check-icon svg{width:12px;height:12px;color:#059669}
+
+/* ── Plans teaser ── */
+.ft-plans{padding:72px 2rem 80px;background:var(--ft-surface)}
+.ft-plans-inner{max-width:900px;margin:0 auto}
+.ft-plan-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:700px){.ft-plan-cards{grid-template-columns:1fr;max-width:360px;margin:0 auto}}
+.ft-plan-card{border:1.5px solid var(--ft-border);border-radius:var(--ft-radius);padding:28px 24px;
+  text-align:center;transition:all .3s;background:var(--ft-surface)}
+.ft-plan-card:hover{border-color:rgba(99,102,241,.3);box-shadow:var(--ft-shadow-lg)}
+.ft-plan-card.featured{border-color:var(--ft-primary);background:linear-gradient(180deg,rgba(99,102,241,.12),rgba(99,102,241,.04));position:relative;
+  box-shadow:0 0 40px rgba(99,102,241,.1),var(--ft-shadow)}
+.ft-plan-card.featured::before{content:'Most Popular';position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  padding:4px 14px;border-radius:100px;background:var(--ft-primary);color:#fff;font-size:11px;font-weight:700;white-space:nowrap}
+.ft-plan-name{font-size:18px;font-weight:700;color:var(--ft-text);margin-bottom:8px}
+.ft-plan-desc{font-size:13px;color:var(--ft-text3);margin-bottom:16px;line-height:1.5}
+.ft-plan-features{list-style:none;padding:0;margin:0 0 20px;text-align:left;display:flex;flex-direction:column;gap:8px}
+.ft-plan-features li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ft-text2)}
+.ft-plan-features li svg{width:16px;height:16px;color:#10B981;flex-shrink:0}
+.ft-plan-btn{display:block;padding:10px;border-radius:10px;font-size:13px;font-weight:600;
+  text-decoration:none;transition:all .2s;text-align:center}
+.ft-plan-btn.outline{border:1.5px solid var(--ft-border);color:var(--ft-text2);background:none}
+.ft-plan-btn.outline:hover{border-color:var(--ft-primary);color:var(--ft-primary);text-decoration:none}
+.ft-plan-btn.solid{border:none;background:var(--ft-primary);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.25)}
+.ft-plan-btn.solid:hover{background:var(--ft-primary-h);text-decoration:none;color:#fff}
+
+/* ── CTA Banner — now uses global .bp-cta from base.html ── */
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  .ft-hero{padding-top:100px;padding-bottom:3rem}
+  .ft-stats-inner{gap:24px}
+  .ft-stat-divider{display:none}
+}
+@media(max-width:480px){
+  .ft-hero-actions,.ft-cta-actions{flex-direction:column;align-items:center}
+}
+</style>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- HERO -->
+<!-- ══════════════════════════════════════════════════ -->
+<section class="ft-hero">
+  <div class="hero-shapes">
+    <div class="hero-shape hero-shape-1" style="--r:12deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-2" style="--r:-15deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-3" style="--r:-8deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-4" style="--r:20deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-5" style="--r:-25deg"><div class="hero-shape-inner"></div></div>
+  </div>
+  <div class="ft-hero-inner">
+    <div class="ft-hero-badge">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg>
+      Platform Features
+    </div>
+    <h1><span class="ft-h1-line1">Everything You Need to</span><span class="ft-h1-line2">Stand Out</span></h1>
+    <p>One NFC card. One tap. A complete digital identity with analytics, social links, catalogs, and more — all managed from your dashboard.</p>
+    <div class="ft-hero-actions">
+      <a href="{% url 'accounts:signup' %}" class="ft-hero-btn primary">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
+        Get Started Free
+      </a>
+      <a href="{% url 'core:pricing' %}" class="ft-hero-btn ghost">View Pricing</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- STATS BAR -->
+<!-- ══════════════════════════════════════════════════ -->
+<section class="ft-stats">
+  <div class="ft-stats-inner">
+    <div class="ft-stat"><div class="ft-stat-val">7+</div><div class="ft-stat-label">Industry Templates</div></div>
+    <div class="ft-stat-divider"></div>
+    <div class="ft-stat"><div class="ft-stat-val">20+</div><div class="ft-stat-label">Profile Sections</div></div>
+    <div class="ft-stat-divider"></div>
+    <div class="ft-stat"><div class="ft-stat-val">100%</div><div class="ft-stat-label">No App Needed</div></div>
+    <div class="ft-stat-divider"></div>
+    <div class="ft-stat"><div class="ft-stat-val">1 Tap</div><div class="ft-stat-label">Instant Share</div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- CORE FEATURES GRID -->
+<!-- ══════════════════════════════════════════════════ -->
+<section class="ft-core">
+  <div class="ft-core-inner">
+    <span class="ft-section-label">Core Features</span>
+    <h2 class="ft-section-title">Built for modern professionals</h2>
+    <p class="ft-section-sub">Everything you need to make a lasting first impression, all from a single NFC card tap.</p>
+
+    <div class="ft-grid">
+
+      <!-- 1 · NFC Tap to Share -->
+      <div class="ft-card" data-aos="fade-up" data-aos-duration="600">
+        <div class="ft-card-icon ic-indigo">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0"/></svg>
+        </div>
+        <h3>NFC Tap to Share</h3>
+        <p>Hold your card to any smartphone and your full digital profile loads instantly. No app downloads, no QR scanning — just tap and go.</p>
+      </div>
+
+      <!-- 2 · Custom Profiles -->
+      <div class="ft-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
+        <div class="ft-card-icon ic-violet">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        </div>
+        <h3>Custom Profiles</h3>
+        <p>Build a rich digital identity with your bio, skills, experience, education, services, testimonials, and more — all fully customizable.</p>
+      </div>
+
+      <!-- 3 · Product Catalog -->
+      <div class="ft-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
+        <div class="ft-card-icon ic-orange">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016A3.001 3.001 0 0021 9.349m-18 0a2.999 2.999 0 002.25-1.015 2.993 2.993 0 002.25 1.015c.896 0 1.7-.393 2.25-1.015A2.993 2.993 0 0012 9.349m0 0a2.999 2.999 0 002.25-1.015A2.993 2.993 0 0016.5 9.349m-13.5 0L4.5 3h15l1.5 6.349"/></svg>
+        </div>
+        <h3>Product Catalog</h3>
+        <p>Showcase your products or services with images, prices, and categories. Perfect for restaurants, shops, freelancers, and creatives.</p>
+      </div>
+
+      <!-- 4 · Social Links -->
+      <div class="ft-card" data-aos="fade-up" data-aos-duration="600">
+        <div class="ft-card-icon ic-cyan">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
+        </div>
+        <h3>Social Links Hub</h3>
+        <p>Connect all your social media profiles in one place — Instagram, LinkedIn, TikTok, WhatsApp, YouTube, Twitter, and many more.</p>
+      </div>
+
+      <!-- 5 · Tap Analytics -->
+      <div class="ft-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
+        <div class="ft-card-icon ic-emerald">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+        </div>
+        <h3>Tap Analytics</h3>
+        <p>Track every card tap in real time. See total visits, unique visitors, device breakdown, geographic data, and daily trends.</p>
+      </div>
+
+      <!-- 6 · Industry Templates -->
+      <div class="ft-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
+        <div class="ft-card-icon ic-amber">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/></svg>
+        </div>
+        <h3>Industry Templates</h3>
+        <p>Purpose-built profile layouts for Business, Freelancer, Real Estate, Restaurant, Creative, Events, and Personal categories.</p>
+      </div>
+
+      <!-- 7 · Custom Themes -->
+      <div class="ft-card" data-aos="fade-up" data-aos-duration="600">
+        <div class="ft-card-icon ic-rose">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>
+        </div>
+        <h3>Custom Themes</h3>
+        <p>Choose from beautiful preset color themes or pick your own brand colors. Make your profile uniquely yours with full color control.</p>
+      </div>
+
+      <!-- 8 · Gallery & Portfolio -->
+      <div class="ft-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
+        <div class="ft-card-icon ic-blue">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
+        </div>
+        <h3>Gallery & Portfolio</h3>
+        <p>Upload photos, project images, and portfolio pieces. Showcase your work with a beautiful image gallery right on your profile.</p>
+      </div>
+
+      <!-- 9 · Your Own Subdomain -->
+      <div class="ft-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
+        <div class="ft-card-icon ic-teal">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+        </div>
+        <h3>Your Own Subdomain</h3>
+        <p>Every user gets a unique <strong>username.inftycard.cc</strong> URL — easy to remember, easy to share, always accessible.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- HOW IT WORKS -->
+<!-- ══════════════════════════════════════════════════ -->
+<section class="ft-how">
+  <div class="ft-how-inner">
+    <span class="ft-section-label">How It Works</span>
+    <h2 class="ft-section-title">Up and running in minutes</h2>
+    <p class="ft-section-sub">Three simple steps to transform how you network.</p>
+
+    <div class="ft-steps">
+      <div class="ft-step" data-aos="fade-up" data-aos-duration="600">
+        <div class="ft-step-num">1</div>
+        <h3>Get Your NFC Card</h3>
+        <p>Order a premium NFC card from our shop — available in metal, wood, plastic, and transparent finishes.</p>
+        <div class="ft-step-connector"></div>
+      </div>
+      <div class="ft-step" data-aos="fade-up" data-aos-duration="600" data-aos-delay="150">
+        <div class="ft-step-num">2</div>
+        <h3>Build Your Profile</h3>
+        <p>Sign up, pick your category, and fill in your bio, skills, services, social links, catalog — everything in one place.</p>
+        <div class="ft-step-connector"></div>
+      </div>
+      <div class="ft-step" data-aos="fade-up" data-aos-duration="600" data-aos-delay="300">
+        <div class="ft-step-num">3</div>
+        <h3>Tap & Share</h3>
+        <p>Hold your card to any phone. Your full profile opens instantly — no app needed. Update anytime from your dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- HIGHLIGHT — ANALYTICS -->
+<!-- ══════════════════════════════════════════════════ -->
+<section class="ft-highlight">
+  <div class="ft-highlight-inner" data-aos="fade-up" data-aos-duration="800">
+    <div class="ft-highlight-visual">
+      <div class="ft-highlight-mockup">
+        <div class="ft-mockup-bar"><div class="ft-mockup-dot"></div><div class="ft-mockup-dot"></div><div class="ft-mockup-dot"></div></div>
+        <div class="ft-mockup-content">
+          <div class="ft-mockup-line accent w80"></div>
+          <div class="ft-mockup-line w60"></div>
+          <div class="ft-mockup-line w45"></div>
+          <div class="ft-mockup-grid">
+            <div class="ft-mockup-box"></div><div class="ft-mockup-box"></div>
+            <div class="ft-mockup-box"></div><div class="ft-mockup-box"></div>
+          </div>
+          <div class="ft-mockup-line w80"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ft-highlight-text">
+      <div class="ft-highlight-tag tag-emerald">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z"/></svg>
+        Analytics Dashboard
+      </div>
+      <h2>Know exactly who's tapping your card</h2>
+      <p>Your dashboard gives you real-time insights into every tap. Understand your audience and optimize your networking strategy.</p>
+      <ul class="ft-check-list">
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>Total taps, unique visitors, and daily trends</li>
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>Device and browser breakdown charts</li>
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>Geographic location of your audience</li>
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>Profile view history and peak times</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- HIGHLIGHT — PROFILE CUSTOMIZATION -->
+<!-- ══════════════════════════════════════════════════ -->
+<section class="ft-highlight">
+  <div class="ft-highlight-inner reverse" data-aos="fade-up" data-aos-duration="800">
+    <div class="ft-highlight-visual">
+      <div class="ft-highlight-mockup">
+        <div class="ft-mockup-bar"><div class="ft-mockup-dot"></div><div class="ft-mockup-dot"></div><div class="ft-mockup-dot"></div></div>
+        <div class="ft-mockup-content">
+          <div class="ft-mockup-line w45"></div>
+          <div class="ft-mockup-line accent w60"></div>
+          <div class="ft-mockup-grid">
+            <div class="ft-mockup-box"></div><div class="ft-mockup-box"></div>
+          </div>
+          <div class="ft-mockup-line w80"></div>
+          <div class="ft-mockup-line w60"></div>
+          <div class="ft-mockup-grid">
+            <div class="ft-mockup-box"></div><div class="ft-mockup-box"></div>
+            <div class="ft-mockup-box"></div><div class="ft-mockup-box"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ft-highlight-text">
+      <div class="ft-highlight-tag tag-indigo">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128z"/></svg>
+        Full Customization
+      </div>
+      <h2>Your profile, your brand</h2>
+      <p>Toggle sections on and off, pick your color scheme, upload a cover photo, and arrange everything exactly how you want it.</p>
+      <ul class="ft-check-list">
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>20+ toggleable profile sections</li>
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>Custom color themes and brand colors</li>
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>Photo gallery, cover images, and logos</li>
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>Business hours, location map, and contact form</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- HIGHLIGHT — BUSINESS FEATURES -->
+<!-- ══════════════════════════════════════════════════ -->
+<section class="ft-highlight">
+  <div class="ft-highlight-inner" data-aos="fade-up" data-aos-duration="800">
+    <div class="ft-highlight-visual">
+      <div class="ft-highlight-mockup">
+        <div class="ft-mockup-bar"><div class="ft-mockup-dot"></div><div class="ft-mockup-dot"></div><div class="ft-mockup-dot"></div></div>
+        <div class="ft-mockup-content">
+          <div class="ft-mockup-line accent w60"></div>
+          <div class="ft-mockup-line w80"></div>
+          <div class="ft-mockup-grid">
+            <div class="ft-mockup-box"></div><div class="ft-mockup-box"></div>
+          </div>
+          <div class="ft-mockup-line w45"></div>
+          <div class="ft-mockup-line accent w80"></div>
+          <div class="ft-mockup-line w60"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ft-highlight-text">
+      <div class="ft-highlight-tag tag-amber">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 0h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/></svg>
+        For Teams & Companies
+      </div>
+      <h2>Scale across your entire organization</h2>
+      <p>Manage NFC cards for your whole team from one company dashboard. Consistent branding, centralized billing, complete control.</p>
+      <ul class="ft-check-list">
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>Company dashboard with team management</li>
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>Bulk NFC card ordering and assignment</li>
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>Centralized billing with per-card pricing</li>
+        <li><div class="ft-check-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>Employee profiles under your company brand</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- PLANS TEASER -->
+<!-- ══════════════════════════════════════════════════ -->
+<section class="ft-plans">
+  <div class="ft-plans-inner">
+    <span class="ft-section-label">Flexible Plans</span>
+    <h2 class="ft-section-title">A plan for every professional</h2>
+    <p class="ft-section-sub">Start free and upgrade as you grow. No hidden fees, cancel anytime.</p>
+
+    <div class="ft-plan-cards">
+      <div class="ft-plan-card" data-aos="fade-up" data-aos-duration="600">
+        <div class="ft-plan-name">Starter</div>
+        <div class="ft-plan-desc">Essential digital presence</div>
+        <ul class="ft-plan-features">
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> NFC profile page</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Social links</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Basic analytics</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Custom subdomain</li>
+        </ul>
+        <a href="{% url 'core:pricing' %}" class="ft-plan-btn outline">View Details</a>
+      </div>
+      <div class="ft-plan-card featured" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
+        <div class="ft-plan-name">Business</div>
+        <div class="ft-plan-desc">Complete professional toolkit</div>
+        <ul class="ft-plan-features">
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Everything in Starter</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Product catalog</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Gallery & portfolio</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Advanced analytics</li>
+        </ul>
+        <a href="{% url 'core:pricing' %}" class="ft-plan-btn solid">View Details</a>
+      </div>
+      <div class="ft-plan-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
+        <div class="ft-plan-name">Pro</div>
+        <div class="ft-plan-desc">Maximum power & branding</div>
+        <ul class="ft-plan-features">
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Everything in Business</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Custom themes</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Testimonials & reviews</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Priority support</li>
+        </ul>
+        <a href="{% url 'core:pricing' %}" class="ft-plan-btn outline">View Details</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Animated Background-Paths CTA ── -->
+<section class="bp-cta">
+  <div class="bp-paths" data-pos="1"><svg viewBox="0 0 696 316" fill="none"><title>Background Paths</title></svg></div>
+  <div class="bp-paths" data-pos="-1"><svg viewBox="0 0 696 316" fill="none"><title>Background Paths</title></svg></div>
+  <div class="bp-content">
+    <h1 class="bp-title">Make your first impression unforgettable</h1>
+    <p class="bp-subtitle">Join thousands of professionals who've ditched paper cards for InfinityCard's smart NFC solution.</p>
+    <div class="bp-actions">
+      <div class="bp-btn-wrap">
+        <a href="{% url 'accounts:signup' %}" class="bp-btn">Get Started Free <span class="bp-arrow">&rarr;</span></a>
+      </div>
+      <a href="{% url 'cards:ecommerce_store' %}" class="bp-ghost">Shop NFC Cards</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,570 @@
+{% extends 'pages/home/base.html' %}
+{% load static %}
+
+{% block title %}NFC Business Cards Shop | Infinity Card{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<style>
+.sp-hero{
+  background:#030303;color:#fff;padding:0 2rem 5rem;text-align:center;position:relative;overflow:hidden;
+  padding-top:120px;border-radius:0 0 32px 32px;
+}
+.sp-hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,.05) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(244,63,94,.05) 0%,transparent 50%);
+  pointer-events:none;z-index:0}
+.sp-hero::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,#030303,transparent 40%,rgba(3,3,3,.8));
+  pointer-events:none;z-index:1}
+.sp-hero-inner{position:relative;z-index:2;max-width:760px;margin:0 auto}
+.sp-hero-inner > *{opacity:0;transform:translateY(30px);animation:hero-fadeup 1s cubic-bezier(.25,.4,.25,1) forwards}
+.sp-hero-inner > *:nth-child(1){animation-delay:.5s}
+.sp-hero-inner > *:nth-child(2){animation-delay:.7s}
+.sp-hero-inner > *:nth-child(3){animation-delay:.9s}
+.sp-hero-inner > *:nth-child(4){animation-delay:1.1s}
+.sp-hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:100px;
+  font-size:13px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:24px}
+.sp-hero-badge svg{flex-shrink:0}
+.sp-hero h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;line-height:1.15;
+  letter-spacing:-.03em;margin-bottom:20px}
+.sp-hero h1 .sp-h1-line1{display:block;
+  background:linear-gradient(to bottom,#fff,rgba(255,255,255,.8));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sp-hero h1 .sp-h1-line2{display:block;
+  background:linear-gradient(to right,#A5B4FC,rgba(255,255,255,.9),#FDA4AF);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sp-hero p{font-size:clamp(1rem,2vw,1.25rem);line-height:1.7;color:rgba(255,255,255,.4);
+  margin-bottom:32px;max-width:560px;margin-left:auto;margin-right:auto;font-weight:300;letter-spacing:.01em}
+.sp-hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.sp-hero-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:12px;
+  font-size:15px;font-weight:700;text-decoration:none;transition:all .2s;cursor:pointer;border:none;font-family:inherit}
+.sp-hero-btn.primary{background:#4F46E5;color:#fff;box-shadow:0 4px 16px rgba(79,70,229,.35)}
+.sp-hero-btn.primary:hover{background:#4338CA;transform:translateY(-1px);color:#fff;text-decoration:none}
+</style>
+<section class="sp-hero">
+  <div class="hero-shapes">
+    <div class="hero-shape hero-shape-1" style="--r:12deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-2" style="--r:-15deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-3" style="--r:-8deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-4" style="--r:20deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-5" style="--r:-25deg"><div class="hero-shape-inner"></div></div>
+  </div>
+  <div class="sp-hero-inner">
+    <div class="sp-hero-badge">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+      NFC Business Cards
+    </div>
+    <h1><span class="sp-h1-line1">The Future of</span><span class="sp-h1-line2">Business Cards</span></h1>
+    <p>Tap your NFC card on any phone to instantly share your digital profile. No more fumbling with paper cards. Get yours today.</p>
+    <div class="sp-hero-actions">
+      <a href="{% url 'accounts:signup' %}" class="sp-hero-btn primary">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
+        Get Started Free
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Features Showcase -->
+<section class="features_showcase row_am">
+  <div class="container">
+    <div class="section_title text-center" data-aos="fade-up" data-aos-duration="1500">
+      <span class="title_badge">Why Choose Us</span>
+      <h2>Premium NFC <span>Business Cards</span></h2>
+      <p>Choose from multiple materials and designs. Each card includes monthly digital profile hosting.</p>
+    </div>
+
+    <div class="features_grid">
+      <div class="feature_box" data-aos="fade-up" data-aos-duration="1500">
+        <div class="feature_icon">
+          <i class="icofont-credit-card"></i>
+        </div>
+        <h3>Multiple Materials</h3>
+        <p>Choose from plastic, metal, wood, or transparent NFC cards to match your brand.</p>
+      </div>
+
+      <div class="feature_box" data-aos="fade-up" data-aos-duration="1500">
+        <div class="feature_icon">
+          <i class="icofont-touch"></i>
+        </div>
+        <h3>Instant Sharing</h3>
+        <p>Tap your card on any smartphone to instantly share your digital profile securely.</p>
+      </div>
+
+      <div class="feature_box" data-aos="fade-up" data-aos-duration="1500">
+        <div class="feature_icon">
+          <i class="icofont-chart-line"></i>
+        </div>
+        <h3>Track Analytics</h3>
+        <p>Get detailed insights on who's viewing your profile and when they're engaging.</p>
+      </div>
+
+      <div class="feature_box" data-aos="fade-up" data-aos-duration="1500">
+        <div class="feature_icon">
+          <i class="icofont-lock"></i>
+        </div>
+        <h3>Secure & Private</h3>
+        <p>Your data is encrypted and completely under your control. Share exactly what you want.</p>
+      </div>
+
+      <div class="feature_box" data-aos="fade-up" data-aos-duration="1500">
+        <div class="feature_icon">
+          <i class="icofont-world"></i>
+        </div>
+        <h3>Works Worldwide</h3>
+        <p>Your NFC card works on any NFC-enabled smartphone, anywhere in the world.</p>
+      </div>
+
+      <div class="feature_box" data-aos="fade-up" data-aos-duration="1500">
+        <div class="feature_icon">
+          <i class="icofont-upload"></i>
+        </div>
+        <h3>Easy Customization</h3>
+        <p>Upload your photo, add your links, and customize your digital profile instantly.</p>
+      </div>
+    </div>
+
+    <style>
+      .features_grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 32px;
+        margin-top: 48px;
+      }
+
+      .feature_box {
+        background: #111111;
+        padding: 40px 32px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .feature_box:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+      }
+
+      .feature_icon {
+        font-size: 48px;
+        color: #8B5CF6;
+        margin-bottom: 20px;
+      }
+
+      .feature_box h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #F1F5F9;
+        margin-bottom: 12px;
+      }
+
+      .feature_box p {
+        font-size: 14px;
+        color: rgba(255,255,255,.55);
+        line-height: 1.6;
+        margin: 0;
+      }
+    </style>
+  </div>
+</section>
+
+<!-- Products Showcase -->
+<section class="products_showcase row_am" style="background: #0A0A0A;">
+  <div class="container">
+    <div class="section_title text-center" data-aos="fade-up" data-aos-duration="1500">
+      <span class="title_badge">Our Collection</span>
+      <h2>Browse Our <span>Card Materials</span></h2>
+      <p>Each card is premium quality and comes with lifetime digital hosting.</p>
+    </div>
+
+    {% if products %}
+    <div class="products_showcase_grid">
+      {% for product in products %}
+      <div class="showcase_card" data-aos="fade-up" data-aos-duration="1500">
+        <div class="showcase_image" data-pub-gallery="{{ product.pk }}">
+          <span class="material_tag">{{ product.get_material_display }}</span>
+          {% with images=product.gallery_images.all %}
+          {% if images %}
+            {% for img in images %}
+            <img src="{{ img.image.url }}" alt="{{ img.caption|default:product.name }}" {% if forloop.first %}class="active"{% endif %}>
+            {% endfor %}
+            {% if images|length > 1 %}
+            <button class="pub-gallery-nav prev" onclick="pubGalleryNav({{ product.pk }},-1)">&lsaquo;</button>
+            <button class="pub-gallery-nav next" onclick="pubGalleryNav({{ product.pk }},1)">&rsaquo;</button>
+            <div class="pub-gallery-dots">
+              {% for img in images %}
+              <button class="pub-gallery-dot {% if forloop.first %}active{% endif %}" onclick="pubGalleryGo({{ product.pk }},{{ forloop.counter0 }})"></button>
+              {% endfor %}
+            </div>
+            {% endif %}
+          {% elif product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="active">
+          {% else %}
+          <div class="image_placeholder">
+            <i class="icofont-credit-card"></i>
+          </div>
+          {% endif %}
+          {% endwith %}
+        </div>
+
+        <div class="showcase_content">
+          <h3>{{ product.name }}</h3>
+          <p>{{ product.description|default:"Premium NFC-enabled business card with tap-to-share technology." }}</p>
+          
+          <div class="card_features_list">
+            <span><i class="icofont-check"></i> NFC Technology</span>
+            <span><i class="icofont-check"></i> Premium Material</span>
+            <span><i class="icofont-check"></i> Lifetime Hosting</span>
+          </div>
+
+          <div class="price_tag">
+            <span class="amount">${{ product.price }}</span>
+            <span class="period">One-time</span>
+          </div>
+
+          <a href="{% url 'accounts:signup' %}" class="btn puprple_btn showcase_btn">
+            <i class="icofont-user-add"></i> Sign Up to Buy
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <style>
+      .products_showcase_grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 28px;
+        margin-top: 48px;
+      }
+
+      .showcase_card {
+        background: #111111;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        border: 1px solid rgba(255,255,255,.08);
+      }
+
+      .showcase_card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        border-color: rgba(99,102,241,.2);
+      }
+
+      .showcase_image {
+        position: relative;
+        height: 200px;
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .material_tag {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(99, 102, 241, 0.9);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        z-index: 2;
+      }
+
+      .showcase_image img {
+        width: 100%; height: 100%; object-fit: cover;
+        position: absolute; inset: 0;
+        opacity: 0; transition: opacity 0.4s ease;
+      }
+      .showcase_image img.active { opacity: 1; }
+      .pub-gallery-dots { position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:2 }
+      .pub-gallery-dot { width:7px;height:7px;border-radius:50%;background:rgba(0,0,0,.25);border:none;padding:0;cursor:pointer;transition:background .2s }
+      .pub-gallery-dot.active { background:rgba(99,102,241,.9) }
+      .pub-gallery-nav { position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.35);color:#fff;border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .2s;z-index:2;font-size:14px }
+      .showcase_image:hover .pub-gallery-nav { opacity:1 }
+      .pub-gallery-nav.prev { left:6px }
+      .pub-gallery-nav.next { right:6px }
+
+      .image_placeholder {
+        font-size: 80px;
+        color: rgba(255, 255, 255, 0.15);
+      }
+
+      .showcase_content {
+        padding: 24px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .showcase_content h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #F1F5F9;
+        margin: 0 0 8px 0;
+      }
+
+      .showcase_content p {
+        font-size: 13px;
+        color: rgba(255,255,255,.55);
+        line-height: 1.5;
+        margin: 0 0 16px 0;
+        flex: 1;
+      }
+
+      .card_features_list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 16px;
+        font-size: 12px;
+        color: rgba(255,255,255,.5);
+      }
+
+      .card_features_list span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .card_features_list i {
+        color: #10B981;
+        font-size: 14px;
+      }
+
+      .price_tag {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        padding: 12px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 16px;
+      }
+
+      .amount {
+        font-size: 28px;
+        font-weight: 800;
+        color: #F1F5F9;
+      }
+
+      .period {
+        font-size: 12px;
+        color: rgba(255,255,255,.35);
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+
+      .showcase_btn {
+        width: 100%;
+        padding: 12px !important;
+        margin-top: auto;
+      }
+
+      @media (max-width: 768px) {
+        .products_showcase_grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+        }
+
+        .showcase_card {
+          border-radius: 12px;
+        }
+
+        .showcase_content {
+          padding: 16px;
+        }
+
+        .showcase_image {
+          height: 160px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .products_showcase_grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+    {% endif %}
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta_section row_am">
+  <div class="container">
+    <div class="cta_inner" data-aos="fade-up" data-aos-duration="1500" style="background: linear-gradient(160deg, #0F172A 0%, #1E293B 50%, #334155 100%); border-radius: 20px; padding: 60px 40px; text-align: center; color: white; border: 1px solid rgba(255,255,255,.08);">
+      <h2 style="font-size: 36px; font-weight: 800; margin-bottom: 16px;">Ready to Transform Your Networking?</h2>
+      <p style="font-size: 16px; opacity: 0.95; margin-bottom: 32px; line-height: 1.6;">
+        Join thousands of professionals who've upgraded from paper cards to smart NFC cards. 
+        Create your account today and get your first card with lifetime digital profile hosting.
+      </p>
+      <a href="{% url 'accounts:signup' %}" class="btn" style="background: #6366F1; color: #fff; font-weight: 700; border: none; padding: 16px 50px; font-size: 16px; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; display: inline-block;">
+        <i class="icofont-user-add"></i> Create Free Account
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="how_it_works row_am" style="background: #0A0A0A;">
+  <div class="container">
+    <div class="section_title text-center" data-aos="fade-up" data-aos-duration="1500">
+      <span class="title_badge">Getting Started</span>
+      <h2>How It <span>Works</span></h2>
+    </div>
+
+    <div class="works_steps">
+      <div class="step" data-aos="fade-up" data-aos-duration="1500">
+        <div class="step_num">1</div>
+        <h3>Sign Up</h3>
+        <p>Create your free InfinityCard account in less than 2 minutes.</p>
+      </div>
+
+      <div class="step_arrow">→</div>
+
+      <div class="step" data-aos="fade-up" data-aos-duration="1500">
+        <div class="step_num">2</div>
+        <h3>Design Profile</h3>
+        <p>Customize your digital profile with your photo, bio, and links.</p>
+      </div>
+
+      <div class="step_arrow">→</div>
+
+      <div class="step" data-aos="fade-up" data-aos-duration="1500">
+        <div class="step_num">3</div>
+        <h3>Order Card</h3>
+        <p>Choose your material and order your NFC card. Quick checkout.</p>
+      </div>
+
+      <div class="step_arrow">→</div>
+
+      <div class="step" data-aos="fade-up" data-aos-duration="1500">
+        <div class="step_num">4</div>
+        <h3>Tap & Share</h3>
+        <p>Receive your card and start sharing your profile instantly.</p>
+      </div>
+    </div>
+
+    <style>
+      .works_steps {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+
+      .step {
+        background: #111111;
+        padding: 32px 24px;
+        border-radius: 14px;
+        text-align: center;
+        flex: 0 1 220px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .step_num {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 auto 16px;
+      }
+
+      .step h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #F1F5F9;
+        margin: 0 0 8px 0;
+      }
+
+      .step p {
+        font-size: 13px;
+        color: rgba(255,255,255,.55);
+        line-height: 1.5;
+        margin: 0;
+      }
+
+      .step_arrow {
+        font-size: 32px;
+        color: rgba(255,255,255,.2);
+        flex: 0 1 auto;
+      }
+
+      @media (max-width: 768px) {
+        .works_steps {
+          gap: 16px;
+        }
+
+        .step {
+          flex: 0 1 150px;
+          padding: 24px 16px;
+        }
+
+        .step h3 {
+          font-size: 14px;
+        }
+
+        .step p {
+          font-size: 12px;
+        }
+
+        .step_arrow {
+          display: none;
+        }
+      }
+    </style>
+  </div>
+</section>
+
+<script>
+function pubGalleryNav(productId, dir) {
+    var container = document.querySelector('[data-pub-gallery="'+productId+'"]');
+    if (!container) return;
+    var imgs = container.querySelectorAll('img');
+    var dots = container.querySelectorAll('.pub-gallery-dot');
+    if (imgs.length < 2) return;
+    var cur = -1;
+    imgs.forEach(function(img, i) { if (img.classList.contains('active')) cur = i; });
+    if (cur < 0) cur = 0;
+    imgs[cur].classList.remove('active');
+    if (dots[cur]) dots[cur].classList.remove('active');
+    var next = (cur + dir + imgs.length) % imgs.length;
+    imgs[next].classList.add('active');
+    if (dots[next]) dots[next].classList.add('active');
+}
+function pubGalleryGo(productId, idx) {
+    var container = document.querySelector('[data-pub-gallery="'+productId+'"]');
+    if (!container) return;
+    var imgs = container.querySelectorAll('img');
+    var dots = container.querySelectorAll('.pub-gallery-dot');
+    imgs.forEach(function(img) { img.classList.remove('active'); });
+    dots.forEach(function(dot) { dot.classList.remove('active'); });
+    if (imgs[idx]) imgs[idx].classList.add('active');
+    if (dots[idx]) dots[idx].classList.add('active');
+}
+</script>
+
+{% endblock %}

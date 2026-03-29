@@ -1,0 +1,32 @@
+{% extends "profiles/_base_profile.html" %}
+
+{% block category_content %}
+{% if menu_items %}
+<div class="pc-card anim-stagger" data-delay="2">
+    <div class="pc-card-header">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.871c1.355 0 2.697.056 4.024.166C17.155 8.51 18 9.473 18 10.608v2.513M15 8.25v-1.5m-6 1.5v-1.5m12 9.75l-1.5.75a3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0L3 16.5m15-3.379a48.474 48.474 0 00-6-.371c-2.032 0-4.034.126-6 .371m12 0c.39.049.777.102 1.163.16 1.07.16 1.837 1.094 1.837 2.175v5.169c0 .621-.504 1.125-1.125 1.125H4.125A1.125 1.125 0 013 20.625v-5.17c0-1.08.768-2.014 1.837-2.174A47.78 47.78 0 016 13.12"/></svg>
+        <span>Menu</span>
+    </div>
+    {% regroup menu_items by category_label as grouped_items %}
+    {% for group in grouped_items %}
+    {% if group.grouper %}
+    <h3 class="menu-group-title">{{ group.grouper }}</h3>
+    {% endif %}
+    <div class="menu-list">
+        {% for item in group.list %}
+        <div class="menu-item">
+            <div class="menu-item-info">
+                <span class="menu-item-name">{{ item.name }}</span>
+                {% if item.description %}
+                <span class="menu-item-desc">{{ item.description }}</span>
+                {% endif %}
+            </div>
+            <span class="menu-item-price">${{ item.price|floatformat:2 }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

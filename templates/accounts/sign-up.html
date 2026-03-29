@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - InfinityCard</title>
+  <link rel="stylesheet" href="{% static './home/css/icofont.min.css' %}">
+  <link rel="stylesheet" href="{% static './home/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static './home/css/aos.css' %}">
+  <link rel="stylesheet" href="{% static './home/css/style.css' %}">
+  <link rel="stylesheet" href="{% static './home/css/responsive.css' %}">
+  <link rel="shortcut icon" href="{% static './home/images/favicon.png' %}" type="image/x-icon">
+  <!-- Select2 for searchable country dropdown -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <style>
+  /* ── Form overrides: compact, minimal, clean ── */
+  .form_side { max-width: 520px; }
+  .section_title { margin-bottom: 20px; }
+  .section_title h2 { font-size: 1.6rem; margin-bottom: 4px; }
+  .section_title p { font-size: 13px; opacity: .7; line-height: 1.5; margin: 0; }
+
+  .sf-google { display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; padding:11px 16px; background:#fff; border:1.5px solid #E2E8F0;
+    border-radius:10px; font-size:14px; font-weight:600; color:#1E293B;
+    text-decoration:none; transition:all .15s; }
+  .sf-google:hover { background:#F8FAFC; border-color:#CBD5E1;
+    box-shadow:0 2px 8px rgba(0,0,0,.05); text-decoration:none; color:#1E293B; }
+  .sf-google svg { width:18px; height:18px; flex-shrink:0; }
+
+  .sf-divider { display:flex; align-items:center; gap:12px; margin:16px 0;
+    color:#94A3B8; font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.6px; }
+  .sf-divider::before,.sf-divider::after { content:''; flex:1; height:1px; background:#E2E8F0; }
+
+  /* ── Non-field errors ── */
+  .sf-alert { padding:10px 14px; border-radius:8px; background:rgba(239,68,68,.06);
+    border:1px solid rgba(239,68,68,.15); margin-bottom:14px; font-size:12px;
+    color:#EF4444; line-height:1.5; }
+
+  /* ── Fields ── */
+  .sf-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .sf-field { margin-bottom:14px; }
+  .sf-field label { display:block; font-size:12px; font-weight:600; color:#334155;
+    margin-bottom:4px; letter-spacing:.01em; }
+  .sf-field label .sf-req { color:#EF4444; }
+  .sf-field input { width:100%; padding:11px 14px; font-size:14px; color:#0F172A;
+    background:#fff; border:1.5px solid #E2E8F0; border-radius:8px;
+    transition:border-color .15s, box-shadow .15s; outline:none; }
+  .sf-field input::placeholder { color:#94A3B8; }
+  .sf-field input:focus { border-color:#6C63FF; box-shadow:0 0 0 3px rgba(108,99,255,.1); }
+  .sf-field.has-error input { border-color:#EF4444; background:rgba(239,68,68,.02); }
+  .sf-field.has-error input:focus { box-shadow:0 0 0 3px rgba(239,68,68,.08); }
+  .sf-field.is-valid input { border-color:#10B981; }
+  .sf-field.is-valid input:focus { box-shadow:0 0 0 3px rgba(16,185,129,.1); }
+  .sf-error { font-size:11px; color:#EF4444; margin-top:3px; font-weight:500; }
+
+  /* ── Password wrapper ── */
+  .sf-pw { position:relative; }
+  .sf-pw input { padding-right:40px; }
+  .sf-pw-btn { position:absolute; right:1px; top:1px; bottom:1px; width:38px;
+    display:flex; align-items:center; justify-content:center; background:transparent;
+    border:none; cursor:pointer; color:#94A3B8; border-radius:0 8px 8px 0; transition:color .15s; }
+  .sf-pw-btn:hover { color:#475569; }
+  .sf-pw-btn svg { width:16px; height:16px; }
+
+  /* ── Strength meter ── */
+  .sf-str { margin-top:6px; }
+  .sf-str-bar { display:flex; gap:3px; margin-bottom:4px; }
+  .sf-str-bar span { flex:1; height:2.5px; border-radius:2px; background:#E2E8F0; transition:background .25s; }
+  .sf-str-bar[data-l="1"] span:nth-child(1){background:#EF4444}
+  .sf-str-bar[data-l="2"] span:nth-child(1),.sf-str-bar[data-l="2"] span:nth-child(2){background:#F59E0B}
+  .sf-str-bar[data-l="3"] span:nth-child(1),.sf-str-bar[data-l="3"] span:nth-child(2),.sf-str-bar[data-l="3"] span:nth-child(3){background:#22C55E}
+  .sf-str-bar[data-l="4"] span{background:#10B981}
+  .sf-str-lbl { font-size:10px; font-weight:600; color:#94A3B8; }
+  .sf-str-lbl[data-l="1"]{color:#EF4444} .sf-str-lbl[data-l="2"]{color:#F59E0B}
+  .sf-str-lbl[data-l="3"]{color:#22C55E} .sf-str-lbl[data-l="4"]{color:#10B981}
+
+  /* ── Submit ── */
+  .sf-submit { width:100%; padding:11px 20px; font-size:14px; font-weight:700; color:#fff;
+    background:var(--primery); border:none; border-radius:8px; cursor:pointer;
+    transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px;
+    margin-top:4px; }
+  .sf-submit:hover { opacity:.9; transform:translateY(-1px); }
+  .sf-submit:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+  /* ── Footer ── */
+  .sf-footer { margin-top:14px; text-align:center; font-size:12px; color:#64748B; }
+  .sf-footer a { color:var(--primery); font-weight:600; text-decoration:none; }
+  .sf-footer a:hover { text-decoration:underline; }
+  .sf-terms { margin-top:10px; font-size:10px; color:#94A3B8; text-align:center; line-height:1.5; }
+  .sf-terms a { color:#64748B; text-decoration:underline; text-underline-offset:2px; }
+
+  @media(max-width:480px){ .sf-row{grid-template-columns:1fr} }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  
+  /* ── Select2 custom styling ── */
+  .select2-container--default .select2-selection--single { height:44px; border:1.5px solid #E2E8F0; border-radius:8px; padding:11px 14px; }
+  .select2-container--default .select2-selection--single .select2-selection__rendered { line-height:20px; color:#0F172A; font-size:14px; padding-left:0; }
+  .select2-container--default .select2-selection--single .select2-selection__arrow { height:42px; }
+  .select2-container--default.select2-container--focus .select2-selection--single { border-color:#6C63FF; box-shadow:0 0 0 3px rgba(108,99,255,.1); }
+  .select2-dropdown { border:1.5px solid #E2E8F0; border-radius:8px; margin-top:4px; }
+  .select2-search--dropdown .select2-search__field { border:1.5px solid #E2E8F0; border-radius:6px; padding:8px 12px; font-size:14px; }
+  .select2-results__option { padding:8px 12px; font-size:14px; }
+  .select2-container--default .select2-results__option--highlighted[aria-selected] { background-color:#6C63FF; }
+  .sf-field.has-error .select2-container--default .select2-selection--single { border-color:#EF4444; background:rgba(239,68,68,.02); }
+  </style>
+</head>
+
+<body>
+  <div class="page_wrapper">
+    <div id="preloader"><div id="loader"></div></div>
+
+    <div class="full_bg">
+      <section class="signup_section">
+        <div class="container">
+
+          <div class="top_part">
+            <a href="/" class="back_btn"><i class="icofont-arrow-left"></i> Back to home</a>
+            <a class="navbar-brand" href="/">
+              <img src="{% static './images/logo_colour.png' %}" alt="InfinityCard">
+            </a>
+          </div>
+
+          <div class="form_block" style="display:flex;min-height:600px;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+            <!-- Left Side - Signup Form -->
+            <div class="form_side" style="flex:0 0 50%;padding:3rem;display:flex;flex-direction:column;justify-content:center;background:#fff">
+              <div class="section_title">
+                <span class="title_badge">Get Started</span>
+                <h2><span>Create</span> an account</h2>
+                <p>Sign up in seconds. We'll never send you spam.</p>
+              </div>
+
+              <!-- Google SSO -->
+              <span class="sf-google disabled" style="opacity:0.4;cursor:not-allowed;pointer-events:none">
+                <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Continue with Google
+              </span>
+
+              <div class="sf-divider">or</div>
+
+              <!-- Non-field errors -->
+              {% if form.non_field_errors %}
+              <div class="sf-alert">
+                {% for error in form.non_field_errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+              </div>
+              {% endif %}
+
+              <form method="post" id="signupForm" novalidate>
+                {% csrf_token %}
+                {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+                <div class="sf-row">
+                  <div class="sf-field {% if form.first_name.errors %}has-error{% endif %}">
+                    <label for="{{ form.first_name.id_for_label }}">First name <span class="sf-req">*</span></label>
+                    <input type="text" name="first_name" id="{{ form.first_name.id_for_label }}"
+                           placeholder="John" maxlength="150" required
+                           value="{{ form.first_name.value|default:'' }}">
+                    {% for error in form.first_name.errors %}<div class="sf-error">{{ error }}</div>{% endfor %}
+                  </div>
+                  <div class="sf-field {% if form.last_name.errors %}has-error{% endif %}">
+                    <label for="{{ form.last_name.id_for_label }}">Last name <span class="sf-req">*</span></label>
+                    <input type="text" name="last_name" id="{{ form.last_name.id_for_label }}"
+                           placeholder="Doe" maxlength="150" required
+                           value="{{ form.last_name.value|default:'' }}">
+                    {% for error in form.last_name.errors %}<div class="sf-error">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+
+                <div class="sf-field {% if form.email.errors %}has-error{% endif %}">
+                  <label for="{{ form.email.id_for_label }}">Email <span class="sf-req">*</span></label>
+                  <input type="email" name="email" id="{{ form.email.id_for_label }}"
+                         placeholder="you@example.com" required
+                         value="{{ form.email.value|default:'' }}">
+                  {% for error in form.email.errors %}<div class="sf-error">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="sf-field {% if form.country.errors %}has-error{% endif %}">
+                  <label for="{{ form.country.id_for_label }}">Country <span class="sf-req">*</span></label>
+                  {{ form.country }}
+                  {% for error in form.country.errors %}<div class="sf-error">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="sf-field {% if form.password1.errors %}has-error{% endif %}">
+                  <label for="{{ form.password1.id_for_label }}">Password <span class="sf-req">*</span></label>
+                  <div class="sf-pw">
+                    <input type="password" name="password1" id="{{ form.password1.id_for_label }}"
+                           placeholder="Min. 8 characters" required autocomplete="new-password">
+                    <button type="button" class="sf-pw-btn" data-target="{{ form.password1.id_for_label }}" aria-label="Show password">
+                      <svg class="eye-on" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                      <svg class="eye-off" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                    </button>
+                  </div>
+                  <div class="sf-str" id="strMeter" style="display:none">
+                    <div class="sf-str-bar" id="strBar" data-l="0"><span></span><span></span><span></span><span></span></div>
+                    <div class="sf-str-lbl" id="strLbl"></div>
+                  </div>
+                  {% for error in form.password1.errors %}<div class="sf-error">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="sf-field {% if form.password2.errors %}has-error{% endif %}">
+                  <label for="{{ form.password2.id_for_label }}">Confirm password <span class="sf-req">*</span></label>
+                  <div class="sf-pw">
+                    <input type="password" name="password2" id="{{ form.password2.id_for_label }}"
+                           placeholder="Repeat password" required autocomplete="new-password">
+                    <button type="button" class="sf-pw-btn" data-target="{{ form.password2.id_for_label }}" aria-label="Show password">
+                      <svg class="eye-on" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                      <svg class="eye-off" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                    </button>
+                  </div>
+                  {% for error in form.password2.errors %}<div class="sf-error">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="sf-terms">
+                  By signing up you agree to our <a href="{% url 'core:terms' %}">Terms</a> & <a href="{% url 'core:privacy' %}">Privacy Policy</a>.
+                </div>
+
+                <button type="submit" class="sf-submit" id="submitBtn">Create Account</button>
+              </form>
+
+              <div class="sf-footer">
+                Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a>
+              </div>
+            </div>
+
+            <!-- Right Side - Image -->
+            <div class="side_screen" style="flex:0 0 50%;position:relative;overflow:hidden;background:#f8f9fa">
+              <img src="{% static './home/images/signup_page.png' %}" alt="InfinityCard Signup" 
+                   style="width:100%;height:100%;object-fit:cover;object-position:center">
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="{% static './home/js/jquery.js' %}"></script>
+  <script src="{% static './home/js/bootstrap.min.js' %}"></script>
+  <script src="{% static './home/js/aos.js' %}"></script>
+  <script src="{% static './home/js/main.js' %}"></script>
+  <!-- Select2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script>
+  (function(){
+    // Initialize Select2 for country dropdown
+    $(document).ready(function() {
+      $('#id_country').select2({
+        placeholder: 'Select your country',
+        allowClear: false,
+        width: '100%'
+      });
+    });
+    
+    // Toggle password visibility
+    document.querySelectorAll('.sf-pw-btn').forEach(function(b){
+      b.addEventListener('click',function(){
+        var inp=document.getElementById(this.dataset.target),show=inp.type==='password';
+        inp.type=show?'text':'password';
+        this.querySelector('.eye-on').style.display=show?'none':'block';
+        this.querySelector('.eye-off').style.display=show?'block':'none';
+      });
+    });
+    // Password strength
+    var pw1=document.getElementById('{{ form.password1.id_for_label }}'),
+        meter=document.getElementById('strMeter'),bar=document.getElementById('strBar'),
+        lbl=document.getElementById('strLbl'),names=['','Weak','Fair','Good','Strong'];
+    function strength(p){var s=0;if(p.length>=8)s++;if(/[a-z]/.test(p)&&/[A-Z]/.test(p))s++;
+      if(/\d/.test(p))s++;if(/[^a-zA-Z0-9]/.test(p))s++;return s;}
+    if(pw1)pw1.addEventListener('input',function(){var v=this.value;
+      if(v){meter.style.display='block';var l=strength(v);bar.dataset.l=l;lbl.dataset.l=l;lbl.textContent=names[l]||'';}
+      else meter.style.display='none';});
+    // Blur validation
+    var pw2=document.getElementById('{{ form.password2.id_for_label }}');
+    function vf(inp,test){
+      inp.addEventListener('blur',function(){var f=this.closest('.sf-field');if(!f)return;
+        f.classList.remove('has-error','is-valid');if(!this.value.trim())return;
+        f.classList.add(test(this)?'is-valid':'has-error');});
+      inp.addEventListener('input',function(){var f=this.closest('.sf-field');if(f)f.classList.remove('has-error');});
+    }
+    document.querySelectorAll('input[name="first_name"],input[name="last_name"]').forEach(function(f){vf(f,function(i){return i.value.trim().length>=1})});
+    var em=document.querySelector('input[name="email"]');if(em)vf(em,function(i){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(i.value)});
+    if(pw1)vf(pw1,function(i){return i.value.length>=8});
+    if(pw2)vf(pw2,function(i){return i.value&&pw1&&i.value===pw1.value});
+    // Double-submit guard
+    var form=document.getElementById('signupForm');
+    if(form)form.addEventListener('submit',function(){var btn=document.getElementById('submitBtn');
+      if(btn.disabled)return false;btn.disabled=true;
+      btn.innerHTML='<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .5s linear infinite"></span> Creating...';});
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{% extends "companies/company_base.html" %}
+{% block title %}{{ company.name }} — Edit Employee{% endblock %}
+{% block nav_employees %}active{% endblock %}
+{% block page_title %}Edit Employee{% endblock %}
+
+{% block company_content %}
+
+<div style="max-width:480px">
+    <div style="margin-bottom:20px">
+        <h2 style="font-size:18px;font-weight:800;color:#1E293B;margin:0">Edit Employee</h2>
+        <p style="font-size:13px;color:#64748B;margin:4px 0 0">{{ membership.invite_email }}</p>
+    </div>
+
+    <div class="cp-card">
+        <div class="cp-card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="cp-form-group">
+                    <label for="id_employee_name">Full Name</label>
+                    {{ form.employee_name }}
+                    {% if form.employee_name.errors %}<div class="co-error">{{ form.employee_name.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="cp-form-group">
+                    <label for="id_employee_title">Job Title</label>
+                    {{ form.employee_title }}
+                    {% if form.employee_title.errors %}<div class="co-error">{{ form.employee_title.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="cp-form-group">
+                    <label for="id_role">Role</label>
+                    {{ form.role }}
+                    {% if form.role.errors %}<div class="co-error">{{ form.role.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div style="display:flex;align-items:center;gap:10px;margin-top:20px">
+                    <button type="submit" class="cp-btn cp-btn--primary">Save Changes</button>
+                    <a href="{% url 'companies:employees' %}" class="cp-btn cp-btn--secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

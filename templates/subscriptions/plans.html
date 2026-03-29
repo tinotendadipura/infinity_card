@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Plans & Pricing | InfinityCard{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="plans-page">
+            <div class="section-header">
+                <h2>Simple, transparent <span class="highlight">pricing</span></h2>
+                <p>Start with a free 30-day trial. No credit card required. Upgrade anytime.</p>
+            </div>
+
+            <div class="plans-grid">
+                {% for plan in plans %}
+                <div class="plan-card {% if plan.is_highlighted %}plan-highlighted{% endif %} {% if plan.slug == current_plan_slug %}plan-current{% endif %}">
+                    {% if plan.badge_label %}
+                    <span class="plan-badge">{{ plan.badge_label }}</span>
+                    {% endif %}
+                    <h2 class="plan-name">{{ plan.name }}</h2>
+                    <div class="plan-price">
+                        <span class="plan-amount">${{ plan.price }}</span>
+                        <span class="plan-period">/mo</span>
+                    </div>
+                    {% if plan.description %}
+                    <p class="plan-description">{{ plan.description }}</p>
+                    {% endif %}
+                    <ul class="plan-features">
+                        {% if plan.features.max_images %}
+                        <li>Up to {{ plan.features.max_images }} images</li>
+                        {% endif %}
+                        {% if plan.features.analytics %}
+                        <li>Tap analytics</li>
+                        {% else %}
+                        <li class="feature-disabled">No tap analytics</li>
+                        {% endif %}
+                        {% if plan.features.custom_theme %}
+                        <li>Custom theme colors</li>
+                        {% endif %}
+                        <li>Public profile page</li>
+                        <li>NFC card linking</li>
+                    </ul>
+                    {% if plan.slug == current_plan_slug %}
+                    <span class="btn btn-outline btn-block">Current Plan</span>
+                    {% elif user.is_authenticated %}
+                    <a href="{% url 'subscriptions:subscribe' plan.slug %}" class="btn btn-primary btn-block">
+                        {% if current_plan_slug %}Switch to {{ plan.name }}{% else %}Choose {{ plan.name }}{% endif %}
+                    </a>
+                    {% else %}
+                    <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-block">Get Started</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Not sure which plan is right?</h2>
+            <p>Every plan starts with a free 30-day trial. Try it risk-free.</p>
+            <div class="page-actions">
+                <a href="{% url 'accounts:signup' %}" class="btn btn-white btn-lg">Start free trial</a>
+                <a href="{% url 'core:contact' %}" class="btn btn-ghost btn-lg">Talk to us</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

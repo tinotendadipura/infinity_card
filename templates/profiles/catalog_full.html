@@ -1,0 +1,648 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="{{ profile.color_primary|default:'#0F172A' }}">
+    <title>Catalog — {{ profile.display_name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: {{ profile.color_primary|default:"#25D366" }};
+            --bg: #FFFFFF;
+            --text: #1A1A1A;
+            --muted: #8696A0;
+            --border: #F0F2F5;
+            --surface: #F0F2F5;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 80px;
+        }
+
+        /* ── Top Bar ── */
+        .cf-topbar {
+            position: sticky; top: 0; z-index: 50;
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.65rem 0.85rem;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        .cf-back {
+            display: flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px; border-radius: 50%;
+            text-decoration: none; color: var(--text);
+            transition: background 0.15s;
+        }
+        .cf-back:hover { background: var(--surface); }
+        .cf-back svg { width: 20px; height: 20px; }
+        .cf-topbar-info { flex: 1; min-width: 0; }
+        .cf-topbar-title { font-size: 0.95rem; font-weight: 700; }
+        .cf-topbar-sub { font-size: 0.68rem; color: var(--muted); }
+        .cf-topbar-cart {
+            position: relative; display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 50%;
+            background: transparent; border: none; cursor: pointer;
+            color: var(--text); transition: background 0.15s;
+        }
+        .cf-topbar-cart:hover { background: var(--surface); }
+        .cf-topbar-cart svg { width: 22px; height: 22px; }
+        .cf-cart-badge {
+            position: absolute; top: 2px; right: 2px;
+            min-width: 16px; height: 16px; padding: 0 4px;
+            border-radius: 8px; background: var(--accent);
+            color: #fff; font-size: 0.58rem; font-weight: 700;
+            display: none; align-items: center; justify-content: center;
+            line-height: 1;
+        }
+        .cf-cart-badge.show { display: flex; }
+
+        /* ── Hero ── */
+        .cf-hero {
+            position: relative; overflow: hidden; background: #111;
+            aspect-ratio: 2.2/1;
+        }
+        .cf-hero img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+            opacity: 0.55;
+        }
+        .cf-hero-overlay {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 1rem 1rem 0.85rem;
+            background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.65) 100%);
+            color: #fff;
+        }
+        .cf-hero-name {
+            font-size: 1.15rem; font-weight: 800; line-height: 1.2;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .cf-hero-bio {
+            font-size: 0.7rem; opacity: 0.85; line-height: 1.35; margin-top: 0.15rem;
+        }
+
+        /* ── Category Tabs ── */
+        .cf-tabs {
+            display: flex; gap: 0; overflow-x: auto;
+            -webkit-overflow-scrolling: touch; scrollbar-width: none;
+            border-bottom: 1px solid var(--border);
+            background: #fff;
+        }
+        .cf-tabs::-webkit-scrollbar { display: none; }
+        .cf-tab {
+            flex-shrink: 0; padding: 0.65rem 1rem;
+            font-size: 0.72rem; font-weight: 600;
+            color: var(--muted); cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+        .cf-tab:hover { color: var(--text); }
+        .cf-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* ── Section Label ── */
+        .cf-section-label {
+            padding: 0.75rem 1rem 0.35rem;
+            font-size: 0.62rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--muted);
+        }
+
+        /* ── Product List ── */
+        .cf-list { list-style: none; }
+        .cf-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid var(--border);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .cf-item:last-child { border-bottom: none; }
+
+        .cf-item-img {
+            width: 68px; height: 68px;
+            border-radius: 12px; overflow: hidden;
+            background: var(--surface); flex-shrink: 0;
+            cursor: pointer;
+        }
+        .cf-item-img img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+        }
+
+        .cf-item-body {
+            flex: 1; min-width: 0; cursor: pointer;
+        }
+        .cf-item-title {
+            font-size: 0.84rem; font-weight: 600; line-height: 1.25;
+            color: var(--text);
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .cf-item-price {
+            font-size: 0.72rem; font-weight: 700; color: var(--accent);
+            margin-top: 0.15rem;
+        }
+        .cf-item-desc {
+            font-size: 0.65rem; color: var(--muted); margin-top: 0.1rem;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        /* Cart controls on each item */
+        .cf-item-cart {
+            flex-shrink: 0; display: flex; align-items: center; gap: 0;
+        }
+        .cf-cart-add {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 1.5px solid #E0E0E0; background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--muted);
+            transition: all 0.15s;
+        }
+        .cf-cart-add:hover { border-color: var(--accent); color: var(--accent); }
+        .cf-cart-add svg { width: 18px; height: 18px; }
+
+        /* Quantity stepper (shown when qty > 0) */
+        .cf-qty-stepper {
+            display: flex; align-items: center; gap: 0;
+        }
+        .cf-qty-btn {
+            width: 30px; height: 30px; border-radius: 50%;
+            border: none; background: var(--surface);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text);
+            font-size: 1rem; font-weight: 600;
+            transition: background 0.15s;
+        }
+        .cf-qty-btn:hover { background: #E2E8F0; }
+        .cf-qty-btn svg { width: 16px; height: 16px; }
+        .cf-qty-val {
+            min-width: 28px; text-align: center;
+            font-size: 0.82rem; font-weight: 700;
+        }
+
+        /* ── Sticky Cart Bar ── */
+        .cf-cartbar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            z-index: 60;
+            padding: 0.6rem 1rem calc(env(safe-area-inset-bottom, 0px) + 0.6rem);
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(.16,1,.3,1);
+        }
+        .cf-cartbar.show { transform: translateY(0); }
+        .cf-cartbar-btn {
+            display: flex; align-items: center; justify-content: center;
+            gap: 0.5rem; width: 100%;
+            padding: 0.75rem; border: none; border-radius: 14px;
+            background: #25D366; color: #fff;
+            font-size: 0.85rem; font-weight: 700;
+            font-family: inherit; cursor: pointer;
+            transition: opacity 0.15s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+        .cf-cartbar-btn:hover { opacity: 0.92; }
+        .cf-cartbar-btn:active { transform: scale(0.98); }
+        .cf-cartbar-btn svg { width: 20px; height: 20px; }
+        .cf-cartbar-count {
+            background: rgba(255,255,255,0.25);
+            padding: 0.15rem 0.5rem; border-radius: 8px;
+            font-size: 0.72rem;
+        }
+
+        /* ── Product Detail Modal ── */
+        .cf-modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+        }
+        .cf-modal-overlay.open { display: block; }
+
+        .cf-modal {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 101;
+            background: #fff; border-radius: 20px 20px 0 0;
+            max-height: 88vh; overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(.16,1,.3,1);
+        }
+        .cf-modal-overlay.open .cf-modal { transform: translateY(0); }
+
+        .cf-modal-handle {
+            display: flex; justify-content: center; padding: 0.6rem 0 0.3rem;
+            position: sticky; top: 0; background: #fff; z-index: 1;
+        }
+        .cf-modal-handle span {
+            width: 36px; height: 4px; border-radius: 2px; background: #D1D5DB;
+        }
+
+        .cf-modal-gallery {
+            position: relative; aspect-ratio: 1/1; overflow: hidden;
+            background: var(--surface);
+        }
+        .cf-modal-gallery-track {
+            display: flex; height: 100%; transition: transform 0.3s ease;
+        }
+        .cf-modal-gallery-track img {
+            min-width: 100%; height: 100%; object-fit: cover;
+        }
+        .cf-modal-dots {
+            display: flex; justify-content: center; gap: 5px; padding: 0.55rem 0;
+        }
+        .cf-modal-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #D1D5DB; transition: background 0.2s;
+        }
+        .cf-modal-dot.active { background: var(--accent); }
+
+        .cf-modal-body { padding: 0.65rem 1rem 1.5rem; }
+        .cf-modal-title { font-size: 1.05rem; font-weight: 800; line-height: 1.3; }
+        .cf-modal-price {
+            font-size: 0.92rem; font-weight: 700; color: var(--accent);
+            margin-top: 0.2rem;
+        }
+        .cf-modal-desc {
+            font-size: 0.78rem; color: var(--muted); line-height: 1.6;
+            margin-top: 0.45rem;
+        }
+        .cf-modal-add {
+            display: flex; align-items: center; justify-content: center;
+            gap: 0.4rem; width: 100%; padding: 0.7rem;
+            margin-top: 0.85rem; border: none; border-radius: 12px;
+            background: var(--accent); color: #fff;
+            font-size: 0.82rem; font-weight: 700;
+            font-family: inherit; cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        .cf-modal-add:hover { opacity: 0.9; }
+        .cf-modal-add svg { width: 18px; height: 18px; }
+
+        /* ── Empty State ── */
+        .cf-empty {
+            text-align: center; padding: 4rem 1.5rem; color: #CBD5E1;
+        }
+        .cf-empty svg { width: 48px; height: 48px; margin-bottom: 0.75rem; opacity: 0.5; }
+        .cf-empty p { font-size: 0.85rem; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="cf-topbar">
+    <a href="javascript:history.back()" class="cf-back">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+    </a>
+    <div class="cf-topbar-info">
+        <div class="cf-topbar-title">Catalog</div>
+        <div class="cf-topbar-sub">{{ profile.display_name }} &middot; {{ total_items }} item{{ total_items|pluralize }}</div>
+    </div>
+    <button class="cf-topbar-cart" id="topCartBtn" title="View cart">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
+        <span class="cf-cart-badge" id="topCartBadge">0</span>
+    </button>
+</div>
+
+<!-- Hero -->
+{% if profile.cover_image %}
+<div class="cf-hero">
+    <img src="{{ profile.cover_image.url }}" alt="{{ profile.display_name }}">
+    <div class="cf-hero-overlay">
+        <div class="cf-hero-name">{{ profile.display_name }}</div>
+        {% if profile.bio %}<div class="cf-hero-bio">{{ profile.bio|truncatewords:12 }}</div>{% endif %}
+    </div>
+</div>
+{% elif profile.profile_image %}
+<div class="cf-hero">
+    <img src="{{ profile.profile_image.url }}" alt="{{ profile.display_name }}">
+    <div class="cf-hero-overlay">
+        <div class="cf-hero-name">{{ profile.display_name }}</div>
+        {% if profile.bio %}<div class="cf-hero-bio">{{ profile.bio|truncatewords:12 }}</div>{% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Category Tabs -->
+{% if catalog_categories %}
+<div class="cf-tabs">
+    <span class="cf-tab active" data-filter="all">All</span>
+    {% for cat in catalog_categories %}
+    {% if cat.items.all %}
+    <span class="cf-tab" data-filter="cat-{{ cat.id }}">{{ cat.name }}</span>
+    {% endif %}
+    {% endfor %}
+    {% if uncategorized_items %}<span class="cf-tab" data-filter="uncategorized">Other</span>{% endif %}
+</div>
+{% endif %}
+
+<!-- Categorized Items -->
+{% for cat in catalog_categories %}
+{% if cat.items.all %}
+<div class="cf-cat-section" data-cat="cat-{{ cat.id }}">
+    <div class="cf-section-label">{{ cat.name }}</div>
+    <ul class="cf-list">
+        {% for item in cat.items.all %}
+        <li class="cf-item" data-id="{{ item.id }}" data-title="{{ item.title }}" data-price="{{ item.price }}" data-img="{{ item.image.url }}">
+            <div class="cf-item-img" onclick="openCfProduct(this.parentNode)">
+                <img src="{{ item.image.url }}" alt="{{ item.title }}" loading="lazy">
+            </div>
+            <div class="cf-item-body" onclick="openCfProduct(this.parentNode)">
+                <div class="cf-item-title">{{ item.title }}</div>
+                {% if item.price %}<div class="cf-item-price">{{ item.price }}</div>{% endif %}
+                {% if item.description %}<div class="cf-item-desc">{{ item.description }}</div>{% endif %}
+            </div>
+            <div class="cf-item-cart">
+                <button class="cf-cart-add" onclick="addToCart(this.closest('.cf-item'))" title="Add to cart">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                </button>
+            </div>
+            <div hidden class="cf-pd">
+                <span class="cf-pd-title">{{ item.title }}</span>
+                <span class="cf-pd-price">{{ item.price }}</span>
+                <span class="cf-pd-desc">{{ item.description }}</span>
+                <span class="cf-pd-img">{{ item.image.url }}</span>
+                {% for img in item.extra_images.all %}
+                <span class="cf-pd-extra">{{ img.image.url }}</span>
+                {% endfor %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endfor %}
+
+<!-- Uncategorized Items -->
+{% if uncategorized_items %}
+<div class="cf-cat-section" data-cat="uncategorized">
+    {% if catalog_categories %}<div class="cf-section-label">Other</div>{% endif %}
+    <ul class="cf-list">
+        {% for item in uncategorized_items %}
+        <li class="cf-item" data-id="{{ item.id }}" data-title="{{ item.title }}" data-price="{{ item.price }}" data-img="{{ item.image.url }}">
+            <div class="cf-item-img" onclick="openCfProduct(this.parentNode)">
+                <img src="{{ item.image.url }}" alt="{{ item.title }}" loading="lazy">
+            </div>
+            <div class="cf-item-body" onclick="openCfProduct(this.parentNode)">
+                <div class="cf-item-title">{{ item.title }}</div>
+                {% if item.price %}<div class="cf-item-price">{{ item.price }}</div>{% endif %}
+                {% if item.description %}<div class="cf-item-desc">{{ item.description }}</div>{% endif %}
+            </div>
+            <div class="cf-item-cart">
+                <button class="cf-cart-add" onclick="addToCart(this.closest('.cf-item'))" title="Add to cart">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                </button>
+            </div>
+            <div hidden class="cf-pd">
+                <span class="cf-pd-title">{{ item.title }}</span>
+                <span class="cf-pd-price">{{ item.price }}</span>
+                <span class="cf-pd-desc">{{ item.description }}</span>
+                <span class="cf-pd-img">{{ item.image.url }}</span>
+                {% for img in item.extra_images.all %}
+                <span class="cf-pd-extra">{{ img.image.url }}</span>
+                {% endfor %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if not total_items %}
+<div class="cf-empty">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75v-2.25a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v2.25c0 .414.336.75.75.75z"/></svg>
+    <p>No items in this catalog</p>
+</div>
+{% endif %}
+
+<!-- Sticky Cart Bar -->
+<div class="cf-cartbar" id="cartBar">
+    <button class="cf-cartbar-btn" id="checkoutBtn" onclick="checkout()">
+        <svg viewBox="0 0 24 24" fill="#fff" width="20" height="20"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        <span>Order via WhatsApp</span>
+        <span class="cf-cartbar-count" id="cartBarCount">0</span>
+    </button>
+</div>
+
+<!-- Product Detail Modal -->
+<div class="cf-modal-overlay" id="cfModalOverlay">
+    <div class="cf-modal" id="cfModal">
+        <div class="cf-modal-handle"><span></span></div>
+        <div class="cf-modal-gallery" id="cfGallery">
+            <div class="cf-modal-gallery-track" id="cfTrack"></div>
+        </div>
+        <div class="cf-modal-dots" id="cfDots"></div>
+        <div class="cf-modal-body">
+            <div class="cf-modal-title" id="cfTitle"></div>
+            <div class="cf-modal-price" id="cfPrice"></div>
+            <div class="cf-modal-desc" id="cfDesc"></div>
+            <button class="cf-modal-add" id="cfModalAdd">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                Add to order
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var WA_NUMBER = '{{ wa_number }}';
+    var PAGE_URL = window.location.href;
+
+    // ── Cart State ──
+    var cart = {}; // { itemId: { title, price, qty, img } }
+
+    function getCartCount() {
+        var n = 0;
+        for (var k in cart) n += cart[k].qty;
+        return n;
+    }
+
+    function updateCartUI() {
+        var count = getCartCount();
+        var badge = document.getElementById('topCartBadge');
+        var bar = document.getElementById('cartBar');
+        var barCount = document.getElementById('cartBarCount');
+
+        badge.textContent = count;
+        badge.classList.toggle('show', count > 0);
+        bar.classList.toggle('show', count > 0);
+        barCount.textContent = count + ' item' + (count !== 1 ? 's' : '');
+
+        // Update each item's cart controls
+        document.querySelectorAll('.cf-item').forEach(function(el) {
+            var id = el.getAttribute('data-id');
+            var cartArea = el.querySelector('.cf-item-cart');
+            var qty = (cart[id] && cart[id].qty) || 0;
+
+            if (qty === 0) {
+                cartArea.innerHTML = '<button class="cf-cart-add" onclick="addToCart(this.closest(\'.cf-item\'))" title="Add to cart"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg></button>';
+            } else {
+                cartArea.innerHTML = '<div class="cf-qty-stepper">' +
+                    '<button class="cf-qty-btn" onclick="changeQty(\'' + id + '\',-1)"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15"/></svg></button>' +
+                    '<span class="cf-qty-val">' + qty + '</span>' +
+                    '<button class="cf-qty-btn" onclick="changeQty(\'' + id + '\',1)"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg></button>' +
+                    '</div>';
+            }
+        });
+    }
+
+    window.addToCart = function(el) {
+        var id = el.getAttribute('data-id');
+        var title = el.getAttribute('data-title');
+        var price = el.getAttribute('data-price');
+        var img = el.getAttribute('data-img');
+
+        if (!cart[id]) {
+            cart[id] = { title: title, price: price, qty: 0, img: img };
+        }
+        cart[id].qty++;
+        updateCartUI();
+    };
+
+    window.changeQty = function(id, delta) {
+        if (!cart[id]) return;
+        cart[id].qty += delta;
+        if (cart[id].qty <= 0) delete cart[id];
+        updateCartUI();
+    };
+
+    // ── Checkout via WhatsApp ──
+    window.checkout = function() {
+        var lines = [];
+        lines.push('Hi! I\'d like to order the following:\n');
+        var itemNum = 1;
+        for (var id in cart) {
+            var item = cart[id];
+            var line = itemNum + '. *' + item.title + '*';
+            if (item.qty > 1) line += ' x' + item.qty;
+            if (item.price) line += ' — ' + item.price;
+            lines.push(line);
+            itemNum++;
+        }
+        lines.push('\n---');
+        lines.push('Total items: ' + getCartCount());
+        lines.push('Catalog: ' + PAGE_URL);
+        var msg = encodeURIComponent(lines.join('\n'));
+
+        if (WA_NUMBER) {
+            window.open('https://wa.me/' + WA_NUMBER + '?text=' + msg, '_blank');
+        } else {
+            window.open('https://wa.me/?text=' + msg, '_blank');
+        }
+    };
+
+    // ── Category Tabs ──
+    var tabs = document.querySelectorAll('.cf-tab');
+    var catSections = document.querySelectorAll('.cf-cat-section');
+
+    tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            tabs.forEach(function(t) { t.classList.remove('active'); });
+            tab.classList.add('active');
+            var filter = tab.getAttribute('data-filter');
+
+            catSections.forEach(function(sec) {
+                if (filter === 'all') {
+                    sec.style.display = '';
+                } else {
+                    sec.style.display = (sec.getAttribute('data-cat') === filter) ? '' : 'none';
+                }
+            });
+        });
+    });
+
+    // ── Product Detail Modal ──
+    var overlay = document.getElementById('cfModalOverlay');
+    var track = document.getElementById('cfTrack');
+    var dots = document.getElementById('cfDots');
+    var titleEl = document.getElementById('cfTitle');
+    var priceEl = document.getElementById('cfPrice');
+    var descEl = document.getElementById('cfDesc');
+    var modalAddBtn = document.getElementById('cfModalAdd');
+    var currentSlide = 0, totalSlides = 0;
+    var currentModalItem = null;
+
+    window.openCfProduct = function(el) {
+        var data = el.querySelector('.cf-pd');
+        if (!data) return;
+        currentModalItem = el;
+
+        titleEl.textContent = data.querySelector('.cf-pd-title').textContent;
+        var price = data.querySelector('.cf-pd-price').textContent;
+        priceEl.textContent = price;
+        priceEl.style.display = price ? '' : 'none';
+        var desc = data.querySelector('.cf-pd-desc').textContent;
+        descEl.textContent = desc;
+        descEl.style.display = desc ? '' : 'none';
+
+        var images = [data.querySelector('.cf-pd-img').textContent];
+        data.querySelectorAll('.cf-pd-extra').forEach(function(e) { images.push(e.textContent); });
+
+        track.innerHTML = '';
+        dots.innerHTML = '';
+        images.forEach(function(src, i) {
+            var img = document.createElement('img');
+            img.src = src;
+            track.appendChild(img);
+            if (images.length > 1) {
+                var dot = document.createElement('span');
+                dot.className = 'cf-modal-dot' + (i === 0 ? ' active' : '');
+                dots.appendChild(dot);
+            }
+        });
+        currentSlide = 0;
+        totalSlides = images.length;
+        track.style.transform = 'translateX(0)';
+        dots.style.display = totalSlides > 1 ? '' : 'none';
+
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    };
+
+    modalAddBtn.addEventListener('click', function() {
+        if (currentModalItem) {
+            addToCart(currentModalItem);
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    });
+
+    // Swipe gallery
+    var gallery = document.getElementById('cfGallery');
+    var sx = 0, dx = 0;
+    gallery.addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; dx = 0; });
+    gallery.addEventListener('touchmove', function(e) { dx = e.touches[0].clientX - sx; });
+    gallery.addEventListener('touchend', function() {
+        if (Math.abs(dx) > 40) {
+            if (dx < 0 && currentSlide < totalSlides - 1) currentSlide++;
+            else if (dx > 0 && currentSlide > 0) currentSlide--;
+            track.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
+            dots.querySelectorAll('.cf-modal-dot').forEach(function(d, i) {
+                d.classList.toggle('active', i === currentSlide);
+            });
+        }
+    });
+
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    });
+
+    // Top cart btn scrolls to show cart bar
+    document.getElementById('topCartBtn').addEventListener('click', function() {
+        if (getCartCount() > 0) checkout();
+    });
+})();
+</script>
+
+</body>
+</html>

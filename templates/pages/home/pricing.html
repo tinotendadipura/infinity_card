@@ -1,0 +1,534 @@
+{% extends 'pages/home/base.html' %}
+{% load static %}
+
+{% block title %}Pricing - InfinityCard{% endblock %}
+
+{% block content %}
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --pr-primary:#6366F1;--pr-primary-h:#4F46E5;--pr-accent:#8B5CF6;
+  --pr-bg:#0A0A0A;--pr-surface:#111111;--pr-border:rgba(255,255,255,.08);
+  --pr-text:#F1F5F9;--pr-text2:rgba(255,255,255,.55);--pr-text3:rgba(255,255,255,.3);
+  --pr-success:#10B981;--pr-radius:16px;
+  --pr-shadow:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);
+  --pr-shadow-lg:0 20px 40px rgba(0,0,0,.4),0 8px 16px rgba(0,0,0,.3);
+}
+
+/* ── Hero ── */
+.pr-hero{
+  background:#030303;
+  color:#fff;padding:0 2rem 4rem;text-align:center;position:relative;overflow:hidden;
+  padding-top:120px;
+  border-radius:0 0 40px 40px;
+}
+.pr-hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,.05) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(244,63,94,.05) 0%,transparent 50%);
+  pointer-events:none;z-index:0}
+.pr-hero::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,#030303,transparent 40%,rgba(3,3,3,.8));
+  pointer-events:none;z-index:1}
+.pr-hero-inner{position:relative;z-index:2;max-width:720px;margin:0 auto}
+.pr-hero-inner > *{opacity:0;transform:translateY(30px);animation:hero-fadeup 1s cubic-bezier(.25,.4,.25,1) forwards}
+.pr-hero-inner > *:nth-child(1){animation-delay:.5s}
+.pr-hero-inner > *:nth-child(2){animation-delay:.7s}
+.pr-hero-inner > *:nth-child(3){animation-delay:.9s}
+.pr-hero-inner > *:nth-child(4){animation-delay:1.1s}
+.pr-hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:100px;
+  font-size:13px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:24px}
+.pr-hero-badge svg{flex-shrink:0}
+.pr-hero h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;line-height:1.15;
+  letter-spacing:-.03em;margin-bottom:20px}
+.pr-hero h1 .pr-h1-line1{display:block;
+  background:linear-gradient(to bottom,#fff,rgba(255,255,255,.8));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pr-hero h1 .pr-h1-line2{display:block;
+  background:linear-gradient(to right,#A5B4FC,rgba(255,255,255,.9),#FDA4AF);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pr-hero p{font-size:clamp(1rem,2vw,1.25rem);line-height:1.7;color:rgba(255,255,255,.4);
+  margin-bottom:12px;max-width:560px;margin-left:auto;margin-right:auto;font-weight:300;letter-spacing:.01em}
+
+/* ── Toggle ── */
+.pr-toggle-wrap{display:flex;align-items:center;justify-content:center;gap:14px;
+  margin-top:32px;margin-bottom:0}
+.pr-toggle-label{font-size:14px;font-weight:600;color:rgba(255,255,255,.5);transition:color .2s;cursor:pointer}
+.pr-toggle-label.active{color:#fff}
+.pr-toggle{position:relative;width:52px;height:28px;cursor:pointer}
+.pr-toggle input{display:none}
+.pr-toggle-track{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:100px;
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);transition:background .2s}
+.pr-toggle input:checked ~ .pr-toggle-track{background:var(--pr-primary);border-color:var(--pr-primary)}
+.pr-toggle-thumb{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:left .2s}
+.pr-toggle input:checked ~ .pr-toggle-thumb{left:27px}
+.pr-save-badge{display:inline-flex;padding:3px 10px;border-radius:100px;
+  font-size:11px;font-weight:700;background:rgba(16,185,129,.15);color:#34D399;
+  border:1px solid rgba(16,185,129,.2);margin-left:4px}
+
+/* ── Plans grid ── */
+.pr-plans{padding:48px 2rem 80px;background:var(--pr-bg)}
+.pr-plans-inner{max-width:1100px;margin:0 auto}
+.pr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;align-items:start}
+
+/* ── Plan card ── */
+.pr-card{background:var(--pr-surface);border-radius:var(--pr-radius);
+  border:1.5px solid var(--pr-border);padding:0;overflow:hidden;
+  transition:all .3s cubic-bezier(.23,1,.32,1);position:relative;display:flex;flex-direction:column}
+.pr-card:hover{transform:translateY(-6px);box-shadow:var(--pr-shadow-lg)}
+.pr-card.featured{border-color:var(--pr-primary);box-shadow:0 0 0 1px var(--pr-primary),var(--pr-shadow-lg)}
+.pr-card.featured:hover{box-shadow:0 0 0 1px var(--pr-primary),0 20px 50px rgba(79,70,229,.15)}
+.pr-card-badge{position:absolute;top:0;right:24px;padding:4px 14px;border-radius:0 0 8px 8px;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  background:var(--pr-primary);color:#fff}
+.pr-card-head{padding:32px 28px 24px}
+.pr-card-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px}
+.pr-card-icon.starter{background:linear-gradient(135deg,#E0E7FF,#EEF2FF);color:var(--pr-primary)}
+.pr-card-icon.business{background:linear-gradient(135deg,#818CF8,#6366F1);color:#fff}
+.pr-card-icon.pro{background:linear-gradient(135deg,#7C3AED,#6D28D9);color:#fff}
+.pr-card-icon svg{width:24px;height:24px}
+.pr-card-name{font-size:1.25rem;font-weight:700;color:var(--pr-text);margin-bottom:6px}
+.pr-card-desc{font-size:14px;color:var(--pr-text2);line-height:1.55;margin-bottom:24px;min-height:40px}
+.pr-card-price{display:flex;align-items:baseline;gap:4px;margin-bottom:4px}
+.pr-card-amount{font-size:2.8rem;font-weight:800;color:var(--pr-text);letter-spacing:-.03em;line-height:1}
+.pr-card-period{font-size:14px;font-weight:500;color:var(--pr-text3)}
+.pr-card-yearly{font-size:13px;color:var(--pr-text3);margin-bottom:4px;min-height:20px}
+.pr-card-yearly s{color:var(--pr-text3);opacity:.6}
+.pr-card-yearly strong{color:var(--pr-success);font-weight:700}
+.pr-card-cta{display:block;width:100%;padding:13px;border-radius:12px;border:none;
+  font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;
+  text-align:center;text-decoration:none;margin-top:24px}
+.pr-card-cta.outline{background:transparent;color:var(--pr-primary);border:1.5px solid var(--pr-border)}
+.pr-card-cta.outline:hover{border-color:var(--pr-primary);background:rgba(79,70,229,.04)}
+.pr-card-cta.filled{background:var(--pr-primary);color:#fff;border:1.5px solid var(--pr-primary);
+  box-shadow:0 4px 16px rgba(79,70,229,.3)}
+.pr-card-cta.filled:hover{background:var(--pr-primary-h);transform:translateY(-1px);
+  box-shadow:0 8px 24px rgba(79,70,229,.35)}
+.pr-card-cta.dark{background:var(--pr-text);color:#fff;border:1.5px solid var(--pr-text)}
+.pr-card-cta.dark:hover{background:#1E293B;transform:translateY(-1px)}
+
+/* ── Features list ── */
+.pr-card-features{padding:0 28px 32px;flex:1}
+.pr-card-divider{height:1px;background:var(--pr-border);margin-bottom:24px}
+.pr-card-feat-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--pr-text3);margin-bottom:16px}
+.pr-feat{display:flex;align-items:flex-start;gap:10px;padding:7px 0;font-size:14px;color:var(--pr-text2);line-height:1.5}
+.pr-feat svg{width:18px;height:18px;flex-shrink:0;margin-top:1px}
+.pr-feat svg.check{color:var(--pr-success)}
+.pr-feat svg.cross{color:var(--pr-text3);opacity:.4}
+.pr-feat.disabled{color:var(--pr-text3);opacity:.5}
+
+/* ── Feature comparison table ── */
+.pr-compare{padding:64px 2rem 80px;background:var(--pr-surface)}
+.pr-compare-inner{max-width:900px;margin:0 auto}
+.pr-section-label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.5px;color:var(--pr-primary);text-align:center;margin-bottom:12px}
+.pr-section-title{font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;text-align:center;
+  color:var(--pr-text);margin-bottom:12px;letter-spacing:-.02em}
+.pr-section-sub{text-align:center;color:var(--pr-text2);font-size:1rem;margin-bottom:48px;
+  max-width:520px;margin-left:auto;margin-right:auto;line-height:1.65}
+.pr-table{width:100%;border-collapse:separate;border-spacing:0;border-radius:12px;overflow:hidden;
+  border:1px solid var(--pr-border)}
+.pr-table th,.pr-table td{padding:14px 20px;text-align:left;font-size:14px;border-bottom:1px solid var(--pr-border)}
+.pr-table th{font-weight:700;color:var(--pr-text);background:rgba(255,255,255,.03)}
+.pr-table td{color:var(--pr-text2)}
+.pr-table td:first-child{font-weight:600;color:var(--pr-text)}
+.pr-table tr:last-child td{border-bottom:none}
+.pr-table .check-cell{text-align:center;font-size:16px}
+.pr-table .check-cell svg{width:18px;height:18px}
+.pr-table .check-cell svg.check{color:var(--pr-success)}
+.pr-table .check-cell svg.cross{color:var(--pr-text3);opacity:.35}
+.pr-table thead th:not(:first-child){text-align:center}
+.pr-table-plan-head{display:flex;flex-direction:column;align-items:center;gap:2px}
+.pr-table-plan-head .name{font-weight:700;font-size:14px}
+.pr-table-plan-head .price{font-size:12px;font-weight:500;color:var(--pr-text2)}
+
+/* ── FAQ ── */
+.pr-faq{padding:64px 2rem 80px;background:var(--pr-bg)}
+.pr-faq-inner{max-width:760px;margin:0 auto}
+.pr-faq-item{border:1px solid var(--pr-border);border-radius:12px;background:var(--pr-surface);
+  margin-bottom:12px;overflow:hidden;transition:border-color .2s}
+.pr-faq-item.open{border-color:rgba(79,70,229,.25)}
+.pr-faq-q{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;
+  cursor:pointer;font-size:15px;font-weight:600;color:var(--pr-text);gap:12px;
+  transition:background .15s;user-select:none}
+.pr-faq-q:hover{background:rgba(255,255,255,.04)}
+.pr-faq-q svg{width:20px;height:20px;flex-shrink:0;color:var(--pr-text3);transition:transform .2s}
+.pr-faq-item.open .pr-faq-q svg{transform:rotate(180deg);color:var(--pr-primary)}
+.pr-faq-a{padding:0 24px 18px;font-size:14px;color:var(--pr-text2);line-height:1.7;display:none}
+.pr-faq-item.open .pr-faq-a{display:block}
+
+/* ── CTA Banner — now uses global .bp-cta from base.html ── */
+
+/* ── Bridge / Trust Strip ── */
+.pr-bridge{background:linear-gradient(180deg,#1E293B 0%,#0F172A 100%);padding:0;position:relative;overflow:hidden}
+.pr-bridge::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(79,70,229,.12) 0%,transparent 60%);pointer-events:none}
+
+.pr-bridge-stats{display:flex;justify-content:center;gap:48px;padding:48px 2rem 40px;flex-wrap:wrap;position:relative;z-index:2;
+  border-top:1px solid rgba(255,255,255,.06)}
+.pr-bridge-stat{text-align:center;min-width:120px}
+.pr-bridge-num{font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(135deg,#818CF8,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pr-bridge-label{font-size:13px;color:rgba(255,255,255,.5);font-weight:500;margin-top:4px}
+
+.pr-bridge-features{display:flex;justify-content:center;gap:32px;padding:0 2rem 48px;flex-wrap:wrap;position:relative;z-index:2}
+.pr-bridge-feat{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,.55)}
+.pr-bridge-feat svg{width:18px;height:18px;color:#818CF8;flex-shrink:0}
+
+.pr-bridge-line{height:1px;max-width:600px;margin:0 auto;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08) 30%,rgba(255,255,255,.08) 70%,transparent)}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  .pr-hero{padding-top:100px;padding-bottom:3rem}
+  .pr-grid{grid-template-columns:1fr;max-width:400px;margin-left:auto;margin-right:auto}
+  .pr-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .pr-table{min-width:600px}
+}
+@media(max-width:480px){
+  .pr-cta-actions{flex-direction:column;align-items:center}
+  .pr-bridge-stats{gap:24px;padding:36px 1.5rem 28px}
+  .pr-bridge-features{gap:16px;padding-bottom:36px}
+}
+</style>
+
+<!-- ── Hero ── -->
+<section class="pr-hero">
+  <div class="hero-shapes">
+    <div class="hero-shape hero-shape-1" style="--r:12deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-2" style="--r:-15deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-3" style="--r:-8deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-4" style="--r:20deg"><div class="hero-shape-inner"></div></div>
+    <div class="hero-shape hero-shape-5" style="--r:-25deg"><div class="hero-shape-inner"></div></div>
+  </div>
+  <div class="pr-hero-inner">
+    <div class="pr-hero-badge">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+      Simple, Transparent Pricing
+    </div>
+    <h1><span class="pr-h1-line1">Choose the Plan That</span><span class="pr-h1-line2">Fits You</span></h1>
+    <p>Start with a free NFC card purchase, then pick a hosting plan. No hidden fees, cancel anytime.</p>
+
+    <div class="pr-toggle-wrap">
+      <span class="pr-toggle-label active" id="prLblMonth" onclick="setPeriod('monthly')">Monthly</span>
+      <label class="pr-toggle">
+        <input type="checkbox" id="prPeriodToggle" onchange="togglePeriod()">
+        <div class="pr-toggle-track"></div>
+        <div class="pr-toggle-thumb"></div>
+      </label>
+      <span class="pr-toggle-label" id="prLblYear" onclick="setPeriod('yearly')">Yearly <span class="pr-save-badge">Save 20%</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ── Plans ── -->
+<section class="pr-plans">
+  <div class="pr-plans-inner">
+    <div class="pr-grid">
+      {% for plan in plans %}
+      <div class="pr-card{% if plan.is_highlighted %} featured{% endif %}">
+        {% if plan.badge_label %}
+        <div class="pr-card-badge">{{ plan.badge_label }}</div>
+        {% endif %}
+
+        <div class="pr-card-head">
+          <div class="pr-card-icon {{ plan.slug }}">
+            {% if plan.slug == 'starter' %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+            {% elif plan.slug == 'business' %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z"/></svg>
+            {% elif plan.slug == 'pro' %}
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            {% endif %}
+          </div>
+          <h3 class="pr-card-name">{{ plan.name }}</h3>
+          <p class="pr-card-desc">{{ plan.description }}</p>
+
+          <div class="pr-card-price">
+            <span class="pr-card-amount" data-monthly="${{ plan.price }}" data-yearly="${{ plan.yearly_monthly_price }}">
+              ${{ plan.price }}
+            </span>
+            <span class="pr-card-period">/month</span>
+          </div>
+          <div class="pr-card-yearly" data-yearly-total="${{ plan.yearly_price }}" data-monthly-price="${{ plan.price }}" data-discount="{{ plan.yearly_discount_percent }}">
+            {% if plan.yearly_discount_percent > 0 %}
+            &nbsp;
+            {% else %}
+            &nbsp;
+            {% endif %}
+          </div>
+
+          {% if plan.is_highlighted %}
+          <a href="{% url 'accounts:signup' %}" class="pr-card-cta filled">Get Started</a>
+          {% elif plan.slug == 'pro' %}
+          <a href="{% url 'accounts:signup' %}" class="pr-card-cta dark">Get Started</a>
+          {% else %}
+          <a href="{% url 'accounts:signup' %}" class="pr-card-cta outline">Get Started</a>
+          {% endif %}
+        </div>
+
+        <div class="pr-card-features">
+          <div class="pr-card-divider"></div>
+          <div class="pr-card-feat-title">What's included</div>
+
+          {% if plan.slug == 'starter' %}
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Digital profile page</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> NFC tap-to-share</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Bio, contact info & social links</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Services & skills sections</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Product catalog</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Up to {{ plan.features.max_images }} images</div>
+          <div class="pr-feat disabled"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> Tap analytics</div>
+          <div class="pr-feat disabled"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> Experience & education</div>
+          <div class="pr-feat disabled"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> Custom themes</div>
+
+          {% elif plan.slug == 'business' %}
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Everything in Starter</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Tap analytics dashboard</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Up to {{ plan.features.max_images }} images</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Experience & education sections</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Gallery & business hours</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Priority email support</div>
+          <div class="pr-feat disabled"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> Custom themes</div>
+          <div class="pr-feat disabled"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> Website portfolio</div>
+          <div class="pr-feat disabled"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> Location map</div>
+
+          {% elif plan.slug == 'pro' %}
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Everything in Business</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Custom profile themes</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Up to {{ plan.features.max_images }} images</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Testimonials & contact form</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Website portfolio showcase</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Interactive location map</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Full analytics suite</div>
+          <div class="pr-feat"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Priority support</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Feature Comparison ── -->
+<section class="pr-compare">
+  <div class="pr-compare-inner">
+    <span class="pr-section-label">Compare Plans</span>
+    <h2 class="pr-section-title">Everything at a glance</h2>
+    <p class="pr-section-sub">See exactly what you get with each plan</p>
+    <div class="pr-table-wrap">
+      <table class="pr-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            {% for plan in plans %}
+            <th>
+              <div class="pr-table-plan-head">
+                <span class="name">{{ plan.name }}</span>
+                <span class="price pr-table-price" data-monthly="${{ plan.price }}/mo" data-yearly="${{ plan.yearly_monthly_price }}/mo">${{ plan.price }}/mo</span>
+              </div>
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Digital profile</td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+          <tr>
+            <td>NFC tap-to-share</td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+          <tr>
+            <td>Bio, contact & social</td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+          <tr>
+            <td>Services & skills</td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+          <tr>
+            <td>Product catalog</td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+          <tr>
+            <td>Image uploads</td>
+            <td class="check-cell">5</td>
+            <td class="check-cell">20</td>
+            <td class="check-cell">50</td>
+          </tr>
+          <tr>
+            <td>Tap analytics</td>
+            <td class="check-cell"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+          <tr>
+            <td>Experience & education</td>
+            <td class="check-cell"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+          <tr>
+            <td>Gallery & business hours</td>
+            <td class="check-cell"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+          <tr>
+            <td>Custom themes</td>
+            <td class="check-cell"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td>
+            <td class="check-cell"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+          <tr>
+            <td>Website portfolio</td>
+            <td class="check-cell"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td>
+            <td class="check-cell"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+          <tr>
+            <td>Location map</td>
+            <td class="check-cell"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td>
+            <td class="check-cell"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+          <tr>
+            <td>Testimonials & contact form</td>
+            <td class="check-cell"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td>
+            <td class="check-cell"><svg class="cross" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td>
+            <td class="check-cell"><svg class="check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="pr-faq" id="faqsec">
+  <div class="pr-faq-inner">
+    <span class="pr-section-label">FAQ</span>
+    <h2 class="pr-section-title">Common questions</h2>
+    <p class="pr-section-sub">Everything you need to know about our pricing and plans</p>
+
+    <div class="pr-faq-item open">
+      <div class="pr-faq-q" onclick="toggleFaq(this)">
+        How does the NFC card + subscription work?
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+      </div>
+      <div class="pr-faq-a">You purchase a physical NFC card once (one-time fee). Once it's delivered, you pick a monthly or yearly hosting plan that powers your digital profile. Tap your card on any phone to share your profile instantly.</div>
+    </div>
+    <div class="pr-faq-item">
+      <div class="pr-faq-q" onclick="toggleFaq(this)">
+        Can I switch plans later?
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+      </div>
+      <div class="pr-faq-a">Yes! You can upgrade instantly at any time and we'll prorate the cost. Downgrades take effect at the end of your current billing cycle, so you keep your features until then.</div>
+    </div>
+    <div class="pr-faq-item">
+      <div class="pr-faq-q" onclick="toggleFaq(this)">
+        What payment methods do you accept?
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+      </div>
+      <div class="pr-faq-a">We accept PayPal, bank transfer, and EcoCash. All payments are processed securely and you'll receive a confirmation once approved.</div>
+    </div>
+    <div class="pr-faq-item">
+      <div class="pr-faq-q" onclick="toggleFaq(this)">
+        Is there a free trial?
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+      </div>
+      <div class="pr-faq-a">Your subscription starts only after your NFC card is delivered. There's no charge until you choose a plan, and you can start with our affordable Starter plan at just $3/month.</div>
+    </div>
+    <div class="pr-faq-item">
+      <div class="pr-faq-q" onclick="toggleFaq(this)">
+        Can I cancel anytime?
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+      </div>
+      <div class="pr-faq-a">Absolutely. You can cancel your subscription at any time from your dashboard. Your profile will remain active until the end of your current billing period.</div>
+    </div>
+    <div class="pr-faq-item">
+      <div class="pr-faq-q" onclick="toggleFaq(this)">
+        What happens if my subscription expires?
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+      </div>
+      <div class="pr-faq-a">If your subscription expires, your public profile will be temporarily suspended. Your data is kept safe and your profile will be restored as soon as you renew.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Animated Background-Paths CTA ── -->
+<section class="bp-cta">
+  <div class="bp-paths" data-pos="1"><svg viewBox="0 0 696 316" fill="none"><title>Background Paths</title></svg></div>
+  <div class="bp-paths" data-pos="-1"><svg viewBox="0 0 696 316" fill="none"><title>Background Paths</title></svg></div>
+  <div class="bp-content">
+    <h1 class="bp-title">Ready to go digital?</h1>
+    <p class="bp-subtitle">Join thousands of professionals who have upgraded their networking with InfinityCard NFC business cards.</p>
+    <div class="bp-actions">
+      <div class="bp-btn-wrap">
+        <a href="{% url 'accounts:signup' %}" class="bp-btn">Get Started Free <span class="bp-arrow">&rarr;</span></a>
+      </div>
+      <a href="{% url 'cards:ecommerce_store' %}" class="bp-ghost">Browse NFC Cards</a>
+    </div>
+  </div>
+</section>
+
+
+<script>
+var isYearly = false;
+
+function togglePeriod(){
+  isYearly = document.getElementById('prPeriodToggle').checked;
+  updatePrices();
+}
+function setPeriod(p){
+  isYearly = p === 'yearly';
+  document.getElementById('prPeriodToggle').checked = isYearly;
+  updatePrices();
+}
+
+function updatePrices(){
+  document.getElementById('prLblMonth').classList.toggle('active', !isYearly);
+  document.getElementById('prLblYear').classList.toggle('active', isYearly);
+
+  document.querySelectorAll('.pr-card-amount').forEach(function(el){
+    el.textContent = isYearly ? el.dataset.yearly : el.dataset.monthly;
+  });
+
+  document.querySelectorAll('.pr-card-yearly').forEach(function(el){
+    var discount = parseInt(el.dataset.discount) || 0;
+    if(isYearly && discount > 0){
+      el.innerHTML = 'Billed at <strong>' + el.dataset.yearlyTotal + '/year</strong> <s>' + el.dataset.monthlyPrice + '/mo</s>';
+    } else {
+      el.innerHTML = '&nbsp;';
+    }
+  });
+
+  document.querySelectorAll('.pr-table-price').forEach(function(el){
+    el.textContent = isYearly ? el.dataset.yearly : el.dataset.monthly;
+  });
+}
+
+function toggleFaq(q){
+  var item = q.parentElement;
+  var wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.pr-faq-item').forEach(function(i){i.classList.remove('open')});
+  if(!wasOpen) item.classList.add('open');
+}
+</script>
+{% endblock %}

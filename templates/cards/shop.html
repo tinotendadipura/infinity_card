@@ -1,0 +1,216 @@
+{% extends "dashboard/_app_shell.html" %}
+
+{% block title %}NFC Business Cards | InfinityCard{% endblock %}
+
+{% block page_header %}
+<h1 class="app-page-title">NFC Business Cards</h1>
+<p class="app-page-subtitle">Choose your card, pay once, and your monthly hosting subscription starts automatically.</p>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.shop-banner{background:linear-gradient(135deg,#1E293B 0%,#0F172A 100%);border:1px solid #334155;border-radius:16px;padding:28px 32px;margin-bottom:32px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.shop-banner-icon{width:56px;height:56px;background:linear-gradient(135deg,#3B82F6,#8B5CF6);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.shop-banner-icon svg{width:28px;height:28px;color:#fff}
+.shop-banner-text h2{font-size:18px;font-weight:700;color:#F1F5F9;margin:0 0 4px}
+.shop-banner-text p{font-size:13px;color:#94A3B8;margin:0;line-height:1.5;max-width:560px}
+
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;margin-bottom:32px}
+
+.card-product{background:#1E293B;border:1px solid #334155;border-radius:14px;overflow:hidden;transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column}
+.card-product:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+
+.card-product-image{height:200px;background:linear-gradient(135deg,#0F172A,#1E293B);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.card-product-image img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0;transition:opacity 0.4s ease}
+.card-product-image img.active{opacity:1}
+.card-product-image .card-placeholder{width:200px;height:120px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#64748B;border:2px dashed #334155}
+.card-gallery-dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:2}
+.card-gallery-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.35);border:none;padding:0;cursor:pointer;transition:background 0.2s}
+.card-gallery-dot.active{background:#fff}
+.card-gallery-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.4);color:#fff;border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity 0.2s;z-index:2;font-size:14px}
+.card-product-image:hover .card-gallery-nav{opacity:1}
+.card-gallery-nav.prev{left:6px}
+.card-gallery-nav.next{right:6px}
+
+.card-product-material{position:absolute;top:12px;left:12px;background:rgba(15,23,42,.85);backdrop-filter:blur(6px);border:1px solid #334155;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.5px}
+
+.card-product-body{padding:20px;flex:1;display:flex;flex-direction:column}
+.card-product-name{font-size:17px;font-weight:700;color:#F1F5F9;margin-bottom:4px}
+.card-product-desc{font-size:13px;color:#94A3B8;line-height:1.5;margin-bottom:16px;flex:1}
+.card-product-price-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-product-price{font-size:24px;font-weight:800;color:#F1F5F9}
+.card-product-price span{font-size:13px;font-weight:500;color:#64748B}
+.card-product-once{font-size:11px;color:#6EE7B7;background:#065F4630;border:1px solid #065F46;border-radius:20px;padding:3px 10px;font-weight:600}
+
+.card-product-features{list-style:none;padding:0;margin:0 0 18px;font-size:12px;color:#CBD5E1}
+.card-product-features li{display:flex;align-items:center;gap:6px;padding:4px 0}
+.card-product-features li svg{width:14px;height:14px;color:#34D399;flex-shrink:0}
+
+.card-buy-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;text-decoration:none;color:#FFF}
+.card-buy-btn:hover{filter:brightness(1.1);text-decoration:none;color:#FFF}
+.card-buy-btn.plastic{background:linear-gradient(135deg,#3B82F6,#2563EB)}
+.card-buy-btn.plastic_gold{background:linear-gradient(135deg,#F59E0B,#D97706)}
+.card-buy-btn.plastic_transparent{background:linear-gradient(135deg,#8B5CF6,#7C3AED)}
+.card-buy-btn.wood{background:linear-gradient(135deg,#A16207,#854D0E)}
+.card-buy-btn.metal{background:linear-gradient(135deg,#475569,#334155)}
+
+.shop-info{background:#1E293B;border:1px solid #334155;border-radius:14px;padding:24px 28px;margin-bottom:24px}
+.shop-info-title{font-size:15px;font-weight:700;color:#F1F5F9;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.shop-info-title svg{width:18px;height:18px;color:#60A5FA}
+.shop-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.shop-step{text-align:center;padding:16px}
+.shop-step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#8B5CF6);color:#FFF;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-bottom:10px}
+.shop-step-title{font-size:14px;font-weight:600;color:#F1F5F9;margin-bottom:4px}
+.shop-step-desc{font-size:12px;color:#94A3B8;line-height:1.4}
+
+@media(max-width:600px){
+    .shop-banner{padding:20px;gap:16px}
+    .shop-grid{grid-template-columns:1fr}
+    .shop-steps{grid-template-columns:1fr}
+    .card-product-body{padding:16px}
+    .card-product-name{font-size:16px;word-break:break-word}
+    .card-product-price{font-size:20px}
+    .card-product-price-row{flex-wrap:wrap;gap:8px}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+<div style="margin-bottom:16px">
+    {% for message in messages %}
+    <div style="padding:10px 16px;border-radius:8px;font-size:13px;margin-bottom:8px;{% if message.tags == 'success' %}background:#065F4620;border:1px solid #065F46;color:#6EE7B7{% elif message.tags == 'error' %}background:#7F1D1D20;border:1px solid #7F1D1D;color:#FCA5A5{% else %}background:#1E3A5F20;border:1px solid #1E3A5F;color:#93C5FD{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="shop-banner">
+    <div class="shop-banner-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+    </div>
+    <div class="shop-banner-text">
+        <h2>Get Your NFC Business Card</h2>
+        <p>Tap your card on any phone to instantly share your digital profile. Each card is a one-time purchase, and your monthly profile hosting subscription starts automatically after purchase.</p>
+    </div>
+</div>
+
+<div class="shop-grid">
+    {% for product in products %}
+    <div class="card-product">
+        <div class="card-product-image" data-gallery="{{ product.pk }}">
+            <span class="card-product-material">{{ product.get_material_display }}</span>
+            {% with images=product.gallery_images.all %}
+            {% if images %}
+                {% for img in images %}
+                <img src="{{ img.image.url }}" alt="{{ img.caption|default:product.name }}" {% if forloop.first %}class="active"{% endif %}>
+                {% endfor %}
+                {% if images|length > 1 %}
+                <button class="card-gallery-nav prev" onclick="galleryNav({{ product.pk }},-1)">&lsaquo;</button>
+                <button class="card-gallery-nav next" onclick="galleryNav({{ product.pk }},1)">&rsaquo;</button>
+                <div class="card-gallery-dots">
+                    {% for img in images %}
+                    <button class="card-gallery-dot {% if forloop.first %}active{% endif %}" onclick="galleryGo({{ product.pk }},{{ forloop.counter0 }})"></button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% elif product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="active">
+            {% else %}
+            <div class="card-placeholder">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1" width="48" height="48" style="color:#334155"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+        <div class="card-product-body">
+            <div class="card-product-name">{{ product.name }}</div>
+            <div class="card-product-desc">{{ product.description|default:"Premium NFC-enabled business card. Tap to share your digital profile instantly." }}</div>
+            <div class="card-product-price-row">
+                <div class="card-product-price">${{ product.price }} <span>USD</span></div>
+                <div class="card-product-once">One-time</div>
+            </div>
+            <ul class="card-product-features">
+                <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> NFC tap-to-share</li>
+                <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Monthly hosting included</li>
+                <li><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Customizable digital profile</li>
+            </ul>
+            {% if user.is_authenticated %}
+            <a href="{% url 'cards:buy_card' product.slug %}" class="card-buy-btn {{ product.material }}">
+                <svg fill="none" viewBox="0 0 24 24" width="18" height="18" style="vertical-align:-2px;" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
+                Buy Now - ${{ product.price }}
+            </a>
+            {% else %}
+            <a href="{% url 'accounts:signup' %}" class="card-buy-btn {{ product.material }}">
+                Sign Up to Buy
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div style="text-align:center;padding:48px;color:#64748B;grid-column:1/-1">
+        <p style="font-size:16px">No cards available at the moment. Check back soon!</p>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="shop-info">
+    <div class="shop-info-title">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
+        How It Works
+    </div>
+    <div class="shop-steps">
+        <div class="shop-step">
+            <div class="shop-step-num">1</div>
+            <div class="shop-step-title">Choose Your Card</div>
+            <div class="shop-step-desc">Pick the material and style that matches your brand.</div>
+        </div>
+        <div class="shop-step">
+            <div class="shop-step-num">2</div>
+            <div class="shop-step-title">Pay Once</div>
+            <div class="shop-step-desc">One-time payment via PayPal. No hidden fees for the card.</div>
+        </div>
+        <div class="shop-step">
+            <div class="shop-step-num">3</div>
+            <div class="shop-step-title">Subscription Starts</div>
+            <div class="shop-step-desc">Your monthly profile hosting subscription activates automatically.</div>
+        </div>
+        <div class="shop-step">
+            <div class="shop-step-num">4</div>
+            <div class="shop-step-title">Tap & Share</div>
+            <div class="shop-step-desc">Receive your card and start sharing your digital profile with a tap.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+function galleryNav(productId, dir) {
+    var container = document.querySelector('[data-gallery="'+productId+'"]');
+    if (!container) return;
+    var imgs = container.querySelectorAll('img');
+    var dots = container.querySelectorAll('.card-gallery-dot');
+    if (imgs.length < 2) return;
+    var cur = -1;
+    imgs.forEach(function(img, i) { if (img.classList.contains('active')) cur = i; });
+    if (cur < 0) cur = 0;
+    imgs[cur].classList.remove('active');
+    if (dots[cur]) dots[cur].classList.remove('active');
+    var next = (cur + dir + imgs.length) % imgs.length;
+    imgs[next].classList.add('active');
+    if (dots[next]) dots[next].classList.add('active');
+}
+function galleryGo(productId, idx) {
+    var container = document.querySelector('[data-gallery="'+productId+'"]');
+    if (!container) return;
+    var imgs = container.querySelectorAll('img');
+    var dots = container.querySelectorAll('.card-gallery-dot');
+    imgs.forEach(function(img) { img.classList.remove('active'); });
+    dots.forEach(function(dot) { dot.classList.remove('active'); });
+    if (imgs[idx]) imgs[idx].classList.add('active');
+    if (dots[idx]) dots[idx].classList.add('active');
+}
+</script>
+
+{% endblock %}

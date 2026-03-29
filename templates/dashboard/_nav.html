@@ -1,0 +1,8 @@
+<nav class="dash-nav">
+    <a href="{% url 'profiles:dashboard' %}" class="dash-nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Overview</a>
+    <a href="{% url 'profiles:edit_profile' %}" class="dash-nav-link {% if request.resolver_match.url_name == 'edit_profile' %}active{% endif %}">Profile</a>
+    <a href="{% url 'profiles:social_links' %}" class="dash-nav-link {% if request.resolver_match.url_name == 'social_links' %}active{% endif %}">Social Links</a>
+    <a href="{% url 'profiles:theme_picker' %}" class="dash-nav-link {% if request.resolver_match.url_name == 'theme_picker' %}active{% endif %}">Theme</a>
+    <a href="{% url 'profiles:analytics' %}" class="dash-nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">Analytics</a>
+    {% if not is_company_member %}<a href="{% url 'subscriptions:billing' %}" class="dash-nav-link {% if request.resolver_match.url_name == 'billing' %}active{% endif %}">Billing</a>{% endif %}
+</nav>

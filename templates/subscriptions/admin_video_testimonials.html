@@ -1,0 +1,166 @@
+{% extends "subscriptions/admin_base.html" %}
+{% block title %}Video Testimonials{% endblock %}
+{% block nav_video_testimonials %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+.vt-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.vt-header-left h1{font-size:20px;font-weight:800;color:#0F172A;margin:0;letter-spacing:-.3px}
+.vt-header-left p{font-size:13px;color:#64748B;margin:4px 0 0}
+.vt-add-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:#1D9BF0;color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;transition:.15s;font-family:inherit}
+.vt-add-btn:hover{background:#1A8CD8;text-decoration:none}
+.vt-add-btn svg{width:16px;height:16px}
+
+.vt-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.vt-metric{background:#fff;border:1px solid #EFF3F4;border-radius:12px;padding:16px 20px}
+.vt-metric-label{font-size:12px;font-weight:600;color:#536471;margin-bottom:2px}
+.vt-metric-value{font-size:26px;font-weight:800;color:#0F172A}
+.vt-metric-value.green{color:#00BA7C}
+.vt-metric-value.muted{color:#536471}
+
+.vt-list{background:#fff;border:1px solid #EFF3F4;border-radius:12px;overflow:hidden}
+
+.vt-item{display:flex;gap:16px;padding:16px 20px;border-bottom:1px solid #EFF3F4;transition:background .1s}
+.vt-item:last-child{border-bottom:none}
+.vt-item:hover{background:#F7F9F9}
+.vt-item.inactive{opacity:.55}
+
+.vt-thumb{width:56px;height:72px;border-radius:8px;object-fit:cover;background:#EFF3F4;flex-shrink:0}
+.vt-thumb-empty{width:56px;height:72px;border-radius:8px;background:#EFF3F4;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vt-thumb-empty svg{width:24px;height:24px;color:#536471}
+
+.vt-body{flex:1;min-width:0}
+.vt-row-top{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+.vt-name{font-size:14px;font-weight:700;color:#0F172A}
+.vt-verified{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:#1D9BF0;border-radius:50%;flex-shrink:0}
+.vt-verified svg{width:10px;height:10px;color:#fff}
+.vt-status{display:inline-flex;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.vt-status-active{background:#D1FAE5;color:#065F46}
+.vt-status-inactive{background:#F1F5F9;color:#64748B}
+.vt-stars{color:#F59E0B;font-size:13px;letter-spacing:1px;margin-bottom:4px}
+.vt-review{font-size:13px;color:#536471;line-height:1.45;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.vt-meta{display:flex;align-items:center;gap:12px;margin-top:6px;font-size:12px;color:#8899A6}
+.vt-meta span{display:flex;align-items:center;gap:3px}
+.vt-meta svg{width:13px;height:13px}
+
+.vt-actions{display:flex;align-items:center;gap:2px;flex-shrink:0;align-self:center}
+.vt-act{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:none;background:transparent;cursor:pointer;transition:.15s;color:#536471}
+.vt-act:hover{background:#EFF3F4}
+.vt-act.edit:hover{color:#1D9BF0;background:#E8F5FD}
+.vt-act.toggle:hover{color:#F59E0B;background:#FEF9C3}
+.vt-act.delete:hover{color:#F4212E;background:#FEE2E2}
+.vt-act svg{width:17px;height:17px}
+.vt-act-link{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;color:#536471;transition:.15s;text-decoration:none}
+.vt-act-link:hover{background:#E8F5FD;color:#1D9BF0;text-decoration:none}
+.vt-act-link svg{width:17px;height:17px}
+
+.vt-empty{padding:64px 20px;text-align:center}
+.vt-empty svg{width:48px;height:48px;color:#CFD9DE;margin:0 auto 12px;display:block}
+.vt-empty p{font-size:14px;color:#536471;margin:0 0 16px}
+
+@media(max-width:640px){
+    .vt-header{flex-direction:column;align-items:flex-start;gap:12px}
+    .vt-metrics{grid-template-columns:1fr}
+    .vt-item{flex-wrap:wrap}
+    .vt-actions{width:100%;justify-content:flex-end;padding-top:8px}
+}
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Header -->
+<div class="vt-header">
+    <div class="vt-header-left">
+        <h1>Video Testimonials</h1>
+        <p>Manage homepage spotlight testimonials</p>
+    </div>
+    <a href="{% url 'subscriptions:admin_video_testimonial_create' %}" class="vt-add-btn">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Add Testimonial
+    </a>
+</div>
+
+<!-- Metrics -->
+<div class="vt-metrics">
+    <div class="vt-metric">
+        <div class="vt-metric-label">Total</div>
+        <div class="vt-metric-value">{{ total_count }}</div>
+    </div>
+    <div class="vt-metric">
+        <div class="vt-metric-label">Active</div>
+        <div class="vt-metric-value green">{{ active_count }}</div>
+    </div>
+    <div class="vt-metric">
+        <div class="vt-metric-label">Inactive</div>
+        <div class="vt-metric-value muted">{{ inactive_count }}</div>
+    </div>
+</div>
+
+<!-- Testimonials List -->
+{% if testimonials %}
+<div class="vt-list">
+    {% for t in testimonials %}
+    <div class="vt-item{% if not t.is_active %} inactive{% endif %}">
+        {% if t.thumbnail %}
+        <img class="vt-thumb" src="{{ t.thumbnail.url }}" alt="{{ t.name }}">
+        {% else %}
+        <div class="vt-thumb-empty">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+        </div>
+        {% endif %}
+
+        <div class="vt-body">
+            <div class="vt-row-top">
+                <span class="vt-name">{{ t.name }}</span>
+                {% if t.is_verified %}
+                <span class="vt-verified" title="Verified"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg></span>
+                {% endif %}
+                {% if t.is_active %}
+                <span class="vt-status vt-status-active">Active</span>
+                {% else %}
+                <span class="vt-status vt-status-inactive">Inactive</span>
+                {% endif %}
+            </div>
+            <div class="vt-stars">{% for i in "12345" %}{% if forloop.counter <= t.rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}</div>
+            <p class="vt-review">{{ t.review }}</p>
+            <div class="vt-meta">
+                {% if t.date_label %}<span><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg> {{ t.date_label }}</span>{% endif %}
+                <span><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/></svg> #{{ t.sort_order }}</span>
+                {% if t.has_video %}<span><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/></svg> {{ t.get_video_source_display }}</span>{% else %}<span style="color:#CFD9DE">No video</span>{% endif %}
+            </div>
+        </div>
+
+        <div class="vt-actions">
+            <a href="{% url 'subscriptions:admin_video_testimonial_edit' t.pk %}" class="vt-act-link" title="Edit">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
+            </a>
+            <form method="post" action="{% url 'subscriptions:admin_video_testimonial_toggle' t.pk %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="vt-act toggle" title="{% if t.is_active %}Deactivate{% else %}Activate{% endif %}">
+                    {% if t.is_active %}
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                    {% else %}
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                    {% endif %}
+                </button>
+            </form>
+            <form method="post" action="{% url 'subscriptions:admin_video_testimonial_delete' t.pk %}" style="display:inline" onsubmit="return confirm('Delete testimonial from {{ t.name }}?')">
+                {% csrf_token %}
+                <button type="submit" class="vt-act delete" title="Delete">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="vt-list">
+    <div class="vt-empty">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+        <p>No video testimonials yet</p>
+        <a href="{% url 'subscriptions:admin_video_testimonial_create' %}" class="vt-add-btn">Add Your First Testimonial</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

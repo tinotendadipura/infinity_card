@@ -1,0 +1,114 @@
+{% extends "dashboard/_app_shell.html" %}
+
+{% block title %}Skills | InfinityCard{% endblock %}
+
+{% block page_header %}
+<h1 class="app-page-title">Skills & Expertise</h1>
+<p class="app-page-subtitle">Add skills that showcase your expertise — these appear as tags on your public profile.</p>
+{% endblock %}
+
+{% block content %}
+
+<!-- ═══ ADD SKILL ═══ -->
+<div class="sk-form-card">
+    <div class="sk-form-header">
+        <div class="sk-form-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        </div>
+        <div>
+            <h3 class="sk-form-title">Add Skill</h3>
+            <p class="sk-form-sub">Type a skill name and press Add</p>
+        </div>
+    </div>
+
+    <form method="post" class="sk-add-row" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add">
+        <input type="text" name="name" placeholder="e.g. Project Management" class="sk-input" required maxlength="100" autocomplete="off">
+        <button type="submit" class="sk-add-btn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add
+        </button>
+    </form>
+</div>
+
+<!-- ═══ SKILLS LIST ═══ -->
+{% if skills %}
+<div class="sk-list-header">
+    <h3 class="sk-list-title">Your Skills</h3>
+    <span class="sk-list-count">{{ skills|length }} skill{{ skills|length|pluralize }}</span>
+</div>
+
+<div class="sk-chips">
+    {% for skill in skills %}
+    <div class="sk-chip">
+        <span class="sk-chip-name">{{ skill.name }}</span>
+        <form method="post" style="display:inline">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="skill_id" value="{{ skill.pk }}">
+            <button type="submit" class="sk-chip-remove" title="Remove skill" onclick="return confirm('Remove &quot;{{ skill.name }}&quot;?')">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="sk-empty">
+    <div class="sk-empty-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+    </div>
+    <h3 class="sk-empty-title">No skills yet</h3>
+    <p class="sk-empty-desc">Add your first skill above — skills appear as tags on your public profile when the Skills toggle is enabled.</p>
+</div>
+{% endif %}
+
+<!-- ═══ TIP ═══ -->
+<div class="sk-tip">
+    <div class="sk-tip-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>
+    </div>
+    <div>
+        <strong>Pro tip:</strong> Enable the <em>Skills / Expertise</em> toggle in your
+        <a href="{% url 'profiles:settings' %}">Profile Settings</a> so skills appear on your public profile.
+    </div>
+</div>
+
+<style>
+.sk-form-card{background:#fff;border:1px solid #E2E8F0;border-radius:16px;padding:28px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sk-form-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #F1F5F9}
+.sk-form-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#8B5CF6,#7C3AED);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sk-form-icon svg{width:22px;height:22px;color:#fff}
+.sk-form-title{font-size:16px;font-weight:700;color:#1E293B;margin:0}
+.sk-form-sub{font-size:13px;color:#64748B;margin:2px 0 0}
+.sk-add-row{display:flex;gap:10px}
+.sk-input{flex:1;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;color:#1E293B;background:#FAFBFC;outline:none;font-family:inherit;transition:border-color .15s,box-shadow .15s}
+.sk-input:focus{border-color:#8B5CF6;box-shadow:0 0 0 3px rgba(139,92,246,.12);background:#fff}
+.sk-add-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(139,92,246,.25);font-family:inherit;transition:.15s}
+.sk-add-btn:hover{box-shadow:0 4px 12px rgba(139,92,246,.35)}
+
+.sk-list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sk-list-title{font-size:15px;font-weight:700;color:#1E293B;margin:0}
+.sk-list-count{font-size:12px;color:#64748B;background:#F1F5F9;padding:3px 10px;border-radius:20px;font-weight:600}
+.sk-chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+.sk-chip{display:inline-flex;align-items:center;gap:8px;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:100px;padding:8px 10px 8px 16px;transition:.15s}
+.sk-chip:hover{border-color:#A78BFA;background:#EDE9FE}
+.sk-chip-name{font-size:14px;font-weight:600;color:#5B21B6}
+.sk-chip-remove{width:24px;height:24px;border-radius:50%;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#A78BFA;transition:.15s;padding:0}
+.sk-chip-remove svg{width:14px;height:14px}
+.sk-chip-remove:hover{background:#DDD6FE;color:#7C3AED}
+
+.sk-empty{text-align:center;padding:48px 24px;background:#FAFBFC;border:1.5px dashed #E2E8F0;border-radius:16px;margin-bottom:24px}
+.sk-empty-icon{width:64px;height:64px;border-radius:16px;background:#F1F5F9;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px}
+.sk-empty-icon svg{width:32px;height:32px;color:#94A3B8}
+.sk-empty-title{font-size:16px;font-weight:700;color:#1E293B;margin:0 0 6px}
+.sk-empty-desc{font-size:13px;color:#64748B;max-width:360px;margin:0 auto;line-height:1.5}
+
+.sk-tip{display:flex;align-items:flex-start;gap:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:14px 18px;font-size:13px;color:#92400E;line-height:1.5;margin-bottom:24px}
+.sk-tip-icon{flex-shrink:0;margin-top:1px}
+.sk-tip-icon svg{width:18px;height:18px;color:#F59E0B}
+.sk-tip a{color:#D97706;font-weight:600;text-decoration:underline}
+</style>
+
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "dashboard/_app_shell.html" %}
+{% block page_title %}Contacts{% endblock %}
+
+{% block content %}
+<style>
+.cb-wrap { max-width:480px; margin:0 auto; }
+.cb-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.cb-title { font-size:22px; font-weight:800; color:#1E293B; margin:0; }
+.cb-count {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:5px 14px; background:#F1F5F9; color:#64748B;
+    border-radius:100px; font-size:13px; font-weight:700;
+}
+.cb-count svg { width:14px; height:14px; }
+.cb-warn {
+    background:#FFFBEB; border:1px solid #FDE68A; border-radius:12px;
+    padding:14px 18px; font-size:13px; color:#92400E; line-height:1.5;
+    margin-bottom:18px; display:flex; align-items:flex-start; gap:10px;
+}
+.cb-warn svg { width:18px; height:18px; flex-shrink:0; color:#F59E0B; }
+.cb-warn a { color:#D97706; font-weight:600; }
+.cb-list { display:flex; flex-direction:column; gap:0; background:#fff; border:1px solid #E2E8F0; border-radius:16px; overflow:hidden; }
+.cb-item {
+    display:flex; align-items:center; gap:12px;
+    padding:14px 16px; border-bottom:1px solid #F1F5F9;
+    position:relative;
+}
+.cb-item:last-child { border-bottom:none; }
+.cb-avatar {
+    width:42px; height:42px; border-radius:50%;
+    background:linear-gradient(135deg,#2EC4B6 0%,#1A9E92 100%);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    color:#fff; font-weight:800; font-size:16px; text-transform:uppercase;
+}
+.cb-info { flex:1; min-width:0; }
+.cb-name { font-size:14px; font-weight:700; color:#1E293B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cb-phone { font-size:12.5px; color:#475569; margin-top:1px; display:flex; align-items:center; gap:5px; }
+.cb-phone svg { width:12px; height:12px; flex-shrink:0; color:#94A3B8; }
+.cb-email { font-size:12px; color:#94A3B8; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cb-meta { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; }
+.cb-time { font-size:10.5px; color:#94A3B8; white-space:nowrap; }
+.cb-actions { display:flex; gap:4px; }
+.cb-act {
+    width:30px; height:30px; border-radius:8px; border:none;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:background 0.15s;
+}
+.cb-act svg { width:14px; height:14px; }
+.cb-act-call { background:#ECFDF5; color:#059669; }
+.cb-act-call:hover { background:#D1FAE5; }
+.cb-act-mail { background:#EFF6FF; color:#3B82F6; }
+.cb-act-mail:hover { background:#DBEAFE; }
+.cb-act-del { background:#FEF2F2; color:#EF4444; }
+.cb-act-del:hover { background:#FEE2E2; }
+.cb-empty {
+    text-align:center; padding:60px 20px; background:#fff;
+    border:1px solid #E2E8F0; border-radius:16px;
+}
+.cb-empty svg { width:52px; height:52px; color:#CBD5E1; margin:0 auto 14px; }
+.cb-empty h3 { font-size:16px; font-weight:700; color:#1E293B; margin:0 0 6px; }
+.cb-empty p { font-size:13px; color:#64748B; margin:0; }
+</style>
+
+<div class="cb-wrap">
+    <div class="cb-head">
+        <h1 class="cb-title">Contacts</h1>
+        {% if total_count %}
+        <span class="cb-count">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+            {{ total_count }}
+        </span>
+        {% endif %}
+    </div>
+
+    {% if not profile.show_contact_form %}
+    <div class="cb-warn">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+        <div>Your <strong>Contact Collection</strong> is currently disabled. Enable it in <a href="{% url 'profiles:settings' %}">Profile Settings</a> so visitors can save their details to your contacts.</div>
+    </div>
+    {% endif %}
+
+    {% if contacts %}
+    <div class="cb-list">
+        {% for c in contacts %}
+        <div class="cb-item">
+            <div class="cb-avatar">{{ c.sender_name|first }}</div>
+            <div class="cb-info">
+                <div class="cb-name">{{ c.sender_name }}</div>
+                <div class="cb-phone">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+                    {{ c.sender_phone }}
+                </div>
+                {% if c.sender_email %}<div class="cb-email">{{ c.sender_email }}</div>{% endif %}
+            </div>
+            <div class="cb-meta">
+                <span class="cb-time">{{ c.created_at|timesince }} ago</span>
+                <div class="cb-actions">
+                    <a href="tel:{{ c.sender_phone }}" class="cb-act cb-act-call" title="Call">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+                    </a>
+                    <a href="mailto:{{ c.sender_email }}" class="cb-act cb-act-mail" title="Email">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+                    </a>
+                    <form method="post" style="display:inline" onsubmit="return confirm('Delete this contact?')">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="contact_id" value="{{ c.pk }}">
+                        <button type="submit" class="cb-act cb-act-del" title="Delete">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="cb-empty">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+        <h3>No contacts yet</h3>
+        <p>When visitors save their details via your profile, they'll appear here like a phone book.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

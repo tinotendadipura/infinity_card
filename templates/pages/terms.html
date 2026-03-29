@@ -1,0 +1,197 @@
+{% extends "pages/home/base.html" %}
+{% load static %}
+
+{% block title %}Terms of Service | InfinityCard{% endblock %}
+
+{% block content %}
+<style>
+/* ── Legal Pages Dark Theme ── */
+body{background-color:#0A0A0A!important;color:#E2E8F0!important}
+a{color:#C4B5FD}
+a:hover{color:#A78BFA}
+h1,h2{color:#F1F5F9}
+p{color:rgba(255,255,255,.65);line-height:1.7}
+ul{color:rgba(255,255,255,.65)}
+li{margin-bottom:0.5rem}
+
+/* ── Hero Section ── */
+.legal-hero{
+  background:#030303;
+  color:#fff;padding:0 2rem 4rem;text-align:center;position:relative;overflow:hidden;
+  padding-top:120px;border-radius:0 0 32px 32px;
+}
+.legal-hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,.05) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(139,92,246,.05) 0%,transparent 50%);
+  pointer-events:none;z-index:0}
+.legal-hero::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,#030303,transparent 40%,rgba(3,3,3,.8));
+  pointer-events:none;z-index:1}
+
+/* Geometric floating shapes */
+.legal-hero-shapes{position:absolute;inset:0;overflow:hidden;z-index:0}
+.legal-shape{position:absolute;border-radius:9999px;border:2px solid rgba(255,255,255,.15);
+  backdrop-filter:blur(2px);
+  box-shadow:0 8px 32px 0 rgba(255,255,255,.1);
+  opacity:0;animation:legal-shape-enter 2.4s cubic-bezier(.23,.86,.39,.96) forwards}
+.legal-shape-1{width:600px;height:140px;left:-10%;top:15%;transform:rotate(12deg);
+  background:linear-gradient(to right,rgba(99,102,241,.15),transparent);
+  animation-delay:0.3s}
+.legal-shape-2{width:500px;height:120px;right:-5%;top:70%;transform:rotate(-15deg);
+  background:linear-gradient(to right,rgba(139,92,246,.15),transparent);
+  animation-delay:0.5s}
+@keyframes legal-shape-enter{
+  0%{opacity:0;transform:translateY(-150px) rotate(var(--r,-15deg))}
+  100%{opacity:1;transform:translateY(0) rotate(var(--r,0deg))}
+}
+
+.legal-hero-inner{position:relative;z-index:2;max-width:720px;margin:0 auto}
+.legal-hero-inner > *{opacity:0;transform:translateY(30px);animation:legal-fadeup 1s cubic-bezier(.25,.4,.25,1) forwards}
+.legal-hero-inner > *:nth-child(1){animation-delay:.5s}
+.legal-hero-inner > *:nth-child(2){animation-delay:.7s}
+.legal-hero-inner > *:nth-child(3){animation-delay:.9s}
+@keyframes legal-fadeup{
+  to{opacity:1;transform:translateY(0)}
+}
+
+.legal-hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:100px;
+  font-size:13px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:24px}
+.legal-hero h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;line-height:1.15;
+  letter-spacing:-.03em;margin-bottom:20px}
+.legal-hero h1 .legal-h1-line1{display:block;
+  background:linear-gradient(to bottom,#fff,rgba(255,255,255,.8));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.legal-hero h1 .legal-h1-line2{display:block;
+  background:linear-gradient(to right,#A5B4FC,rgba(255,255,255,.9),#FDA4AF);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.legal-hero p{font-size:clamp(1rem,2vw,1.25rem);line-height:1.7;color:rgba(255,255,255,.4);
+  margin-bottom:32px;max-width:560px;margin-left:auto;margin-right:auto;font-weight:300;letter-spacing:.01em}
+
+/* ── Content Section ── */
+.legal-content{background:#0A0A0A;padding:80px 0}
+.legal-container{max-width:900px;margin:0 auto;padding:0 2rem}
+.legal-page{background:#111111;border:1px solid rgba(255,255,255,.06);border-radius:20px;
+  padding:3rem;box-shadow:0 20px 40px rgba(0,0,0,.4)}
+
+.page-header{text-align:center;margin-bottom:3rem}
+.page-header h1{font-size:2.5rem;font-weight:700;color:#F1F5F9;margin-bottom:1rem}
+.page-subtitle{color:rgba(255,255,255,.5);font-size:1rem}
+
+.page-section{margin-bottom:3rem}
+.page-section h2{font-size:1.5rem;font-weight:600;color:#F1F5F9;margin-bottom:1rem;
+  padding-bottom:0.5rem;border-bottom:2px solid rgba(167,139,250,.3)}
+.page-section p{margin-bottom:1rem}
+.page-section ul{margin-left:1.5rem;margin-bottom:1rem}
+.page-section a{color:#A78BFA;text-decoration:underline;text-underline-offset:2px}
+.page-section a:hover{color:#C4B5FD}
+
+/* Responsive */
+@media (max-width:768px){
+  .legal-page{padding:2rem}
+  .page-header h1{font-size:2rem}
+  .page-section h2{font-size:1.25rem}
+}
+</style>
+
+<!-- Hero Section -->
+<section class="legal-hero">
+  <div class="legal-hero-shapes">
+    <div class="legal-shape legal-shape-1"></div>
+    <div class="legal-shape legal-shape-2"></div>
+  </div>
+  <div class="legal-hero-inner">
+    <div class="legal-hero-badge">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+      </svg>
+      Legal Information
+    </div>
+    <h1>
+      <span class="legal-h1-line1">Terms of Service</span>
+      <span class="legal-h1-line2">Your rights and responsibilities</span>
+    </h1>
+    <p>By using InfinityCard, you agree to these terms that govern your use of our platform and services.</p>
+  </div>
+</section>
+
+<!-- Content Section -->
+<section class="legal-content">
+  <div class="legal-container">
+    <div class="legal-page">
+      <div class="page-header">
+        <h1>Terms of Service</h1>
+        <p class="page-subtitle">Last updated: February 2026</p>
+      </div>
+
+    <section class="page-section">
+        <h2>1. Acceptance of Terms</h2>
+        <p>By creating an account or using InfinityCard, you agree to be bound by these Terms of Service. If you do not agree, please do not use the platform.</p>
+    </section>
+
+    <section class="page-section">
+        <h2>2. Account Responsibilities</h2>
+        <ul>
+            <li>You must provide accurate and complete registration information.</li>
+            <li>You are responsible for maintaining the security of your account credentials.</li>
+            <li>You must not impersonate another person or use a misleading username.</li>
+            <li>Your username serves as your subdomain and must comply with our reserved names policy.</li>
+        </ul>
+    </section>
+
+    <section class="page-section">
+        <h2>3. Acceptable Use</h2>
+        <p>You agree not to use InfinityCard to:</p>
+        <ul>
+            <li>Post illegal, harmful, or offensive content</li>
+            <li>Infringe on intellectual property rights of others</li>
+            <li>Distribute spam, malware, or phishing content</li>
+            <li>Attempt to gain unauthorized access to other accounts or systems</li>
+            <li>Abuse the NFC tap system or analytics features</li>
+        </ul>
+    </section>
+
+    <section class="page-section">
+        <h2>4. Subscriptions & Billing</h2>
+        <ul>
+            <li>New accounts receive a free 30-day trial on the Starter plan.</li>
+            <li>Subscriptions are billed monthly at the rate of your chosen plan.</li>
+            <li>You may upgrade, downgrade, or cancel your subscription at any time.</li>
+            <li>When a subscription expires, your profile becomes temporarily unavailable.</li>
+            <li>No refunds are provided for partial billing periods.</li>
+        </ul>
+    </section>
+
+    <section class="page-section">
+        <h2>5. NFC Cards</h2>
+        <p>Physical NFC cards remain the property of InfinityCard until assigned. Cards are programmed with a unique identifier linked to your profile. Tampering with or reprogramming cards is prohibited.</p>
+    </section>
+
+    <section class="page-section">
+        <h2>6. Content Ownership</h2>
+        <p>You retain ownership of all content you upload to your profile (images, text, media). By uploading content, you grant InfinityCard a license to display it on your public profile page as part of the service.</p>
+    </section>
+
+    <section class="page-section">
+        <h2>7. Termination</h2>
+        <p>We reserve the right to suspend or terminate accounts that violate these terms. You may close your account at any time by contacting support.</p>
+    </section>
+
+    <section class="page-section">
+        <h2>8. Limitation of Liability</h2>
+        <p>InfinityCard is provided "as is" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform.</p>
+    </section>
+
+    <section class="page-section">
+        <h2>9. Changes to Terms</h2>
+        <p>We may update these terms from time to time. Continued use of the platform after changes constitutes acceptance of the new terms.</p>
+    </section>
+
+    <section class="page-section">
+        <h2>10. Contact</h2>
+        <p>Questions about these terms? Contact us at <a href="mailto:legal@inftycard.cc">legal@inftycard.cc</a> or use our <a href="{% url 'core:contact' %}">contact form</a>.</p>
+    </section>
+    </div>
+  </div>
+</section>
+{% endblock %}

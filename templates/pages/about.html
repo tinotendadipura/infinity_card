@@ -1,0 +1,73 @@
+{% extends "pages/home/base.html" %}
+
+{% block title %}About Us | InfinityCard{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2>About <span class="highlight">InfinityCard</span></h2>
+            <p>We're on a mission to make networking instant, sustainable, and effortless for every professional on the planet.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section section-light">
+    <div class="container container-sm">
+        <div class="page-section">
+            <h2>Our Mission</h2>
+            <p>InfinityCard exists to replace outdated paper business cards with a single, tap-powered digital identity. We believe the way you share who you are should be as dynamic as you are.</p>
+            <p>With one NFC-enabled card, you carry your entire professional identity — your portfolio, your menu, your listings, your links — all accessible with a single tap on any smartphone.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2>How we're different</h2>
+            <p>Built from the ground up for modern professionals.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">&#8734;</div>
+                <h3>One Card, Infinite Updates</h3>
+                <p>Update your profile anytime. Your card always points to the latest version of you. No reprinting, no waste.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#9733;</div>
+                <h3>Industry-Specific Profiles</h3>
+                <p>Whether you're a chef, realtor, photographer, or entrepreneur — we have a profile template built for your exact use case.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#9889;</div>
+                <h3>Zero Friction Sharing</h3>
+                <p>No app downloads. No QR scanning. No fumbling. Just tap your card on any NFC-enabled phone and you're done.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-light">
+    <div class="container container-sm">
+        <div class="page-section">
+            <h2>Built for everyone</h2>
+            <p>InfinityCard serves professionals across every industry — from freelancers and consultants to restaurants, real estate agents, event planners, and creatives. Each category gets a purpose-built profile template with the fields and layout that matter most.</p>
+            <p>We're not just a digital business card. We're a complete identity platform that grows with your career.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to go infinite?</h2>
+            <p>Join thousands of professionals who've ditched paper cards for good.</p>
+            <div class="page-actions">
+                <a href="{% url 'accounts:signup' %}" class="btn btn-white btn-lg">Get started free</a>
+                <a href="{% url 'core:features' %}" class="btn btn-ghost btn-lg">See all features</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

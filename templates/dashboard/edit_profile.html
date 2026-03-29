@@ -1,0 +1,1975 @@
+{% extends "dashboard/_app_shell.html" %}
+
+{% block title %}{% if profile %}Edit Profile{% else %}Create Profile{% endif %} | InfinityCard{% endblock %}
+
+{% block extra_head %}
+{% if profile.show_map %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+{% endif %}
+{% endblock %}
+
+{% block page_header %}
+<h1 class="app-page-title">{% if profile %}Edit Profile{% else %}Create Profile{% endif %}</h1>
+<p class="app-page-subtitle">Update your public-facing information.</p>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="app-form" id="profileForm" novalidate>
+    {% csrf_token %}
+
+    <!-- Profile Image — social-media style avatar picker -->
+    <div class="avatar-upload">
+        <label for="id_profile_image" class="avatar-upload-label">
+            <div class="avatar-upload-preview" id="avatarPreview">
+                {% if profile and profile.profile_image %}
+                <img src="{{ profile.profile_image.url }}" alt="{{ profile.display_name }}" id="avatarImg">
+                {% else %}
+                <svg id="avatarPlaceholder" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                {% endif %}
+            </div>
+            <div class="avatar-upload-badge">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
+            </div>
+            <input type="file" name="profile_image" accept="image/*" id="id_profile_image" class="avatar-upload-input">
+        </label>
+        <div class="avatar-upload-hint">Tap to change photo</div>
+        {% for error in form.profile_image.errors %}
+        <span class="form-error">{{ error }}</span>
+        {% endfor %}
+    </div>
+
+    <!-- First & Last Name (User model) -->
+    <div class="ep-name-row">
+        <div class="form-group {% if form.first_name.errors %}has-error{% endif %}">
+            <label for="{{ form.first_name.id_for_label }}">First Name</label>
+            {{ form.first_name }}
+            {% for error in form.first_name.errors %}<span class="form-error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-group {% if form.last_name.errors %}has-error{% endif %}">
+            <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+            {{ form.last_name }}
+            {% for error in form.last_name.errors %}<span class="form-error">{{ error }}</span>{% endfor %}
+        </div>
+    </div>
+
+    <!-- Fields up to and including bio -->
+    {% for field in form %}
+        {% if field.name == 'category' or field.name == 'display_name' or field.name == 'headline' or field.name == 'bio' %}
+        <div class="form-group {% if field.errors %}has-error{% endif %}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+            <small class="form-help">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+            <span class="form-error">{{ error }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endfor %}
+</form>
+
+{% if profile %}
+<!-- ── Skills & Expertise ── -->
+{% if profile.show_skills %}
+<div class="ep-section" id="sectionSkills">
+    <button type="button" class="ep-section-toggle" onclick="toggleSection('sectionSkills')">
+        <div class="ep-section-left">
+            <div class="ep-section-icon ep-icon-purple">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            </div>
+            <div>
+                <span class="ep-section-title">Skills & Expertise</span>
+                <span class="ep-section-count">{{ skills|length }} skill{{ skills|length|pluralize }}</span>
+            </div>
+        </div>
+        <svg class="ep-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    <div class="ep-section-body">
+        <form method="post" class="ep-inline-add" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="section_action" value="add_skill">
+            <input type="text" name="name" placeholder="e.g. Project Management" class="ep-input" required maxlength="100">
+            <button type="submit" class="ep-add-btn">Add</button>
+        </form>
+        {% if skills %}
+        <div class="ep-chips">
+            {% for skill in skills %}
+            <div class="ep-chip">
+                <span>{{ skill.name }}</span>
+                <form method="post" style="display:inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_action" value="delete_skill">
+                    <input type="hidden" name="skill_id" value="{{ skill.pk }}">
+                    <button type="submit" class="ep-chip-x" title="Remove">&times;</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Experience ── -->
+{% if profile.show_experience %}
+<div class="ep-section" id="sectionExperience">
+    <button type="button" class="ep-section-toggle" onclick="toggleSection('sectionExperience')">
+        <div class="ep-section-left">
+            <div class="ep-section-icon ep-icon-blue">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+            </div>
+            <div>
+                <span class="ep-section-title">Experience</span>
+                <span class="ep-section-count">{{ experiences|length }} position{{ experiences|length|pluralize }}</span>
+            </div>
+        </div>
+        <svg class="ep-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    <div class="ep-section-body">
+        <button type="button" class="ep-show-form-btn" onclick="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add Position
+        </button>
+        <div class="ep-add-form" style="display:none">
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="section_action" value="add_experience">
+                <div class="ep-form-grid">
+                    <div class="ep-form-field"><label>Title *</label>{{ experience_form.title }}</div>
+                    <div class="ep-form-field"><label>Company *</label>{{ experience_form.company }}</div>
+                </div>
+                <div class="ep-form-field"><label>Location</label>{{ experience_form.location }}</div>
+                <div class="ep-form-field ep-check-field">
+                    <label>{{ experience_form.is_current }} I currently work here</label>
+                </div>
+                <div class="ep-form-grid">
+                    <div class="ep-form-field"><label>Start Date *</label>{{ experience_form.start_date }}</div>
+                    <div class="ep-form-field"><label>End Date</label>{{ experience_form.end_date }}</div>
+                </div>
+                <div class="ep-form-field"><label>Description</label>{{ experience_form.description }}</div>
+                <div class="ep-form-field">
+                    <label>Company Logo</label>
+                    <div class="ep-file-picker" onclick="this.querySelector('input').click()">
+                        <input type="file" name="company_logo" accept="image/*" class="ep-file-picker-input" onchange="handleFilePicker(this)">
+                        <div class="ep-file-picker-empty">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="width:20px;height:20px;color:#94A3B8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+                            <span>Choose logo</span>
+                        </div>
+                        <div class="ep-file-picker-chosen" hidden>
+                            <img src="" alt="Preview" class="ep-file-picker-thumb">
+                            <span class="ep-file-picker-name"></span>
+                            <button type="button" class="ep-file-picker-clear" onclick="event.stopPropagation();clearFilePicker(this)">&times;</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="ep-form-actions">
+                    <button type="submit" class="ep-add-btn">Save</button>
+                    <button type="button" class="ep-cancel-btn" onclick="this.closest('.ep-add-form').style.display='none';this.closest('.ep-add-form').previousElementSibling.style.display=''">Cancel</button>
+                </div>
+            </form>
+        </div>
+        {% if experiences %}
+        <div class="ep-items">
+            {% for exp in experiences %}
+            <div class="ep-item">
+                <div class="ep-item-logo">
+                    {% if exp.company_logo %}<img src="{{ exp.company_logo.url }}" alt="">{% else %}<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>{% endif %}
+                </div>
+                <div class="ep-item-body">
+                    <strong>{{ exp.title }}</strong>
+                    <div class="ep-item-sub">{{ exp.company }}</div>
+                    <div class="ep-item-meta">{{ exp.start_date|date:"M Y" }} – {% if exp.is_current %}Present{% elif exp.end_date %}{{ exp.end_date|date:"M Y" }}{% endif %} &middot; {{ exp.duration_display }}</div>
+                    {% if exp.location %}<div class="ep-item-meta">{{ exp.location }}</div>{% endif %}
+                </div>
+                <form method="post" style="display:inline" onsubmit="return confirm('Delete this position?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_action" value="delete_experience">
+                    <input type="hidden" name="experience_id" value="{{ exp.pk }}">
+                    <button type="submit" class="ep-del-btn" title="Delete">&times;</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Education ── -->
+{% if profile.show_education %}
+<div class="ep-section" id="sectionEducation">
+    <button type="button" class="ep-section-toggle" onclick="toggleSection('sectionEducation')">
+        <div class="ep-section-left">
+            <div class="ep-section-icon ep-icon-green">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15v-3.75m0 0h10.5"/></svg>
+            </div>
+            <div>
+                <span class="ep-section-title">Education</span>
+                <span class="ep-section-count">{{ education_entries|length }} entr{{ education_entries|length|pluralize:"y,ies" }}</span>
+            </div>
+        </div>
+        <svg class="ep-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    <div class="ep-section-body">
+        <button type="button" class="ep-show-form-btn" onclick="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add Education
+        </button>
+        <div class="ep-add-form" style="display:none">
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="section_action" value="add_education">
+                <div class="ep-form-field"><label>School / Institution *</label>{{ education_form.school }}</div>
+                <div class="ep-form-grid">
+                    <div class="ep-form-field"><label>Degree</label>{{ education_form.degree }}</div>
+                    <div class="ep-form-field"><label>Field of Study</label>{{ education_form.field_of_study }}</div>
+                </div>
+                <div class="ep-form-grid">
+                    <div class="ep-form-field"><label>Start Year</label>{{ education_form.start_year }}</div>
+                    <div class="ep-form-field"><label>End Year</label>{{ education_form.end_year }}</div>
+                </div>
+                <div class="ep-form-field"><label>Description</label>{{ education_form.description }}</div>
+                <div class="ep-form-field">
+                    <label>School Logo</label>
+                    <div class="ep-file-picker" onclick="this.querySelector('input').click()">
+                        <input type="file" name="school_logo" accept="image/*" class="ep-file-picker-input" onchange="handleFilePicker(this)">
+                        <div class="ep-file-picker-empty">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="width:20px;height:20px;color:#94A3B8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15v-3.75m0 0h10.5"/></svg>
+                            <span>Choose logo</span>
+                        </div>
+                        <div class="ep-file-picker-chosen" hidden>
+                            <img src="" alt="Preview" class="ep-file-picker-thumb">
+                            <span class="ep-file-picker-name"></span>
+                            <button type="button" class="ep-file-picker-clear" onclick="event.stopPropagation();clearFilePicker(this)">&times;</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="ep-form-actions">
+                    <button type="submit" class="ep-add-btn">Save</button>
+                    <button type="button" class="ep-cancel-btn" onclick="this.closest('.ep-add-form').style.display='none';this.closest('.ep-add-form').previousElementSibling.style.display=''">Cancel</button>
+                </div>
+            </form>
+        </div>
+        {% if education_entries %}
+        <div class="ep-items">
+            {% for edu in education_entries %}
+            <div class="ep-item">
+                <div class="ep-item-logo ep-logo-green">
+                    {% if edu.school_logo %}<img src="{{ edu.school_logo.url }}" alt="">{% else %}<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15v-3.75m0 0h10.5"/></svg>{% endif %}
+                </div>
+                <div class="ep-item-body">
+                    <strong>{{ edu.school }}</strong>
+                    {% if edu.degree or edu.field_of_study %}<div class="ep-item-sub">{% if edu.degree %}{{ edu.degree }}{% endif %}{% if edu.degree and edu.field_of_study %}, {% endif %}{% if edu.field_of_study %}{{ edu.field_of_study }}{% endif %}</div>{% endif %}
+                    {% if edu.start_year or edu.end_year %}<div class="ep-item-meta">{% if edu.start_year %}{{ edu.start_year }}{% endif %}{% if edu.start_year and edu.end_year %} – {% endif %}{% if edu.end_year %}{{ edu.end_year }}{% endif %}</div>{% endif %}
+                </div>
+                <form method="post" style="display:inline" onsubmit="return confirm('Delete this education entry?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_action" value="delete_education">
+                    <input type="hidden" name="education_id" value="{{ edu.pk }}">
+                    <button type="submit" class="ep-del-btn" title="Delete">&times;</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Services ── -->
+{% if profile.show_services %}
+<div class="ep-section" id="sectionServices">
+    <button type="button" class="ep-section-toggle" onclick="toggleSection('sectionServices')">
+        <div class="ep-section-left">
+            <div class="ep-section-icon ep-icon-amber">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75"/></svg>
+            </div>
+            <div>
+                <span class="ep-section-title">Services</span>
+                <span class="ep-section-count">{{ services|length }} service{{ services|length|pluralize }}</span>
+            </div>
+        </div>
+        <svg class="ep-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    <div class="ep-section-body">
+        <button type="button" class="ep-show-form-btn" onclick="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add Service
+        </button>
+        <div class="ep-add-form" style="display:none">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="section_action" value="add_service">
+                <div class="ep-form-grid">
+                    <div class="ep-form-field"><label>Service Title *</label>{{ service_form.title }}</div>
+                    <div class="ep-form-field"><label>Price</label>{{ service_form.price }}</div>
+                </div>
+                <div class="ep-form-field"><label>Description</label>{{ service_form.description }}</div>
+                <div class="ep-form-actions">
+                    <button type="submit" class="ep-add-btn">Save</button>
+                    <button type="button" class="ep-cancel-btn" onclick="this.closest('.ep-add-form').style.display='none';this.closest('.ep-add-form').previousElementSibling.style.display=''">Cancel</button>
+                </div>
+            </form>
+        </div>
+        {% if services %}
+        <div class="ep-items">
+            {% for svc in services %}
+            <div class="ep-item">
+                <div class="ep-item-body">
+                    <strong>{{ svc.title }}</strong>
+                    {% if svc.description %}<div class="ep-item-sub">{{ svc.description|truncatewords:20 }}</div>{% endif %}
+                    {% if svc.price %}<span class="ep-item-badge">{{ svc.price }}</span>{% endif %}
+                </div>
+                <form method="post" style="display:inline" onsubmit="return confirm('Delete this service?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_action" value="delete_service">
+                    <input type="hidden" name="service_id" value="{{ svc.pk }}">
+                    <button type="submit" class="ep-del-btn" title="Delete">&times;</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Photo Gallery ── -->
+{% if profile.show_gallery %}
+<div class="ep-section" id="sectionGallery">
+    <button type="button" class="ep-section-toggle" onclick="toggleSection('sectionGallery')">
+        <div class="ep-section-left">
+            <div class="ep-section-icon ep-icon-pink">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21zm2.25-9.75a2.25 2.25 0 114.5 0 2.25 2.25 0 01-4.5 0z"/></svg>
+            </div>
+            <div>
+                <span class="ep-section-title">Photo Gallery</span>
+                <span class="ep-section-count">{{ gallery_images.count }} image{{ gallery_images.count|pluralize }}</span>
+            </div>
+        </div>
+        <svg class="ep-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    <div class="ep-section-body">
+        <form method="post" enctype="multipart/form-data" id="galleryUploadForm">
+            {% csrf_token %}
+            <input type="hidden" name="section_action" value="add_gallery_image">
+            <div class="ep-dropzone" id="galleryDropzone">
+                <input type="file" name="image" accept="image/*" required id="galleryFileInput" class="ep-dropzone-input" onchange="handleGalleryPreview(this)">
+                <div class="ep-dropzone-empty" id="galleryDropzoneEmpty">
+                    <div class="ep-dropzone-icon">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
+                    </div>
+                    <div class="ep-dropzone-text">
+                        <span class="ep-dropzone-title">Drop image here or <span class="ep-dropzone-link">browse</span></span>
+                        <span class="ep-dropzone-hint">JPG, PNG, WebP up to 10 MB</span>
+                    </div>
+                </div>
+                <div class="ep-dropzone-preview" id="galleryDropzonePreview" hidden>
+                    <img id="galleryPreviewImg" src="" alt="Preview">
+                    <button type="button" class="ep-dropzone-remove" onclick="clearGalleryPreview()" title="Remove">&times;</button>
+                </div>
+            </div>
+            <div class="ep-dropzone-footer">
+                <input type="text" name="caption" placeholder="Caption (optional)" class="ep-input" style="flex:1">
+                <button type="submit" class="ep-add-btn" id="galleryUploadBtn" disabled>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                    Upload
+                </button>
+            </div>
+        </form>
+        {% if gallery_images %}
+        <div class="ep-gallery-grid">
+            {% for img in gallery_images %}
+            <div class="ep-gallery-item">
+                <img src="{{ img.image.url }}" alt="{{ img.caption|default:'Gallery image' }}" loading="lazy">
+                {% if img.caption %}<div class="ep-gallery-caption">{{ img.caption }}</div>{% endif %}
+                <form method="post" class="ep-gallery-del" onsubmit="return confirm('Delete this image?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_action" value="delete_gallery_image">
+                    <input type="hidden" name="gallery_image_id" value="{{ img.pk }}">
+                    <button type="submit" class="ep-del-btn" title="Delete">&times;</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Business Hours ── -->
+{% if profile.show_business_hours %}
+<div class="ep-section" id="sectionHours">
+    <button type="button" class="ep-section-toggle" onclick="toggleSection('sectionHours')">
+        <div class="ep-section-left">
+            <div class="ep-section-icon ep-icon-teal">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+                <span class="ep-section-title">Business Hours</span>
+                <span class="ep-section-count">{{ business_hours.count }} day{{ business_hours.count|pluralize }} set</span>
+            </div>
+        </div>
+        <svg class="ep-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    <div class="ep-section-body">
+        <button type="button" class="ep-show-form-btn" onclick="this.nextElementSibling.hidden=!this.nextElementSibling.hidden">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add / Update Hours
+        </button>
+        <div class="ep-add-form" hidden>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="section_action" value="save_business_hour">
+                <div class="ep-form-grid">
+                    <div class="ep-form-field">
+                        <label>Day</label>
+                        <select name="day" class="ep-input" required>
+                            <option value="0">Monday</option>
+                            <option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option>
+                            <option value="3">Thursday</option>
+                            <option value="4">Friday</option>
+                            <option value="5">Saturday</option>
+                            <option value="6">Sunday</option>
+                        </select>
+                    </div>
+                    <div class="ep-form-field ep-check-field" style="align-self:end;padding-bottom:6px">
+                        <label><input type="checkbox" name="is_closed" onchange="toggleClosedFields(this)"> Closed this day</label>
+                    </div>
+                    <div class="ep-form-field ep-hours-field">
+                        <label>Opening Time</label>
+                        <input type="time" name="opening_time" class="ep-input" value="08:00">
+                    </div>
+                    <div class="ep-form-field ep-hours-field">
+                        <label>Closing Time</label>
+                        <input type="time" name="closing_time" class="ep-input" value="17:00">
+                    </div>
+                </div>
+                <div class="ep-form-actions" style="margin-top:12px">
+                    <button type="submit" class="ep-add-btn">Save Hours</button>
+                    <button type="button" class="ep-cancel-btn" onclick="this.closest('.ep-add-form').hidden=true">Cancel</button>
+                </div>
+            </form>
+        </div>
+        {% if business_hours %}
+        <div class="ep-items">
+            {% for bh in business_hours %}
+            <div class="ep-item">
+                <div class="ep-item-body">
+                    <strong>{{ bh.get_day_display }}</strong>
+                    {% if bh.is_closed %}
+                    <div class="ep-item-sub" style="color:#EF4444">Closed</div>
+                    {% else %}
+                    <div class="ep-item-sub">{{ bh.opening_time|time:"g:i A" }} – {{ bh.closing_time|time:"g:i A" }}</div>
+                    {% endif %}
+                </div>
+                <form method="post" style="display:inline" onsubmit="return confirm('Remove these hours?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_action" value="delete_business_hour">
+                    <input type="hidden" name="business_hour_id" value="{{ bh.pk }}">
+                    <button type="submit" class="ep-del-btn" title="Delete">&times;</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Testimonials ── -->
+{% if profile.show_testimonials %}
+<div class="ep-section" id="sectionTestimonials">
+    <button type="button" class="ep-section-toggle" onclick="toggleSection('sectionTestimonials')">
+        <div class="ep-section-left">
+            <div class="ep-section-icon ep-icon-yellow">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+            </div>
+            <div>
+                <span class="ep-section-title">Testimonials</span>
+                <span class="ep-section-count">{{ testimonials.count }} review{{ testimonials.count|pluralize }}</span>
+            </div>
+        </div>
+        <svg class="ep-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    <div class="ep-section-body">
+        <button type="button" class="ep-show-form-btn" onclick="this.nextElementSibling.hidden=!this.nextElementSibling.hidden">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add Testimonial
+        </button>
+        <div class="ep-add-form" hidden>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="section_action" value="add_testimonial">
+                <div class="ep-form-grid">
+                    <div class="ep-form-field">
+                        <label>Author Name</label>
+                        <input type="text" name="author_name" placeholder="e.g. John Doe" class="ep-input" required>
+                    </div>
+                    <div class="ep-form-field">
+                        <label>Role / Title</label>
+                        <input type="text" name="author_role" placeholder="e.g. CEO at Acme Inc." class="ep-input">
+                    </div>
+                    <div class="ep-form-field">
+                        <label>Photo (optional)</label>
+                        <div class="ep-file-picker" onclick="this.querySelector('input').click()">
+                            <input type="file" name="author_photo" accept="image/*" class="ep-file-picker-input" onchange="handleFilePicker(this)">
+                            <div class="ep-file-picker-empty">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="width:20px;height:20px;color:#94A3B8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0"/></svg>
+                                <span>Choose photo</span>
+                            </div>
+                            <div class="ep-file-picker-chosen" hidden>
+                                <img src="" alt="Preview" class="ep-file-picker-thumb">
+                                <span class="ep-file-picker-name"></span>
+                                <button type="button" class="ep-file-picker-clear" onclick="event.stopPropagation();clearFilePicker(this)">&times;</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ep-form-field">
+                        <label>Rating (1-5)</label>
+                        <input type="number" name="rating" value="5" min="1" max="5" class="ep-input" style="width:80px">
+                    </div>
+                </div>
+                <div class="ep-form-field" style="margin-top:4px">
+                    <label>Testimonial</label>
+                    <textarea name="content" rows="3" placeholder="What did they say about you?" class="ep-input" required style="resize:vertical"></textarea>
+                </div>
+                <div class="ep-form-actions" style="margin-top:12px">
+                    <button type="submit" class="ep-add-btn">Add Testimonial</button>
+                    <button type="button" class="ep-cancel-btn" onclick="this.closest('.ep-add-form').hidden=true">Cancel</button>
+                </div>
+            </form>
+        </div>
+        {% if testimonials %}
+        <div class="ep-items">
+            {% for t in testimonials %}
+            <div class="ep-item" style="align-items:flex-start">
+                {% if t.author_photo %}
+                <div class="ep-item-logo"><img src="{{ t.author_photo.url }}" alt="{{ t.author_name }}"></div>
+                {% else %}
+                <div class="ep-item-logo">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0"/></svg>
+                </div>
+                {% endif %}
+                <div class="ep-item-body">
+                    <strong>{{ t.author_name }}</strong>
+                    {% if t.author_role %}<div class="ep-item-sub">{{ t.author_role }}</div>{% endif %}
+                    <div class="ep-item-sub" style="margin-top:2px">{{ t.content|truncatewords:25 }}</div>
+                    <div class="ep-stars" style="margin-top:4px">{% for i in "12345" %}{% if forloop.counter <= t.rating %}<span style="color:#F59E0B">&#9733;</span>{% else %}<span style="color:#E2E8F0">&#9733;</span>{% endif %}{% endfor %}</div>
+                </div>
+                <form method="post" style="display:inline" onsubmit="return confirm('Delete this testimonial?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_action" value="delete_testimonial">
+                    <input type="hidden" name="testimonial_id" value="{{ t.pk }}">
+                    <button type="submit" class="ep-del-btn" title="Delete">&times;</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Location Map ── -->
+{% if profile.show_map %}
+<div class="ep-section" id="sectionMap">
+    <button type="button" class="ep-section-toggle" onclick="toggleSection('sectionMap')">
+        <div class="ep-section-left">
+            <div class="ep-section-icon ep-icon-red">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+            </div>
+            <div>
+                <span class="ep-section-title">Location Map</span>
+                <span class="ep-section-count">{% if profile.map_latitude %}Location set{% else %}Not set{% endif %}</span>
+            </div>
+        </div>
+        <svg class="ep-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    <div class="ep-section-body">
+        <!-- Search bar + GPS button -->
+        <div class="ep-map-toolbar">
+            <div class="ep-map-search-wrap">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="ep-map-search-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <input type="text" id="mapSearchInput" class="ep-input ep-map-search" placeholder="Search address or place..." autocomplete="off">
+                <div id="mapSearchResults" class="ep-map-results" hidden></div>
+            </div>
+            <button type="button" class="ep-map-gps-btn" id="mapGpsBtn" title="Use my current location">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2m0 14v2m9-9h-2M5 12H3"/><circle cx="12" cy="12" r="3" fill="currentColor" opacity=".3"/></svg>
+            </button>
+        </div>
+        <!-- Map container -->
+        <div id="mapPickerContainer" class="ep-map-container">
+            <div id="mapPicker" class="ep-map-canvas"></div>
+        </div>
+        <!-- Location label display -->
+        <div id="mapLocationDisplay" class="ep-map-location-display" {% if not profile.map_latitude %}hidden{% endif %}>
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px;color:#EF4444;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+            <span id="mapLocationLabel">{{ profile.map_location_label|default:"" }}</span>
+            <button type="button" class="ep-map-clear-btn" id="mapClearBtn" title="Clear location">&times;</button>
+        </div>
+        <p class="ep-map-hint">Click on the map, search an address, or use GPS to set your location. Drag the pin to adjust.</p>
+        <!-- Hidden form fields (part of main profileForm) -->
+        <input type="hidden" name="map_latitude" id="id_map_latitude" value="{{ form.map_latitude.value|default_if_none:'' }}" form="profileForm">
+        <input type="hidden" name="map_longitude" id="id_map_longitude" value="{{ form.map_longitude.value|default_if_none:'' }}" form="profileForm">
+        <input type="hidden" name="map_location_label" id="id_map_location_label" value="{{ form.map_location_label.value|default_if_none:'' }}" form="profileForm">
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Website Portfolio ── -->
+{% if profile.show_website_portfolio %}
+<div class="ep-section" id="sectionWebPortfolio">
+    <button type="button" class="ep-section-toggle" onclick="toggleSection('sectionWebPortfolio')">
+        <div class="ep-section-left">
+            <div class="ep-section-icon ep-icon-indigo">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+            </div>
+            <div>
+                <span class="ep-section-title">Website Portfolio</span>
+                <span class="ep-section-count">{{ website_portfolios.count }} site{{ website_portfolios.count|pluralize }}</span>
+            </div>
+        </div>
+        <svg class="ep-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    <div class="ep-section-body">
+
+        {% if website_portfolios %}
+        <!-- Website cards grid -->
+        <div class="epwp-grid">
+            {% for wp in website_portfolios %}
+            <div class="epwp-card">
+                <!-- Live iframe preview -->
+                <div class="epwp-preview">
+                    <iframe src="{{ wp.url }}" class="epwp-iframe" loading="lazy" sandbox="allow-scripts allow-same-origin" tabindex="-1"></iframe>
+                    <!-- Fallback shown when iframe blocked -->
+                    <div class="epwp-fallback">
+                        <div class="epwp-fallback-icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3"/></svg>
+                        </div>
+                        <span class="epwp-fallback-domain">{{ wp.domain }}</span>
+                    </div>
+                    <!-- Overlay actions -->
+                    <div class="epwp-overlay">
+                        <a href="{{ wp.url }}" target="_blank" rel="noopener" class="epwp-overlay-btn">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                            Open
+                        </a>
+                        <form method="post" action="{% url 'profiles:edit_profile' %}" onsubmit="return confirm('Remove this website?')">
+                            {% csrf_token %}
+                            <input type="hidden" name="section_action" value="delete_website_portfolio">
+                            <input type="hidden" name="portfolio_id" value="{{ wp.pk }}">
+                            <button type="submit" class="epwp-overlay-btn epwp-overlay-del">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Card info -->
+                <div class="epwp-info">
+                    <div class="epwp-info-text">
+                        <strong class="epwp-title">{{ wp.title }}</strong>
+                        <span class="epwp-domain">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.282a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364l1.757 1.757" transform="translate(2,2) scale(0.833)"/></svg>
+                            {{ wp.domain }}
+                        </span>
+                    </div>
+                    {% if wp.description %}
+                    <p class="epwp-desc">{{ wp.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty state -->
+        <div class="epwp-empty">
+            <div class="epwp-empty-icon">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+            </div>
+            <p class="epwp-empty-title">No websites added yet</p>
+            <p class="epwp-empty-sub">Add websites you've designed or built to showcase your portfolio</p>
+        </div>
+        {% endif %}
+
+        <!-- Add website form -->
+        <div id="addWebPortfolioForm" class="epwp-form-wrap" hidden>
+            <form method="post" action="{% url 'profiles:edit_profile' %}" class="epwp-form">
+                {% csrf_token %}
+                <input type="hidden" name="section_action" value="add_website_portfolio">
+                <div class="epwp-form-header">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px;color:#6366F1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    <span>Add New Website</span>
+                </div>
+                <div class="epwp-form-body">
+                    <div class="epwp-field">
+                        <label for="{{ website_portfolio_form.url.id_for_label }}">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.282a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364l1.757 1.757" transform="translate(2,2) scale(0.833)"/></svg>
+                            Website URL
+                        </label>
+                        {{ website_portfolio_form.url }}
+                    </div>
+                    <div class="epwp-field-row">
+                        <div class="epwp-field epwp-field-grow">
+                            <label for="{{ website_portfolio_form.title.id_for_label }}">Project Title</label>
+                            {{ website_portfolio_form.title }}
+                        </div>
+                    </div>
+                    <div class="epwp-field">
+                        <label for="{{ website_portfolio_form.description.id_for_label }}">
+                            Description
+                            <span class="epwp-optional">optional</span>
+                        </label>
+                        {{ website_portfolio_form.description }}
+                    </div>
+                </div>
+                <div class="epwp-form-footer">
+                    <button type="button" class="epwp-cancel-btn" onclick="document.getElementById('addWebPortfolioForm').hidden=true">Cancel</button>
+                    <button type="submit" class="epwp-submit-btn">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        Add Website
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Add button -->
+        <button type="button" class="epwp-add-trigger" onclick="var f=document.getElementById('addWebPortfolioForm');f.hidden=!f.hidden;if(!f.hidden)f.querySelector('input[type=url]').focus();">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add Website
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Social Links ── -->
+{% if profile.show_social_links %}
+<div class="ep-section" id="sectionSocialLinks">
+    <button type="button" class="ep-section-toggle" onclick="toggleSection('sectionSocialLinks')">
+        <div class="ep-section-left">
+            <div class="ep-section-icon ep-icon-cyan">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+            </div>
+            <div>
+                <span class="ep-section-title">Social Links</span>
+                <span class="ep-section-count">{{ social_links_existing|length }} link{{ social_links_existing|length|pluralize }}</span>
+            </div>
+        </div>
+        <svg class="ep-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    <div class="ep-section-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="section_action" value="save_social_links">
+            <div class="ep-sl-list">
+                {% for value, label, url in social_links_with_urls %}
+                <div class="ep-sl-row{% if url %} ep-sl-active{% endif %}" id="slRow_{{ value }}">
+                    <div class="ep-sl-platform">
+                        <span class="ep-sl-icon">
+                            {% if value == 'facebook' %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                            {% elif value == 'instagram' %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                            {% elif value == 'twitter' %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                            {% elif value == 'linkedin' %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                            {% elif value == 'tiktok' %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+                            {% elif value == 'youtube' %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                            {% elif value == 'github' %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                            {% elif value == 'whatsapp' %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            {% elif value == 'telegram' %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0 12 12 0 0011.944 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                            {% elif value == 'snapchat' %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.217-.937 1.407-5.965 1.407-5.965s-.359-.72-.359-1.781c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12.017 24c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641 0 12.017 0z"/></svg>
+                            {% elif value == 'pinterest' %}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.217-.937 1.407-5.965 1.407-5.965s-.359-.72-.359-1.781c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12.017 24c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641 0 12.017 0z"/></svg>
+                            {% else %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                            {% endif %}
+                        </span>
+                        <span class="ep-sl-label">{{ label }}</span>
+                    </div>
+                    <input type="url" name="link_{{ value }}"
+                           placeholder="{% if value == 'whatsapp' %}https://wa.me/263771234567{% elif value == 'other' %}https://example.com{% else %}https://{{ value }}.com/yourprofile{% endif %}"
+                           value="{{ url }}" class="ep-input ep-sl-input">
+                </div>
+                {% endfor %}
+            </div>
+            <div class="ep-form-actions" style="margin-top:12px">
+                <button type="submit" class="ep-add-btn">Save Social Links</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Catalog ── -->
+{% if profile.show_catalog %}
+<div class="ep-section" id="sectionCatalog">
+    <button type="button" class="ep-section-toggle" onclick="toggleSection('sectionCatalog')">
+        <div class="ep-section-left">
+            <div class="ep-section-icon ep-icon-orange">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75v-2.25a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v2.25c0 .414.336.75.75.75z"/></svg>
+            </div>
+            <div>
+                <span class="ep-section-title">Catalog</span>
+                <span class="ep-section-count">{{ catalog_items.count }} item{{ catalog_items.count|pluralize }}</span>
+            </div>
+        </div>
+        <svg class="ep-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    <div class="ep-section-body">
+        <!-- Categories -->
+        <div class="ep-cat-chips">
+            {% for cat in catalog_categories %}
+            <div class="ep-chip">
+                <span>{{ cat.name }}</span>
+                <form method="post" style="display:inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_action" value="delete_catalog_category">
+                    <input type="hidden" name="cat_id" value="{{ cat.pk }}">
+                    <button type="submit" class="ep-chip-x" title="Remove">&times;</button>
+                </form>
+            </div>
+            {% endfor %}
+            <button type="button" class="ep-cat-add-chip" onclick="var f=document.getElementById('addCatFormInline');f.hidden=!f.hidden;if(!f.hidden)f.querySelector('input[type=text]').focus()">+ Category</button>
+        </div>
+        <form method="post" id="addCatFormInline" class="ep-inline-add" hidden style="margin-bottom:12px">
+            {% csrf_token %}
+            <input type="hidden" name="section_action" value="add_catalog_category">
+            <input type="text" name="cat_name" placeholder="Category name" class="ep-input" required maxlength="100">
+            <button type="submit" class="ep-add-btn">Add</button>
+        </form>
+
+        <!-- Add item form -->
+        <div id="addCatalogItemForm" class="epci-form-wrap" hidden>
+            <form method="post" enctype="multipart/form-data" novalidate class="epci-form">
+                {% csrf_token %}
+                <input type="hidden" name="section_action" value="add_catalog_item">
+                <div class="epci-form-header">
+                    <div class="epci-form-header-icon">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    </div>
+                    <span>Add New Product</span>
+                </div>
+                <div class="epci-form-body">
+                    <!-- Image dropzone -->
+                    <div class="epci-dropzone" id="catalogDropzone">
+                        {{ catalog_form.image }}
+                        <div class="epci-dropzone-empty" id="catalogDropzoneEmpty">
+                            <div class="epci-dropzone-icon">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
+                            </div>
+                            <div class="epci-dropzone-text">
+                                <span class="epci-dropzone-title">Drop product image here</span>
+                                <span class="epci-dropzone-sub">or <span class="epci-dropzone-link">browse files</span></span>
+                            </div>
+                            <span class="epci-dropzone-hint">PNG, JPG or WebP up to 5 MB</span>
+                        </div>
+                        <div class="epci-dropzone-preview" id="catalogDropzonePreview" hidden>
+                            <img src="" alt="Preview" id="catalogPreviewImg">
+                            <button type="button" class="epci-dropzone-remove" onclick="event.stopPropagation();clearCatalogPreview()" title="Remove">&times;</button>
+                        </div>
+                    </div>
+
+                    <!-- Fields -->
+                    <div class="epci-field-row">
+                        <div class="epci-field epci-field-grow">
+                            <label for="{{ catalog_form.title.id_for_label }}">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+                                Product Title
+                            </label>
+                            {{ catalog_form.title }}
+                        </div>
+                        <div class="epci-field epci-field-price">
+                            <label for="{{ catalog_form.price.id_for_label }}">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Price
+                                <span class="epci-optional">optional</span>
+                            </label>
+                            {{ catalog_form.price }}
+                        </div>
+                    </div>
+                    <div class="epci-field">
+                        <label for="{{ catalog_form.category.id_for_label }}">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/></svg>
+                            Category
+                            <span class="epci-optional">optional</span>
+                        </label>
+                        {{ catalog_form.category }}
+                    </div>
+                </div>
+                <div class="epci-form-footer">
+                    <button type="button" class="epci-cancel-btn" onclick="document.getElementById('addCatalogItemForm').hidden=true;document.getElementById('catalogAddTrigger').style.display=''">Cancel</button>
+                    <button type="submit" class="epci-submit-btn">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        Add Product
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Add trigger button -->
+        <button type="button" class="epci-add-trigger" id="catalogAddTrigger" onclick="var f=document.getElementById('addCatalogItemForm');f.hidden=!f.hidden;if(!f.hidden){this.style.display='none';f.querySelector('input[type=text]').focus()}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add Product
+        </button>
+
+        <!-- Existing items -->
+        {% if catalog_items %}
+        <div class="ep-items ep-catalog-items">
+            {% for item in catalog_items %}
+            <div class="ep-item">
+                <div class="ep-item-logo">
+                    {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }}">{% else %}<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>{% endif %}
+                </div>
+                <div class="ep-item-body">
+                    <strong>{{ item.title }}</strong>
+                    {% if item.category %}<div class="ep-item-sub">{{ item.category.name }}</div>{% endif %}
+                    {% if item.price %}<span class="ep-item-badge">{{ item.price }}</span>{% endif %}
+                </div>
+                <form method="post" style="display:inline" onsubmit="return confirm('Delete this product?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_action" value="delete_catalog_item">
+                    <input type="hidden" name="catalog_item_id" value="{{ item.pk }}">
+                    <button type="submit" class="ep-del-btn" title="Delete">&times;</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% if not profile.show_skills and not profile.show_experience and not profile.show_education and not profile.show_services and not profile.show_gallery and not profile.show_business_hours and not profile.show_testimonials and not profile.show_map and not profile.show_website_portfolio and not profile.show_social_links and not profile.show_catalog %}
+<div class="ep-hint-card">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="width:20px;height:20px;color:#F59E0B;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>
+    <div>Enable sections like <strong>Skills</strong>, <strong>Experience</strong>, <strong>Education</strong>, or <strong>Services</strong> in your <a href="{% url 'profiles:settings' %}">Profile Settings</a> to manage them here.</div>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Remaining profile fields (associated with profileForm via form= attribute) -->
+{% for field in form %}
+    {% if field.name != 'profile_image' and field.name != 'phone' and field.name != 'category' and field.name != 'display_name' and field.name != 'headline' and field.name != 'bio' and field.name != 'is_published' and field.name != 'map_latitude' and field.name != 'map_longitude' and field.name != 'map_location_label' and field.name != 'first_name' and field.name != 'last_name' %}
+    <div class="form-group {% if field.errors %}has-error{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+        <small class="form-help">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+        <span class="form-error">{{ error }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endfor %}
+
+<!-- Publish toggle -->
+<div class="ep-publish-card" id="publishCard">
+    <div class="ep-publish-info">
+        <div class="ep-publish-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+        </div>
+        <div class="ep-publish-text">
+            <span class="ep-publish-title">Publish Profile</span>
+            <span class="ep-publish-desc">Make your profile visible to anyone with your link or NFC card</span>
+        </div>
+    </div>
+    <label class="ep-toggle" for="id_is_published">
+        {{ form.is_published }}
+        <span class="ep-toggle-track">
+            <span class="ep-toggle-thumb"></span>
+        </span>
+    </label>
+</div>
+
+<!-- Phone with country code selector -->
+<div class="form-group {% if form.phone.errors %}has-error{% endif %}">
+    <label for="phoneNumber">Phone</label>
+    <div class="phone-field">
+        <button type="button" class="phone-cc-btn" id="ccBtn" aria-haspopup="listbox" aria-expanded="false">
+            <span class="phone-cc-flag" id="ccFlag"></span>
+            <span class="phone-cc-code" id="ccCode"></span>
+            <svg class="phone-cc-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+        </button>
+        <input type="tel" id="phoneNumber" class="phone-number-input" placeholder="812 345 6789" autocomplete="tel-national">
+        <input type="hidden" name="phone" id="id_phone" form="profileForm" value="{{ form.phone.value|default:'' }}">
+    </div>
+    {% for error in form.phone.errors %}
+    <span class="form-error">{{ error }}</span>
+    {% endfor %}
+
+    <!-- Country code dropdown -->
+    <div class="phone-cc-dropdown" id="ccDropdown">
+        <div class="phone-cc-search-wrap">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+            <input type="text" class="phone-cc-search" id="ccSearch" placeholder="Search country..." autocomplete="off">
+        </div>
+        <ul class="phone-cc-list" id="ccList" role="listbox"></ul>
+    </div>
+</div>
+
+<div class="app-form-actions">
+    <button type="submit" form="profileForm" class="btn btn-primary btn-lg">Save Profile</button>
+    <a href="{% url 'profiles:dashboard' %}" class="btn btn-outline">Cancel</a>
+</div>
+
+<script>
+(function() {
+    // --- Associate remaining fields with profileForm ---
+    // Fields rendered outside the <form> tag need form= attribute to submit with it
+    ['id_email', 'id_location', 'id_website_url', 'id_is_published'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.setAttribute('form', 'profileForm');
+    });
+
+    // --- Publish toggle card state ---
+    var pubCheck = document.getElementById('id_is_published');
+    var pubCard = document.getElementById('publishCard');
+    if (pubCheck && pubCard) {
+        function updatePubCard() {
+            pubCard.classList.toggle('is-active', pubCheck.checked);
+        }
+        updatePubCard();
+        pubCheck.addEventListener('change', updatePubCard);
+    }
+
+    // --- Avatar preview ---
+    var imgInput = document.getElementById('id_profile_image');
+    var preview = document.getElementById('avatarPreview');
+    imgInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview" id="avatarImg">';
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    // --- Country code phone selector ---
+    var COUNTRIES = [
+        {name:"Afghanistan",code:"AF",dial:"+93",flag:"\ud83c\udde6\ud83c\uddeb"},
+        {name:"Albania",code:"AL",dial:"+355",flag:"\ud83c\udde6\ud83c\uddf1"},
+        {name:"Algeria",code:"DZ",dial:"+213",flag:"\ud83c\udde9\ud83c\uddff"},
+        {name:"Argentina",code:"AR",dial:"+54",flag:"\ud83c\udde6\ud83c\uddf7"},
+        {name:"Australia",code:"AU",dial:"+61",flag:"\ud83c\udde6\ud83c\uddfa"},
+        {name:"Austria",code:"AT",dial:"+43",flag:"\ud83c\udde6\ud83c\uddf9"},
+        {name:"Bahrain",code:"BH",dial:"+973",flag:"\ud83c\udde7\ud83c\udded"},
+        {name:"Bangladesh",code:"BD",dial:"+880",flag:"\ud83c\udde7\ud83c\udde9"},
+        {name:"Belgium",code:"BE",dial:"+32",flag:"\ud83c\udde7\ud83c\uddea"},
+        {name:"Botswana",code:"BW",dial:"+267",flag:"\ud83c\udde7\ud83c\uddfc"},
+        {name:"Brazil",code:"BR",dial:"+55",flag:"\ud83c\udde7\ud83c\uddf7"},
+        {name:"Canada",code:"CA",dial:"+1",flag:"\ud83c\udde8\ud83c\udde6"},
+        {name:"Chile",code:"CL",dial:"+56",flag:"\ud83c\udde8\ud83c\uddf1"},
+        {name:"China",code:"CN",dial:"+86",flag:"\ud83c\udde8\ud83c\uddf3"},
+        {name:"Colombia",code:"CO",dial:"+57",flag:"\ud83c\udde8\ud83c\uddf4"},
+        {name:"Congo (DRC)",code:"CD",dial:"+243",flag:"\ud83c\udde8\ud83c\udde9"},
+        {name:"Costa Rica",code:"CR",dial:"+506",flag:"\ud83c\udde8\ud83c\uddf7"},
+        {name:"Croatia",code:"HR",dial:"+385",flag:"\ud83c\udded\ud83c\uddf7"},
+        {name:"Cuba",code:"CU",dial:"+53",flag:"\ud83c\udde8\ud83c\uddfa"},
+        {name:"Czech Republic",code:"CZ",dial:"+420",flag:"\ud83c\udde8\ud83c\uddff"},
+        {name:"Denmark",code:"DK",dial:"+45",flag:"\ud83c\udde9\ud83c\uddf0"},
+        {name:"Egypt",code:"EG",dial:"+20",flag:"\ud83c\uddea\ud83c\uddec"},
+        {name:"Ethiopia",code:"ET",dial:"+251",flag:"\ud83c\uddea\ud83c\uddf9"},
+        {name:"Finland",code:"FI",dial:"+358",flag:"\ud83c\uddeb\ud83c\uddee"},
+        {name:"France",code:"FR",dial:"+33",flag:"\ud83c\uddeb\ud83c\uddf7"},
+        {name:"Germany",code:"DE",dial:"+49",flag:"\ud83c\udde9\ud83c\uddea"},
+        {name:"Ghana",code:"GH",dial:"+233",flag:"\ud83c\uddec\ud83c\udded"},
+        {name:"Greece",code:"GR",dial:"+30",flag:"\ud83c\uddec\ud83c\uddf7"},
+        {name:"Hong Kong",code:"HK",dial:"+852",flag:"\ud83c\udded\ud83c\uddf0"},
+        {name:"Hungary",code:"HU",dial:"+36",flag:"\ud83c\udded\ud83c\uddfa"},
+        {name:"India",code:"IN",dial:"+91",flag:"\ud83c\uddee\ud83c\uddf3"},
+        {name:"Indonesia",code:"ID",dial:"+62",flag:"\ud83c\uddee\ud83c\udde9"},
+        {name:"Iran",code:"IR",dial:"+98",flag:"\ud83c\uddee\ud83c\uddf7"},
+        {name:"Iraq",code:"IQ",dial:"+964",flag:"\ud83c\uddee\ud83c\uddf6"},
+        {name:"Ireland",code:"IE",dial:"+353",flag:"\ud83c\uddee\ud83c\uddea"},
+        {name:"Israel",code:"IL",dial:"+972",flag:"\ud83c\uddee\ud83c\uddf1"},
+        {name:"Italy",code:"IT",dial:"+39",flag:"\ud83c\uddee\ud83c\uddf9"},
+        {name:"Jamaica",code:"JM",dial:"+1876",flag:"\ud83c\uddef\ud83c\uddf2"},
+        {name:"Japan",code:"JP",dial:"+81",flag:"\ud83c\uddef\ud83c\uddf5"},
+        {name:"Jordan",code:"JO",dial:"+962",flag:"\ud83c\uddef\ud83c\uddf4"},
+        {name:"Kenya",code:"KE",dial:"+254",flag:"\ud83c\uddf0\ud83c\uddea"},
+        {name:"Kuwait",code:"KW",dial:"+965",flag:"\ud83c\uddf0\ud83c\uddfc"},
+        {name:"Lebanon",code:"LB",dial:"+961",flag:"\ud83c\uddf1\ud83c\udde7"},
+        {name:"Lesotho",code:"LS",dial:"+266",flag:"\ud83c\uddf1\ud83c\uddf8"},
+        {name:"Malawi",code:"MW",dial:"+265",flag:"\ud83c\uddf2\ud83c\uddfc"},
+        {name:"Malaysia",code:"MY",dial:"+60",flag:"\ud83c\uddf2\ud83c\uddfe"},
+        {name:"Mexico",code:"MX",dial:"+52",flag:"\ud83c\uddf2\ud83c\uddfd"},
+        {name:"Morocco",code:"MA",dial:"+212",flag:"\ud83c\uddf2\ud83c\udde6"},
+        {name:"Mozambique",code:"MZ",dial:"+258",flag:"\ud83c\uddf2\ud83c\uddff"},
+        {name:"Namibia",code:"NA",dial:"+264",flag:"\ud83c\uddf3\ud83c\udde6"},
+        {name:"Netherlands",code:"NL",dial:"+31",flag:"\ud83c\uddf3\ud83c\uddf1"},
+        {name:"New Zealand",code:"NZ",dial:"+64",flag:"\ud83c\uddf3\ud83c\uddff"},
+        {name:"Nigeria",code:"NG",dial:"+234",flag:"\ud83c\uddf3\ud83c\uddec"},
+        {name:"Norway",code:"NO",dial:"+47",flag:"\ud83c\uddf3\ud83c\uddf4"},
+        {name:"Pakistan",code:"PK",dial:"+92",flag:"\ud83c\uddf5\ud83c\uddf0"},
+        {name:"Peru",code:"PE",dial:"+51",flag:"\ud83c\uddf5\ud83c\uddea"},
+        {name:"Philippines",code:"PH",dial:"+63",flag:"\ud83c\uddf5\ud83c\udded"},
+        {name:"Poland",code:"PL",dial:"+48",flag:"\ud83c\uddf5\ud83c\uddf1"},
+        {name:"Portugal",code:"PT",dial:"+351",flag:"\ud83c\uddf5\ud83c\uddf9"},
+        {name:"Qatar",code:"QA",dial:"+974",flag:"\ud83c\uddf6\ud83c\udde6"},
+        {name:"Romania",code:"RO",dial:"+40",flag:"\ud83c\uddf7\ud83c\uddf4"},
+        {name:"Russia",code:"RU",dial:"+7",flag:"\ud83c\uddf7\ud83c\uddfa"},
+        {name:"Rwanda",code:"RW",dial:"+250",flag:"\ud83c\uddf7\ud83c\uddfc"},
+        {name:"Saudi Arabia",code:"SA",dial:"+966",flag:"\ud83c\uddf8\ud83c\udde6"},
+        {name:"Senegal",code:"SN",dial:"+221",flag:"\ud83c\uddf8\ud83c\uddf3"},
+        {name:"Singapore",code:"SG",dial:"+65",flag:"\ud83c\uddf8\ud83c\uddec"},
+        {name:"South Africa",code:"ZA",dial:"+27",flag:"\ud83c\uddff\ud83c\udde6"},
+        {name:"South Korea",code:"KR",dial:"+82",flag:"\ud83c\uddf0\ud83c\uddf7"},
+        {name:"Spain",code:"ES",dial:"+34",flag:"\ud83c\uddea\ud83c\uddf8"},
+        {name:"Sri Lanka",code:"LK",dial:"+94",flag:"\ud83c\uddf1\ud83c\uddf0"},
+        {name:"Sweden",code:"SE",dial:"+46",flag:"\ud83c\uddf8\ud83c\uddea"},
+        {name:"Switzerland",code:"CH",dial:"+41",flag:"\ud83c\udde8\ud83c\udded"},
+        {name:"Tanzania",code:"TZ",dial:"+255",flag:"\ud83c\uddf9\ud83c\uddff"},
+        {name:"Thailand",code:"TH",dial:"+66",flag:"\ud83c\uddf9\ud83c\udded"},
+        {name:"Turkey",code:"TR",dial:"+90",flag:"\ud83c\uddf9\ud83c\uddf7"},
+        {name:"UAE",code:"AE",dial:"+971",flag:"\ud83c\udde6\ud83c\uddea"},
+        {name:"Uganda",code:"UG",dial:"+256",flag:"\ud83c\uddfa\ud83c\uddec"},
+        {name:"Ukraine",code:"UA",dial:"+380",flag:"\ud83c\uddfa\ud83c\udde6"},
+        {name:"United Kingdom",code:"GB",dial:"+44",flag:"\ud83c\uddec\ud83c\udde7"},
+        {name:"United States",code:"US",dial:"+1",flag:"\ud83c\uddfa\ud83c\uddf8"},
+        {name:"Venezuela",code:"VE",dial:"+58",flag:"\ud83c\uddfb\ud83c\uddea"},
+        {name:"Vietnam",code:"VN",dial:"+84",flag:"\ud83c\uddfb\ud83c\uddf3"},
+        {name:"Zambia",code:"ZM",dial:"+260",flag:"\ud83c\uddff\ud83c\uddf2"},
+        {name:"Zimbabwe",code:"ZW",dial:"+263",flag:"\ud83c\uddff\ud83c\uddfc"}
+    ];
+
+    var ccBtn = document.getElementById('ccBtn');
+    var ccFlag = document.getElementById('ccFlag');
+    var ccCode = document.getElementById('ccCode');
+    var dropdown = document.getElementById('ccDropdown');
+    var ccList = document.getElementById('ccList');
+    var ccSearch = document.getElementById('ccSearch');
+    var phoneInput = document.getElementById('phoneNumber');
+    var hiddenInput = document.getElementById('id_phone');
+    var selectedDial = '';
+
+    // Build list
+    function renderList(filter) {
+        var f = (filter || '').toLowerCase();
+        ccList.innerHTML = '';
+        COUNTRIES.forEach(function(c) {
+            if (f && c.name.toLowerCase().indexOf(f) === -1 && c.dial.indexOf(f) === -1 && c.code.toLowerCase().indexOf(f) === -1) return;
+            var li = document.createElement('li');
+            li.className = 'phone-cc-option';
+            li.setAttribute('role', 'option');
+            li.setAttribute('data-dial', c.dial);
+            li.setAttribute('data-code', c.code);
+            li.innerHTML = '<span class="phone-cc-option-flag">' + c.flag + '</span>' +
+                '<span class="phone-cc-option-name">' + c.name + '</span>' +
+                '<span class="phone-cc-option-dial">' + c.dial + '</span>';
+            li.addEventListener('click', function() { selectCountry(c); });
+            ccList.appendChild(li);
+        });
+    }
+
+    function selectCountry(c) {
+        selectedDial = c.dial;
+        ccFlag.textContent = c.flag;
+        ccCode.textContent = c.dial;
+        closeDropdown();
+        syncHidden();
+        phoneInput.focus();
+    }
+
+    function syncHidden() {
+        var num = phoneInput.value.replace(/[^\d]/g, '');
+        hiddenInput.value = num ? selectedDial + num : '';
+    }
+
+    function openDropdown() {
+        dropdown.classList.add('open');
+        ccBtn.setAttribute('aria-expanded', 'true');
+        ccSearch.value = '';
+        renderList('');
+        setTimeout(function() { ccSearch.focus(); }, 50);
+    }
+
+    function closeDropdown() {
+        dropdown.classList.remove('open');
+        ccBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    ccBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        dropdown.classList.contains('open') ? closeDropdown() : openDropdown();
+    });
+
+    ccSearch.addEventListener('input', function() { renderList(this.value); });
+
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+        if (!dropdown.contains(e.target) && !ccBtn.contains(e.target)) closeDropdown();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeDropdown();
+    });
+
+    phoneInput.addEventListener('input', syncHidden);
+
+    // Init: parse existing value
+    var existing = hiddenInput.value || '';
+    if (existing) {
+        // Find best matching country code
+        var bestMatch = null;
+        COUNTRIES.forEach(function(c) {
+            if (existing.indexOf(c.dial) === 0) {
+                if (!bestMatch || c.dial.length > bestMatch.dial.length) bestMatch = c;
+            }
+        });
+        if (bestMatch) {
+            phoneInput.value = existing.substring(bestMatch.dial.length);
+            selectCountry(bestMatch);
+        } else {
+            phoneInput.value = existing.replace(/^\+/, '');
+        }
+        syncHidden();
+    }
+
+    // Default to Zimbabwe if nothing selected
+    if (!selectedDial) {
+        var zw = COUNTRIES.find(function(c) { return c.code === 'ZW'; });
+        if (zw) selectCountry(zw);
+    }
+
+    renderList('');
+
+    // Ensure hidden input is always synced before form submission
+    var profileForm = document.getElementById('profileForm');
+    if (profileForm) {
+        profileForm.addEventListener('submit', function() {
+            syncHidden();
+        });
+    }
+})();
+
+// --- Section collapse/expand ---
+function toggleSection(id) {
+    var sec = document.getElementById(id);
+    if (!sec) return;
+    sec.classList.toggle('ep-open');
+}
+
+// --- Business hours: toggle time fields when "Closed" is checked ---
+function toggleClosedFields(cb) {
+    var fields = cb.closest('form').querySelectorAll('.ep-hours-field');
+    fields.forEach(function(f) {
+        f.style.opacity = cb.checked ? '0.4' : '1';
+        f.querySelectorAll('input').forEach(function(i) { i.disabled = cb.checked; });
+    });
+}
+
+// --- Gallery Dropzone ---
+(function() {
+    var dz = document.getElementById('galleryDropzone');
+    if (!dz) return;
+
+    ['dragenter','dragover'].forEach(function(ev) {
+        dz.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); dz.classList.add('ep-dropzone-active'); });
+    });
+    ['dragleave','drop'].forEach(function(ev) {
+        dz.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); dz.classList.remove('ep-dropzone-active'); });
+    });
+    dz.addEventListener('drop', function(e) {
+        var files = e.dataTransfer.files;
+        if (files.length && files[0].type.startsWith('image/')) {
+            var input = document.getElementById('galleryFileInput');
+            var dt = new DataTransfer();
+            dt.items.add(files[0]);
+            input.files = dt.files;
+            handleGalleryPreview(input);
+        }
+    });
+    dz.addEventListener('click', function(e) {
+        if (e.target.closest('.ep-dropzone-remove')) return;
+        document.getElementById('galleryFileInput').click();
+    });
+})();
+
+function handleGalleryPreview(input) {
+    var empty = document.getElementById('galleryDropzoneEmpty');
+    var preview = document.getElementById('galleryDropzonePreview');
+    var img = document.getElementById('galleryPreviewImg');
+    var btn = document.getElementById('galleryUploadBtn');
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+            empty.hidden = true;
+            preview.hidden = false;
+            btn.disabled = false;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function clearGalleryPreview() {
+    var input = document.getElementById('galleryFileInput');
+    input.value = '';
+    document.getElementById('galleryDropzoneEmpty').hidden = false;
+    document.getElementById('galleryDropzonePreview').hidden = true;
+    document.getElementById('galleryPreviewImg').src = '';
+    document.getElementById('galleryUploadBtn').disabled = true;
+}
+
+// --- Styled file picker (testimonial photo etc.) ---
+function handleFilePicker(input) {
+    var picker = input.closest('.ep-file-picker');
+    var empty = picker.querySelector('.ep-file-picker-empty');
+    var chosen = picker.querySelector('.ep-file-picker-chosen');
+    var thumb = picker.querySelector('.ep-file-picker-thumb');
+    var nameEl = picker.querySelector('.ep-file-picker-name');
+    if (input.files && input.files[0]) {
+        var file = input.files[0];
+        nameEl.textContent = file.name;
+        var reader = new FileReader();
+        reader.onload = function(e) { thumb.src = e.target.result; };
+        reader.readAsDataURL(file);
+        empty.hidden = true;
+        chosen.hidden = false;
+    }
+}
+
+function clearFilePicker(btn) {
+    var picker = btn.closest('.ep-file-picker');
+    var input = picker.querySelector('input[type="file"]');
+    input.value = '';
+    picker.querySelector('.ep-file-picker-empty').hidden = false;
+    picker.querySelector('.ep-file-picker-chosen').hidden = true;
+    picker.querySelector('.ep-file-picker-thumb').src = '';
+    picker.querySelector('.ep-file-picker-name').textContent = '';
+}
+
+// --- Location Map Picker ---
+(function() {
+    var container = document.getElementById('mapPicker');
+    if (!container || typeof L === 'undefined') return;
+
+    var latInput = document.getElementById('id_map_latitude');
+    var lngInput = document.getElementById('id_map_longitude');
+    var labelInput = document.getElementById('id_map_location_label');
+    var labelDisplay = document.getElementById('mapLocationLabel');
+    var locationRow = document.getElementById('mapLocationDisplay');
+    var searchInput = document.getElementById('mapSearchInput');
+    var resultsBox = document.getElementById('mapSearchResults');
+    var gpsBtn = document.getElementById('mapGpsBtn');
+    var clearBtn = document.getElementById('mapClearBtn');
+
+    // Default center (world) or saved location
+    var initLat = parseFloat(latInput.value) || -17.8292;
+    var initLng = parseFloat(lngInput.value) || 31.0522;
+    var initZoom = latInput.value ? 15 : 3;
+
+    var map = L.map('mapPicker', {
+        center: [initLat, initLng],
+        zoom: initZoom,
+        scrollWheelZoom: true,
+        zoomControl: true
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(map);
+
+    var marker = null;
+
+    // Custom red pin icon
+    var pinIcon = L.divIcon({
+        className: 'ep-map-pin',
+        html: '<svg viewBox="0 0 24 36" width="32" height="48"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 24 12 24s12-15 12-24C24 5.4 18.6 0 12 0z" fill="#EF4444"/><circle cx="12" cy="11" r="5" fill="#fff"/></svg>',
+        iconSize: [32, 48],
+        iconAnchor: [16, 48],
+        popupAnchor: [0, -48]
+    });
+
+    function setMarker(lat, lng) {
+        if (marker) {
+            marker.setLatLng([lat, lng]);
+        } else {
+            marker = L.marker([lat, lng], { icon: pinIcon, draggable: true }).addTo(map);
+            marker.on('dragend', function() {
+                var pos = marker.getLatLng();
+                updateLocation(pos.lat, pos.lng);
+                reverseGeocode(pos.lat, pos.lng);
+            });
+        }
+        map.setView([lat, lng], Math.max(map.getZoom(), 15));
+    }
+
+    function updateLocation(lat, lng) {
+        latInput.value = lat.toFixed(6);
+        lngInput.value = lng.toFixed(6);
+    }
+
+    function setLabel(text) {
+        labelInput.value = text;
+        labelDisplay.textContent = text;
+        locationRow.hidden = false;
+    }
+
+    function reverseGeocode(lat, lng) {
+        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1', {
+            headers: { 'Accept-Language': 'en' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data && data.display_name) {
+                setLabel(data.display_name);
+            }
+        })
+        .catch(function() {
+            setLabel(lat.toFixed(4) + ', ' + lng.toFixed(4));
+        });
+    }
+
+    // Click on map to place pin
+    map.on('click', function(e) {
+        setMarker(e.latlng.lat, e.latlng.lng);
+        updateLocation(e.latlng.lat, e.latlng.lng);
+        reverseGeocode(e.latlng.lat, e.latlng.lng);
+    });
+
+    // If saved location exists, show marker
+    if (latInput.value && lngInput.value) {
+        setMarker(initLat, initLng);
+    }
+
+    // --- Address search via Nominatim ---
+    var searchTimeout = null;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        var q = searchInput.value.trim();
+        if (q.length < 3) { resultsBox.hidden = true; return; }
+        searchTimeout = setTimeout(function() {
+            fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q) + '&limit=5&addressdetails=1', {
+                headers: { 'Accept-Language': 'en' }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(results) {
+                resultsBox.innerHTML = '';
+                if (!results.length) {
+                    resultsBox.innerHTML = '<div class="ep-map-result-empty">No results found</div>';
+                    resultsBox.hidden = false;
+                    return;
+                }
+                results.forEach(function(r) {
+                    var div = document.createElement('div');
+                    div.className = 'ep-map-result-item';
+                    div.textContent = r.display_name;
+                    div.addEventListener('click', function() {
+                        var lat = parseFloat(r.lat);
+                        var lng = parseFloat(r.lon);
+                        setMarker(lat, lng);
+                        updateLocation(lat, lng);
+                        setLabel(r.display_name);
+                        searchInput.value = '';
+                        resultsBox.hidden = true;
+                    });
+                    resultsBox.appendChild(div);
+                });
+                resultsBox.hidden = false;
+            })
+            .catch(function() { resultsBox.hidden = true; });
+        }, 400);
+    });
+
+    // Close results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.ep-map-search-wrap')) resultsBox.hidden = true;
+    });
+
+    // --- GPS button ---
+    gpsBtn.addEventListener('click', function() {
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser.');
+            return;
+        }
+        gpsBtn.classList.add('ep-map-gps-loading');
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                gpsBtn.classList.remove('ep-map-gps-loading');
+                var lat = pos.coords.latitude;
+                var lng = pos.coords.longitude;
+                setMarker(lat, lng);
+                updateLocation(lat, lng);
+                reverseGeocode(lat, lng);
+            },
+            function(err) {
+                gpsBtn.classList.remove('ep-map-gps-loading');
+                alert('Could not get your location: ' + err.message);
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    });
+
+    // --- Clear button ---
+    clearBtn.addEventListener('click', function() {
+        if (marker) { map.removeLayer(marker); marker = null; }
+        latInput.value = '';
+        lngInput.value = '';
+        labelInput.value = '';
+        labelDisplay.textContent = '';
+        locationRow.hidden = true;
+        map.setView([-17.8292, 31.0522], 3);
+    });
+
+    // Fix map size when section is expanded (Leaflet needs this)
+    var section = document.getElementById('sectionMap');
+    if (section) {
+        var toggle = section.querySelector('.ep-section-toggle');
+        if (toggle) {
+            toggle.addEventListener('click', function() {
+                setTimeout(function() { map.invalidateSize(); }, 350);
+            });
+        }
+    }
+})();
+
+/* --- Catalog Product Dropzone --- */
+(function() {
+    var dz = document.getElementById('catalogDropzone');
+    if (!dz) return;
+
+    var fileInput = dz.querySelector('input[type="file"]');
+    var emptyState = document.getElementById('catalogDropzoneEmpty');
+    var previewState = document.getElementById('catalogDropzonePreview');
+    var previewImg = document.getElementById('catalogPreviewImg');
+
+    ['dragenter','dragover'].forEach(function(ev) {
+        dz.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); dz.classList.add('epci-dropzone-active'); });
+    });
+    ['dragleave','drop'].forEach(function(ev) {
+        dz.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); dz.classList.remove('epci-dropzone-active'); });
+    });
+    dz.addEventListener('drop', function(e) {
+        var files = e.dataTransfer.files;
+        if (files.length && files[0].type.startsWith('image/')) {
+            var dt = new DataTransfer();
+            dt.items.add(files[0]);
+            fileInput.files = dt.files;
+            showCatalogPreview(files[0]);
+        }
+    });
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) showCatalogPreview(this.files[0]);
+        });
+    }
+
+    function showCatalogPreview(file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            emptyState.hidden = true;
+            previewState.hidden = false;
+        };
+        reader.readAsDataURL(file);
+    }
+})();
+
+function clearCatalogPreview() {
+    var dz = document.getElementById('catalogDropzone');
+    if (!dz) return;
+    var fileInput = dz.querySelector('input[type="file"]');
+    if (fileInput) fileInput.value = '';
+    document.getElementById('catalogDropzoneEmpty').hidden = false;
+    document.getElementById('catalogDropzonePreview').hidden = true;
+    document.getElementById('catalogPreviewImg').src = '';
+}
+
+/* --- Website Portfolio iframe fallback detection --- */
+(function() {
+    var iframes = document.querySelectorAll('.epwp-iframe');
+    iframes.forEach(function(iframe) {
+        iframe.addEventListener('error', function() {
+            iframe.closest('.epwp-preview').classList.add('epwp-blocked');
+        });
+        setTimeout(function() {
+            try {
+                var doc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!doc || !doc.body || doc.body.innerHTML === '') {
+                    iframe.closest('.epwp-preview').classList.add('epwp-blocked');
+                }
+            } catch(e) {
+                // Cross-origin means something loaded — good
+            }
+        }, 3500);
+    });
+})();
+</script>
+
+<style>
+/* ── Edit-profile section panels ── */
+.ep-section{background:#fff;border:1px solid #E2E8F0;border-radius:14px;margin-top:18px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.ep-section-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;padding:16px 20px;background:none;border:none;cursor:pointer;font-family:inherit;text-align:left}
+.ep-section-toggle:hover{background:#FAFBFC}
+.ep-section-left{display:flex;align-items:center;gap:12px}
+.ep-section-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ep-section-icon svg{width:20px;height:20px;color:#fff}
+.ep-icon-purple{background:linear-gradient(135deg,#8B5CF6,#7C3AED)}
+.ep-icon-blue{background:linear-gradient(135deg,#3B82F6,#2563EB)}
+.ep-icon-green{background:linear-gradient(135deg,#059669,#047857)}
+.ep-icon-amber{background:linear-gradient(135deg,#F59E0B,#D97706)}
+.ep-icon-pink{background:linear-gradient(135deg,#EC4899,#DB2777)}
+.ep-icon-teal{background:linear-gradient(135deg,#14B8A6,#0D9488)}
+.ep-icon-yellow{background:linear-gradient(135deg,#EAB308,#CA8A04)}
+.ep-section-title{display:block;font-size:15px;font-weight:700;color:#1E293B}
+.ep-section-count{display:block;font-size:12px;color:#94A3B8;margin-top:1px}
+.ep-chevron{width:18px;height:18px;color:#94A3B8;transition:transform .2s;flex-shrink:0}
+.ep-section.ep-open .ep-chevron{transform:rotate(180deg)}
+.ep-section-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.ep-section.ep-open .ep-section-body{max-height:2000px;overflow:visible}
+.ep-section-body{padding:0 20px}
+.ep-section.ep-open .ep-section-body{padding:0 20px 20px}
+
+/* Inline skill add */
+.ep-inline-add{display:flex;gap:8px;margin-bottom:12px}
+.ep-input{flex:1;padding:9px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;color:#1E293B;background:#FAFBFC;font-family:inherit;outline:none;box-sizing:border-box}
+.ep-input:focus{border-color:#8B5CF6;box-shadow:0 0 0 3px rgba(139,92,246,.12)}
+.ep-add-btn{padding:9px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+.ep-add-btn:hover{box-shadow:0 2px 8px rgba(59,130,246,.3)}
+
+/* Chips */
+.ep-chips{display:flex;flex-wrap:wrap;gap:8px}
+.ep-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(139,92,246,.14));border:1px solid rgba(139,92,246,.2);border-radius:100px;font-size:13px;font-weight:600;color:#7C3AED}
+.ep-chip-x{background:none;border:none;color:#7C3AED;font-size:16px;cursor:pointer;padding:0 0 0 2px;line-height:1;opacity:.6}
+.ep-chip-x:hover{opacity:1}
+
+/* Show-form button */
+.ep-show-form-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px dashed #CBD5E1;border-radius:10px;background:none;color:#475569;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:12px}
+.ep-show-form-btn:hover{border-color:#3B82F6;color:#3B82F6}
+.ep-add-form{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:18px;margin-bottom:12px}
+.ep-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.ep-form-grid{grid-template-columns:1fr}}
+.ep-form-field{margin-bottom:12px}
+.ep-form-field label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px}
+.ep-form-field input[type="text"],.ep-form-field input[type="date"],.ep-form-field input[type="number"],.ep-form-field textarea,.ep-form-field select{width:100%;padding:9px 12px;border:1.5px solid #E2E8F0;border-radius:9px;font-size:13px;color:#1E293B;background:#fff;font-family:inherit;outline:none;box-sizing:border-box}
+.ep-form-field input:focus,.ep-form-field textarea:focus{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.ep-form-field textarea{resize:vertical;min-height:60px}
+.ep-check-field label{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:#374151;cursor:pointer}
+.ep-check-field input[type="checkbox"]{width:16px;height:16px;accent-color:#3B82F6}
+.ep-form-actions{display:flex;gap:8px;margin-top:4px}
+.ep-cancel-btn{padding:9px 18px;border:1.5px solid #E2E8F0;border-radius:10px;background:#fff;color:#475569;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.ep-cancel-btn:hover{border-color:#94A3B8}
+
+/* Item list */
+.ep-items{display:flex;flex-direction:column;gap:8px}
+.ep-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:1px solid #F1F5F9;border-radius:10px;transition:border-color .15s}
+.ep-item:hover{border-color:#CBD5E1}
+.ep-item-logo{width:40px;height:40px;border-radius:10px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid #E2E8F0}
+.ep-item-logo img{width:100%;height:100%;object-fit:cover}
+.ep-item-logo svg{width:20px;height:20px;color:#94A3B8}
+.ep-logo-green{background:#ECFDF5;border-color:#D1FAE5}
+.ep-logo-green svg{color:#059669}
+.ep-item-body{flex:1;min-width:0}
+.ep-item-body strong{font-size:14px;color:#1E293B}
+.ep-item-sub{font-size:12px;color:#475569;margin-top:1px}
+.ep-item-meta{font-size:11px;color:#94A3B8;margin-top:1px}
+.ep-item-badge{display:inline-block;margin-top:3px;padding:2px 8px;background:#F0FDF4;color:#059669;border-radius:6px;font-size:11px;font-weight:700}
+.ep-del-btn{width:30px;height:30px;border-radius:8px;border:1.5px solid #FEE2E2;background:#FEF2F2;color:#EF4444;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;line-height:1}
+.ep-del-btn:hover{background:#FEE2E2;border-color:#EF4444}
+
+/* Name row (first + last side by side) */
+.ep-name-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:0}
+
+/* Hint card */
+.ep-hint-card{display:flex;align-items:flex-start;gap:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:14px 18px;font-size:13px;color:#92400E;line-height:1.5;margin-top:18px}
+.ep-hint-card a{color:#D97706;font-weight:600;text-decoration:underline}
+
+/* Publish toggle card */
+.ep-publish-card{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1.5px solid #E2E8F0;border-radius:14px;padding:18px 20px;margin-top:18px;transition:border-color .2s,box-shadow .2s}
+.ep-publish-card.is-active{border-color:#22C55E;box-shadow:0 0 0 3px rgba(34,197,94,.1)}
+.ep-publish-info{display:flex;align-items:center;gap:14px;min-width:0}
+.ep-publish-icon{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#E0E7FF,#C7D2FE);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s}
+.ep-publish-card.is-active .ep-publish-icon{background:linear-gradient(135deg,#BBF7D0,#86EFAC)}
+.ep-publish-icon svg{width:22px;height:22px;color:#4F46E5;transition:color .2s}
+.ep-publish-card.is-active .ep-publish-icon svg{color:#15803D}
+.ep-publish-text{display:flex;flex-direction:column;min-width:0}
+.ep-publish-title{font-size:15px;font-weight:700;color:#1E293B}
+.ep-publish-desc{font-size:12.5px;color:#64748B;margin-top:2px;line-height:1.4}
+
+/* Toggle switch */
+.ep-toggle{position:relative;display:inline-flex;align-items:center;cursor:pointer;flex-shrink:0}
+.ep-toggle input[type="checkbox"]{position:absolute;width:0;height:0;opacity:0}
+.ep-toggle-track{position:relative;width:52px;height:28px;background:#CBD5E1;border-radius:100px;transition:background .25s;display:block}
+.ep-toggle-thumb{position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.15);transition:transform .25s cubic-bezier(.4,.0,.2,1)}
+.ep-toggle input:checked+.ep-toggle-track{background:#22C55E}
+.ep-toggle input:checked+.ep-toggle-track .ep-toggle-thumb{transform:translateX(24px)}
+.ep-toggle input:focus-visible+.ep-toggle-track{box-shadow:0 0 0 3px rgba(34,197,94,.25)}
+@media(max-width:480px){.ep-publish-card{flex-direction:row;gap:12px}.ep-publish-desc{display:none}}
+
+/* Gallery grid */
+.ep-gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:16px}
+.ep-gallery-item{position:relative;border-radius:10px;overflow:hidden;border:1px solid #E2E8F0;aspect-ratio:1}
+.ep-gallery-item img{width:100%;height:100%;object-fit:cover;display:block}
+.ep-gallery-caption{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:11px;padding:16px 8px 6px;line-height:1.3}
+.ep-gallery-del{position:absolute;top:6px;right:6px;opacity:0;transition:opacity .15s}
+.ep-gallery-item:hover .ep-gallery-del{opacity:1}
+
+/* Stars */
+.ep-stars{font-size:16px;letter-spacing:1px;line-height:1}
+
+/* ── Dropzone (gallery upload) ── */
+.ep-dropzone{
+    position:relative;border:2px dashed #CBD5E1;border-radius:14px;padding:28px 20px;
+    text-align:center;cursor:pointer;transition:border-color .2s,background .2s;
+    background:#FAFBFC;overflow:hidden;
+}
+.ep-dropzone:hover{border-color:#8B5CF6;background:rgba(139,92,246,.02)}
+.ep-dropzone.ep-dropzone-active{border-color:#8B5CF6;background:rgba(139,92,246,.06);border-style:solid}
+.ep-dropzone-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:-1}
+.ep-dropzone-empty{display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none}
+.ep-dropzone-icon{
+    width:52px;height:52px;border-radius:14px;
+    background:linear-gradient(135deg,#EDE9FE,#DDD6FE);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:4px;
+}
+.ep-dropzone-icon svg{width:26px;height:26px;color:#7C3AED}
+.ep-dropzone-text{display:flex;flex-direction:column;gap:4px}
+.ep-dropzone-title{font-size:14px;font-weight:600;color:#374151}
+.ep-dropzone-link{color:#7C3AED;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.ep-dropzone-hint{font-size:12px;color:#94A3B8}
+.ep-dropzone-preview{position:relative;display:flex;align-items:center;justify-content:center}
+.ep-dropzone-preview img{max-height:180px;max-width:100%;border-radius:10px;object-fit:contain;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.ep-dropzone-remove{
+    position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;
+    border:none;background:rgba(0,0,0,.55);color:#fff;font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+    transition:background .15s;z-index:2;
+}
+.ep-dropzone-remove:hover{background:rgba(239,68,68,.9)}
+.ep-dropzone-footer{display:flex;gap:8px;margin-top:12px;align-items:center}
+
+/* ── Styled file picker (testimonial photo etc.) ── */
+.ep-file-picker{
+    display:flex;align-items:center;gap:10px;padding:9px 14px;
+    border:1.5px solid #E2E8F0;border-radius:10px;background:#FAFBFC;
+    cursor:pointer;transition:border-color .15s;min-height:42px;
+}
+.ep-file-picker:hover{border-color:#8B5CF6}
+.ep-file-picker-input{position:absolute;width:0;height:0;opacity:0;pointer-events:none}
+.ep-file-picker-empty{display:flex;align-items:center;gap:8px;color:#94A3B8;font-size:13px;font-weight:500}
+.ep-file-picker-chosen{display:flex;align-items:center;gap:10px;min-width:0}
+.ep-file-picker-thumb{width:32px;height:32px;border-radius:8px;object-fit:cover;border:1px solid #E2E8F0;flex-shrink:0}
+.ep-file-picker-name{font-size:13px;color:#374151;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ep-file-picker-clear{
+    width:24px;height:24px;border-radius:6px;border:1px solid #FEE2E2;
+    background:#FEF2F2;color:#EF4444;font-size:15px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    line-height:1;padding:0;margin-left:auto;
+}
+.ep-file-picker-clear:hover{background:#FEE2E2;border-color:#EF4444}
+
+/* ── Website Portfolio ── */
+.ep-icon-indigo{background:linear-gradient(135deg,#818CF8,#6366F1)}
+
+/* Portfolio card grid — horizontal scroll */
+.epwp-grid{display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;padding-bottom:4px;margin-bottom:14px}
+.epwp-grid::-webkit-scrollbar{height:4px}
+.epwp-grid::-webkit-scrollbar-track{background:transparent}
+.epwp-grid::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px}
+
+/* Individual card — compact & fixed width */
+.epwp-card{display:flex;flex-direction:column;background:#fff;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;transition:border-color .15s,box-shadow .15s;flex:0 0 170px;min-width:170px;scroll-snap-align:start}
+.epwp-card:hover{border-color:#C7D2FE;box-shadow:0 4px 12px rgba(99,102,241,.1)}
+
+/* Preview area with scaled iframe */
+.epwp-preview{position:relative;width:100%;height:105px;overflow:hidden;background:linear-gradient(135deg,#F8FAFC 0%,#EEF2FF 100%);border-bottom:1px solid #F1F5F9}
+.epwp-iframe{position:absolute;top:0;left:0;width:1280px;height:800px;transform:scale(0.133);transform-origin:top left;border:none;pointer-events:none}
+
+/* Fallback (shown when iframe is blocked) */
+.epwp-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:linear-gradient(135deg,#F8FAFC 0%,#EEF2FF 100%);opacity:0;transition:opacity .3s;z-index:1}
+.epwp-preview.epwp-blocked .epwp-fallback{opacity:1}
+.epwp-fallback-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#E0E7FF,#C7D2FE);display:flex;align-items:center;justify-content:center}
+.epwp-fallback-icon svg{width:18px;height:18px;color:#6366F1}
+.epwp-fallback-domain{font-size:10px;color:#6366F1;font-weight:600;letter-spacing:.01em}
+
+/* Hover overlay with action buttons */
+.epwp-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);opacity:0;transition:opacity .2s;z-index:2}
+.epwp-card:hover .epwp-overlay{opacity:1}
+.epwp-overlay-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;background:rgba(255,255,255,.95);color:#1E293B;font-size:11px;font-weight:600;cursor:pointer;border:none;text-decoration:none;font-family:inherit;transition:background .1s,transform .1s;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.epwp-overlay-btn:hover{background:#fff;transform:translateY(-1px)}
+.epwp-overlay-btn svg{width:12px;height:12px}
+.epwp-overlay-del{background:rgba(254,226,226,.95);color:#DC2626}
+.epwp-overlay-del:hover{background:#FEE2E2}
+
+/* Card info row */
+.epwp-info{padding:8px 10px 8px}
+.epwp-info-text{display:flex;flex-direction:column;gap:1px}
+.epwp-title{font-size:12px;font-weight:700;color:#1E293B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.epwp-domain{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:#6366F1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.epwp-domain svg{width:10px!important;height:10px!important}
+.epwp-desc{font-size:10px;color:#64748B;margin:2px 0 0;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Empty state */
+.epwp-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px 20px;border:2px dashed #E2E8F0;border-radius:14px;background:#FAFBFC;margin-bottom:14px}
+.epwp-empty-icon{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.epwp-empty-icon svg{width:28px;height:28px;color:#818CF8}
+.epwp-empty-title{font-size:15px;font-weight:700;color:#1E293B;margin:0 0 4px}
+.epwp-empty-sub{font-size:13px;color:#94A3B8;margin:0;line-height:1.5}
+
+/* Add form */
+.epwp-form-wrap{margin-bottom:14px}
+.epwp-form{background:#FAFBFC;border:1.5px solid #E2E8F0;border-radius:14px;overflow:hidden}
+.epwp-form-header{display:flex;align-items:center;gap:8px;padding:14px 18px;font-size:14px;font-weight:700;color:#1E293B;border-bottom:1px solid #F1F5F9}
+.epwp-form-body{padding:18px}
+.epwp-field{margin-bottom:14px}
+.epwp-field:last-child{margin-bottom:0}
+.epwp-field label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px}
+.epwp-optional{font-size:10.5px;font-weight:500;color:#94A3B8;background:#F1F5F9;padding:1px 7px;border-radius:4px;margin-left:4px}
+.epwp-field input[type="url"],.epwp-field input[type="text"]{width:100%;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13.5px;color:#1E293B;background:#fff;font-family:inherit;outline:none;box-sizing:border-box;transition:border-color .15s,box-shadow .15s}
+.epwp-field input:focus{border-color:#818CF8;box-shadow:0 0 0 3px rgba(129,140,248,.15)}
+.epwp-field-row{display:flex;gap:12px}
+.epwp-field-grow{flex:1;min-width:0}
+.epwp-form-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid #F1F5F9;background:#fff}
+.epwp-cancel-btn{padding:8px 18px;border:1.5px solid #E2E8F0;border-radius:9px;background:#fff;color:#475569;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .15s}
+.epwp-cancel-btn:hover{border-color:#94A3B8}
+.epwp-submit-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 20px;border:none;border-radius:9px;background:linear-gradient(135deg,#818CF8,#6366F1);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(99,102,241,.25);transition:box-shadow .15s,transform .15s}
+.epwp-submit-btn:hover{box-shadow:0 4px 14px rgba(99,102,241,.35);transform:translateY(-1px)}
+
+/* Add trigger button */
+.epwp-add-trigger{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:2px dashed #C7D2FE;border-radius:12px;background:none;color:#6366F1;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s}
+.epwp-add-trigger:hover{background:#EEF2FF;border-color:#818CF8}
+.epwp-add-trigger svg{width:18px;height:18px}
+
+/* ── Location Map picker ── */
+.ep-icon-red{background:linear-gradient(135deg,#EF4444,#DC2626)}
+.ep-map-toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:stretch}
+.ep-map-search-wrap{flex:1;position:relative}
+.ep-map-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#94A3B8;pointer-events:none}
+.ep-map-search{padding-left:36px!important;width:100%;box-sizing:border-box}
+.ep-map-results{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:1000;max-height:220px;overflow-y:auto}
+.ep-map-result-item{padding:10px 14px;font-size:13px;color:#374151;cursor:pointer;border-bottom:1px solid #F1F5F9;line-height:1.4}
+.ep-map-result-item:last-child{border-bottom:none}
+.ep-map-result-item:hover{background:#F8FAFC;color:#2563EB}
+.ep-map-result-empty{padding:12px 14px;font-size:13px;color:#94A3B8;text-align:center}
+.ep-map-gps-btn{
+    width:42px;height:42px;border:1.5px solid #E2E8F0;border-radius:10px;
+    background:#FAFBFC;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;transition:border-color .15s,background .15s;padding:0;
+}
+.ep-map-gps-btn svg{width:20px;height:20px;color:#475569;transition:color .15s}
+.ep-map-gps-btn:hover{border-color:#3B82F6;background:#EFF6FF}
+.ep-map-gps-btn:hover svg{color:#2563EB}
+.ep-map-gps-loading{animation:ep-pulse 1s infinite}
+@keyframes ep-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ep-map-container{border-radius:14px;overflow:hidden;border:1.5px solid #E2E8F0;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.ep-map-canvas{width:100%;height:320px}
+@media(max-width:600px){.ep-map-canvas{height:240px}}
+.ep-map-location-display{
+    display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px 14px;
+    background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;
+    font-size:13px;color:#374151;line-height:1.4;
+}
+.ep-map-location-display span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.ep-map-clear-btn{
+    width:24px;height:24px;border-radius:6px;border:1px solid #FECACA;
+    background:#FEF2F2;color:#EF4444;font-size:15px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    line-height:1;padding:0;margin-left:auto;
+}
+.ep-map-clear-btn:hover{background:#FEE2E2;border-color:#EF4444}
+.ep-map-hint{font-size:12px;color:#94A3B8;margin-top:10px;line-height:1.5}
+.ep-map-pin{background:none!important;border:none!important}
+
+/* ── Social Links section ── */
+.ep-icon-cyan{background:linear-gradient(135deg,#06B6D4,#0891B2)}
+.ep-sl-list{display:flex;flex-direction:column;gap:6px}
+.ep-sl-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:#FAFBFC;border:1px solid #F1F5F9;transition:border-color .15s}
+.ep-sl-row.ep-sl-active{border-color:#06B6D4;background:#F0FDFA}
+.ep-sl-platform{display:flex;align-items:center;gap:8px;flex-shrink:0;min-width:120px}
+.ep-sl-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ep-sl-icon svg{width:18px;height:18px;color:#475569}
+.ep-sl-label{font-size:12px;font-weight:600;color:#374151;white-space:nowrap}
+.ep-sl-input{flex:1;min-width:0}
+@media(max-width:600px){.ep-sl-row{flex-direction:column;align-items:stretch;gap:6px}.ep-sl-platform{min-width:auto}}
+
+/* ── Catalog section ── */
+.ep-icon-orange{background:linear-gradient(135deg,#F97316,#EA580C)}
+.ep-cat-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
+.ep-cat-add-chip{display:inline-flex;align-items:center;padding:6px 14px;border:1.5px dashed #CBD5E1;border-radius:100px;background:none;color:#475569;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s}
+.ep-cat-add-chip:hover{border-color:#F97316;color:#F97316}
+.ep-catalog-items .ep-item-logo{border-radius:8px}
+.ep-catalog-items .ep-item-logo img{border-radius:8px}
+
+/* ── Catalog Item Form (epci-*) ── */
+.epci-form-wrap{margin-bottom:14px}
+.epci-form{background:#FAFBFC;border:1.5px solid #E2E8F0;border-radius:14px;overflow:hidden}
+.epci-form-header{display:flex;align-items:center;gap:10px;padding:14px 18px;font-size:14px;font-weight:700;color:#1E293B;border-bottom:1px solid #F1F5F9}
+.epci-form-header-icon{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#FFEDD5,#FED7AA);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.epci-form-header-icon svg{width:15px;height:15px;color:#EA580C}
+.epci-form-body{padding:18px;display:flex;flex-direction:column;gap:16px}
+
+/* Dropzone */
+.epci-dropzone{
+    position:relative;border:2px dashed #CBD5E1;border-radius:14px;padding:24px 20px;
+    text-align:center;cursor:pointer;transition:border-color .2s,background .2s;
+    background:#fff;overflow:hidden;
+}
+.epci-dropzone:hover{border-color:#F97316;background:rgba(249,115,22,.02)}
+.epci-dropzone.epci-dropzone-active{border-color:#F97316;background:rgba(249,115,22,.06);border-style:solid}
+.epci-dropzone input[type="file"]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:1}
+.epci-dropzone-empty{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.epci-dropzone-icon{
+    width:48px;height:48px;border-radius:14px;
+    background:linear-gradient(135deg,#FFEDD5,#FED7AA);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:2px;
+}
+.epci-dropzone-icon svg{width:24px;height:24px;color:#EA580C}
+.epci-dropzone-text{display:flex;flex-direction:column;gap:2px}
+.epci-dropzone-title{font-size:13px;font-weight:600;color:#374151}
+.epci-dropzone-sub{font-size:12px;color:#64748B}
+.epci-dropzone-link{color:#F97316;font-weight:700;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.epci-dropzone-hint{font-size:11px;color:#94A3B8}
+.epci-dropzone-preview{position:relative;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.epci-dropzone-preview img{max-height:160px;max-width:100%;border-radius:10px;object-fit:contain;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.epci-dropzone-remove{
+    position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;
+    border:none;background:rgba(0,0,0,.55);color:#fff;font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+    transition:background .15s;z-index:2;pointer-events:auto;
+}
+.epci-dropzone-remove:hover{background:rgba(239,68,68,.9)}
+
+/* Fields */
+.epci-field-row{display:flex;gap:12px}
+@media(max-width:500px){.epci-field-row{flex-direction:column}}
+.epci-field{display:flex;flex-direction:column;gap:0}
+.epci-field-grow{flex:1;min-width:0}
+.epci-field-price{flex:0 0 140px}
+@media(max-width:500px){.epci-field-price{flex:1}}
+.epci-field label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px}
+.epci-field label svg{flex-shrink:0}
+.epci-optional{font-size:10.5px;font-weight:500;color:#94A3B8;background:#F1F5F9;padding:1px 7px;border-radius:4px;margin-left:4px}
+.epci-field input[type="text"],.epci-field select{
+    width:100%;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:10px;
+    font-size:13.5px;color:#1E293B;background:#fff;font-family:inherit;
+    outline:none;box-sizing:border-box;transition:border-color .15s,box-shadow .15s;
+}
+.epci-field input[type="text"]:focus,.epci-field select:focus{border-color:#F97316;box-shadow:0 0 0 3px rgba(249,115,22,.12)}
+.epci-field select{appearance:auto;cursor:pointer}
+
+/* Footer */
+.epci-form-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid #F1F5F9;background:#fff}
+.epci-cancel-btn{padding:8px 18px;border:1.5px solid #E2E8F0;border-radius:9px;background:#fff;color:#475569;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .15s}
+.epci-cancel-btn:hover{border-color:#94A3B8}
+.epci-submit-btn{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 20px;border:none;border-radius:9px;
+    background:linear-gradient(135deg,#F97316,#EA580C);color:#fff;font-size:13px;font-weight:600;
+    cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(249,115,22,.25);
+    transition:box-shadow .15s,transform .15s;
+}
+.epci-submit-btn:hover{box-shadow:0 4px 14px rgba(249,115,22,.35);transform:translateY(-1px)}
+
+/* Trigger button */
+.epci-add-trigger{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:2px dashed #FED7AA;border-radius:12px;background:none;color:#EA580C;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s;margin-bottom:14px}
+.epci-add-trigger:hover{background:#FFF7ED;border-color:#F97316}
+.epci-add-trigger svg{width:18px;height:18px}
+</style>
+{% endblock %}

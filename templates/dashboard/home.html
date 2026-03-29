@@ -1,0 +1,168 @@
+{% extends "dashboard/_app_shell.html" %}
+
+{% block title %}Dashboard | InfinityCard{% endblock %}
+
+{% block content %}
+
+<!-- ─── Name Update Prompt ─── -->
+{% if needs_name %}
+<div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1.5px solid #93C5FD;border-radius:14px;padding:20px 24px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#3B82F6,#2563EB);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        </div>
+        <div>
+            <div style="font-size:15px;font-weight:800;color:#1E3A5F">What's your name?</div>
+            <div style="font-size:13px;color:#3B82F6;line-height:1.5">Your name will be displayed on your public profile when people scan your NFC card.</div>
+        </div>
+    </div>
+    <form method="post" action="{% url 'profiles:update_name' %}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        {% csrf_token %}
+        <div style="flex:1;min-width:140px">
+            <label style="display:block;font-size:11px;font-weight:700;color:#1E40AF;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">First Name</label>
+            <input type="text" name="first_name" value="{{ user.first_name }}" required placeholder="e.g. Trymore" style="width:100%;padding:10px 14px;border:1.5px solid #93C5FD;border-radius:10px;font-size:14px;font-family:inherit;background:#fff;color:#1E293B;outline:none" onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#93C5FD'">
+        </div>
+        <div style="flex:1;min-width:140px">
+            <label style="display:block;font-size:11px;font-weight:700;color:#1E40AF;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Last Name</label>
+            <input type="text" name="last_name" value="{{ user.last_name }}" required placeholder="e.g. Mudiwa" style="width:100%;padding:10px 14px;border:1.5px solid #93C5FD;border-radius:10px;font-size:14px;font-family:inherit;background:#fff;color:#1E293B;outline:none" onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#93C5FD'">
+        </div>
+        <button type="submit" style="padding:10px 24px;background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(59,130,246,0.3)">Save Name</button>
+    </form>
+</div>
+{% endif %}
+
+<!-- ─── Card Delivery Notifications (individual users only) ─── -->
+{% if not is_company_member %}
+{% if has_delivered_card and not subscription %}
+<div style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1.5px solid #6EE7B7;border-radius:14px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#10B981,#059669);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    <div style="flex:1;min-width:200px">
+        <div style="font-size:15px;font-weight:800;color:#065F46;margin-bottom:2px">Your NFC Card Has Arrived!</div>
+        <div style="font-size:13px;color:#047857;line-height:1.5">Activate your card by choosing a subscription plan to unlock all features.</div>
+    </div>
+    <a href="{% url 'subscriptions:billing' %}" style="display:inline-flex;align-items:center;gap:6px;padding:10px 22px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;box-shadow:0 2px 8px rgba(16,185,129,0.3)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="15" height="15"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+        Activate Card
+    </a>
+</div>
+{% elif has_pending_order and not subscription %}
+<div style="background:linear-gradient(135deg,#FFF7ED,#FFEDD5);border:1.5px solid #FED7AA;border-radius:14px;padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0H6.375c-.621 0-1.125-.504-1.125-1.125V14.25m17.25 0V6.169a2.25 2.25 0 00-.659-1.591l-2.08-2.08A2.25 2.25 0 0017.83 1.87H6.375c-.621 0-1.125.504-1.125 1.125v11.25"/></svg>
+    </div>
+    <div style="flex:1;min-width:200px">
+        <div style="font-size:14px;font-weight:700;color:#92400E">Your NFC Card is Being Processed</div>
+        <div style="font-size:12px;color:#A16207;line-height:1.5;margin-top:2px">Once your card is delivered, you'll be able to activate your subscription.</div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Profile Quick View -->
+{% if profile %}
+<div class="app-profile-card">
+    <div class="app-profile-card-bg"></div>
+    <div class="app-profile-card-content">
+        <div class="app-profile-avatar">
+            {% if profile.profile_image %}
+            <img src="{{ profile.profile_image.url }}" alt="{{ profile.display_name }}">
+            {% else %}
+            <span>{{ user.username|make_list|first|upper }}</span>
+            {% endif %}
+        </div>
+        <div class="app-profile-info">
+            <div class="app-profile-name">{{ profile.display_name }}</div>
+            <div class="app-profile-url">{{ user.username }}.inftycard.cc</div>
+        </div>
+        <div class="app-profile-status">
+            {% if profile.is_published %}<span class="badge badge-success">Published</span>{% else %}<span class="badge badge-warning">Draft</span>{% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Stat Cards -->
+<div class="app-section-label">Overview</div>
+<div class="app-stats">
+    <div class="app-stat-card">
+        <div class="app-stat-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.062 12.062 0 0116.5 7.605"/></svg>
+        </div>
+        <div class="app-stat-value">{{ tap_count }}</div>
+        <div class="app-stat-label">Total taps</div>
+        {% if last_tap %}
+        <div class="app-stat-meta">Last: {{ last_tap.timestamp|timesince }} ago</div>
+        {% endif %}
+    </div>
+    <div class="app-stat-card">
+        <div class="app-stat-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+        </div>
+        {% if is_company_member %}
+        <div class="app-stat-value">Company</div>
+        <div class="app-stat-label"><span class="badge badge-success">Managed</span></div>
+        <div class="app-stat-meta">Billing managed by company</div>
+        {% elif subscription %}
+        <div class="app-stat-value">{{ subscription.plan.name }}</div>
+        <div class="app-stat-label">
+            <span class="badge {% if subscription.is_active %}badge-success{% else %}badge-warning{% endif %}">{{ subscription.status|title }}</span>
+        </div>
+        <div class="app-stat-meta">
+            {% if subscription.is_active %}{{ subscription.days_remaining }} days left{% else %}Expired{% endif %}
+        </div>
+        {% else %}
+        <div class="app-stat-value">Free</div>
+        <div class="app-stat-label">No plan active</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="app-section-label">Quick Actions</div>
+<div class="app-quick-actions">
+    <a href="{% url 'profiles:edit_profile' %}" class="app-quick-btn">
+        <div class="app-quick-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        </div>
+        <span class="app-quick-label">Edit Profile</span>
+    </a>
+    <a href="{% url 'profiles:social_links' %}" class="app-quick-btn">
+        <div class="app-quick-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+        </div>
+        <span class="app-quick-label">Social Links</span>
+    </a>
+    <a href="{% url 'profiles:theme_picker' %}" class="app-quick-btn">
+        <div class="app-quick-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125V11.25a1.875 1.875 0 01-1.875 1.875H6.75a1.875 1.875 0 00-1.875 1.875V21zM3.375 10.5h3.75m6.654-5.678L18.401 9.444a2.25 2.25 0 010 3.182l-6.4 6.401"/></svg>
+        </div>
+        <span class="app-quick-label">Theme</span>
+    </a>
+    {% if not is_company_member %}
+    <a href="{% url 'subscriptions:plans' %}" class="app-quick-btn">
+        <div class="app-quick-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+        </div>
+        <span class="app-quick-label">Upgrade</span>
+    </a>
+    {% endif %}
+</div>
+
+<!-- Recent Activity -->
+<div class="app-section-label">Activity</div>
+<div class="app-card">
+    <div class="app-card-header">
+        <span class="app-card-title">Recent Taps</span>
+        <a href="{% url 'profiles:analytics' %}" class="app-card-action">View all &rarr;</a>
+    </div>
+    <div class="app-card-body">
+        {% if last_tap %}
+        <p>Your last tap was <strong>{{ last_tap.timestamp|timesince }} ago</strong> from {{ last_tap.country|default:"an unknown location" }}.</p>
+        {% else %}
+        <p>No taps recorded yet. Share your NFC card to start tracking visits.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "subscriptions/admin_base.html" %}
+{% block title %}Subscriptions{% endblock %}
+{% block nav_subscriptions %}active{% endblock %}
+{% block page_title %}Subscriptions{% endblock %}
+
+{% block admin_content %}
+
+<div class="sa-card">
+    <div class="sa-filter">
+        <a class="sa-filter-tab {% if not status_filter %}active{% endif %}" href="{% url 'subscriptions:admin_subscriptions' %}">All</a>
+        <a class="sa-filter-tab {% if status_filter == 'active' %}active{% endif %}" href="{% url 'subscriptions:admin_subscriptions' %}?status=active">Active</a>
+        <a class="sa-filter-tab {% if status_filter == 'suspended' %}active{% endif %}" href="{% url 'subscriptions:admin_subscriptions' %}?status=suspended">Suspended</a>
+        <a class="sa-filter-tab {% if status_filter == 'expired' %}active{% endif %}" href="{% url 'subscriptions:admin_subscriptions' %}?status=expired">Expired</a>
+        <a class="sa-filter-tab {% if status_filter == 'cancelled' %}active{% endif %}" href="{% url 'subscriptions:admin_subscriptions' %}?status=cancelled">Cancelled</a>
+    </div>
+    <table class="sa-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Plan</th>
+                <th>Period</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Days Left</th>
+                <th>Expires</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sub in subscriptions %}
+            <tr>
+                <td>
+                    <div class="sa-user-cell">
+                        <div class="sa-user-avatar">{{ sub.user.username|first|upper }}</div>
+                        <div class="sa-user-info">
+                            <div class="sa-user-name">{{ sub.user.username }}</div>
+                            <div class="sa-user-email">{{ sub.user.email }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>{{ sub.plan.name }}</strong></td>
+                <td><span class="sa-badge {% if sub.billing_period == 'yearly' %}sa-badge-purple{% else %}sa-badge-blue{% endif %}">{{ sub.get_billing_period_display }}</span></td>
+                <td><span class="sa-badge sa-badge-gray">{{ sub.get_payment_method_display }}</span></td>
+                <td>
+                    <span class="sa-badge {% if sub.status == 'active' %}sa-badge-green{% elif sub.status == 'suspended' %}sa-badge-amber{% else %}sa-badge-red{% endif %}">
+                        {{ sub.get_status_display }}
+                    </span>
+                </td>
+                <td style="font-weight:600">{{ sub.days_remaining }}d</td>
+                <td style="font-size:12px;color:#64748B">{{ sub.expires_at|date:"M d, Y" }}</td>
+                <td>
+                    <div class="sa-actions">
+                        {% if sub.status == 'active' %}
+                        <form method="post" action="{% url 'subscriptions:admin_update_subscription' sub.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="extend">
+                            <button class="sa-btn sa-btn-success sa-btn-sm" title="Extend by 1 billing period">Extend</button>
+                        </form>
+                        <form method="post" action="{% url 'subscriptions:admin_update_subscription' sub.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="suspend">
+                            <button class="sa-btn sa-btn-warning sa-btn-sm">Suspend</button>
+                        </form>
+                        <form method="post" action="{% url 'subscriptions:admin_update_subscription' sub.pk %}" onsubmit="return confirm('Cancel this subscription?')">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="cancel">
+                            <button class="sa-btn sa-btn-danger sa-btn-sm">Cancel</button>
+                        </form>
+                        {% elif sub.status == 'suspended' %}
+                        <form method="post" action="{% url 'subscriptions:admin_update_subscription' sub.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="reactivate">
+                            <button class="sa-btn sa-btn-primary sa-btn-sm">Reactivate</button>
+                        </form>
+                        <form method="post" action="{% url 'subscriptions:admin_update_subscription' sub.pk %}" onsubmit="return confirm('Cancel?')">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="cancel">
+                            <button class="sa-btn sa-btn-danger sa-btn-sm">Cancel</button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'subscriptions:admin_update_subscription' sub.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="reactivate">
+                            <button class="sa-btn sa-btn-primary sa-btn-sm">Reactivate</button>
+                        </form>
+                        {% endif %}
+                        <form method="post" action="{% url 'subscriptions:admin_update_subscription' sub.pk %}" style="display:flex;gap:4px;align-items:center">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="change_plan">
+                            <select name="plan_id" style="padding:4px 8px;border:1px solid #E2E8F0;border-radius:6px;font-size:11px;background:#fff;color:#1E293B">
+                                {% for p in plans %}
+                                <option value="{{ p.pk }}" {% if p.pk == sub.plan_id %}selected{% endif %}>{{ p.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="period" style="padding:4px 8px;border:1px solid #E2E8F0;border-radius:6px;font-size:11px;background:#fff;color:#1E293B">
+                                <option value="monthly" {% if sub.billing_period == 'monthly' %}selected{% endif %}>Mo</option>
+                                <option value="yearly" {% if sub.billing_period == 'yearly' %}selected{% endif %}>Yr</option>
+                            </select>
+                            <button class="sa-btn sa-btn-ghost sa-btn-sm">Switch</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="sa-empty">No subscriptions found</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
