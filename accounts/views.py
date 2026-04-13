@@ -70,19 +70,30 @@ def choose_category(request):
     if user.account_type != 'personal':
         return redirect('accounts:choose_account_type')
 
-    categories = Category.objects.all()
+    # Hardcoded valid category slugs for validation (matches template)
+    VALID_CATEGORIES = [
+        'personal', 'business', 'creative', 'freelancer',
+        'restaurant', 'real_estate', 'technology', 'healthcare'
+    ]
 
     if request.method == 'POST':
         cat_slug = request.POST.get('category')
-        category = get_object_or_404(Category, slug=cat_slug)
+        if cat_slug not in VALID_CATEGORIES:
+            return redirect('accounts:choose_category')
+        # Get or create category to satisfy FK constraint
+        category, _ = Category.objects.get_or_create(
+            slug=cat_slug,
+            defaults={
+                'name': cat_slug.replace('_', ' ').title(),
+                'description': ''
+            }
+        )
         profile = user.profile
         profile.category = category
         profile.save(update_fields=['category'])
         return _signup_final_redirect(request)
 
-    return render(request, 'accounts/choose_category.html', {
-        'categories': categories,
-    })
+    return render(request, 'accounts/choose_category.html')
 
 
 class CustomLoginView(LoginView):
