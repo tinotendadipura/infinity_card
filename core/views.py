@@ -155,3 +155,57 @@ def privacy(request):
 
 def terms(request):
     return render(request, 'pages/terms.html')
+
+
+def error_404(request, exception=None):
+    """Custom 404 error handler."""
+    try:
+        return render(request, '404.html', status=404)
+    except Exception:
+        # Try standalone template (no database dependencies)
+        try:
+            return render(request, 'errors/404_standalone.html', status=404)
+        except Exception:
+            # Ultimate fallback - plain HTML
+            from django.http import HttpResponse
+            return HttpResponse(
+                '<h1>404 - Page Not Found</h1><p>The page you requested could not be found.</p><a href="/">Go Home</a>',
+                status=404,
+                content_type='text/html'
+            )
+
+
+def error_500(request):
+    """Custom 500 error handler."""
+    try:
+        return render(request, '500.html', status=500)
+    except Exception:
+        # Try standalone template (no database dependencies)
+        try:
+            return render(request, 'errors/500_standalone.html', status=500)
+        except Exception:
+            # Ultimate fallback - plain HTML
+            from django.http import HttpResponse
+            return HttpResponse(
+                '<h1>500 - Server Error</h1><p>Something went wrong. Please try again later.</p><a href="/">Go Home</a>',
+                status=500,
+                content_type='text/html'
+            )
+
+
+def error_403(request, exception=None):
+    """Custom 403 error handler."""
+    try:
+        return render(request, '403.html', status=403)
+    except Exception:
+        # Try standalone template (no database dependencies)
+        try:
+            return render(request, 'errors/403_standalone.html', status=403)
+        except Exception:
+            # Ultimate fallback - plain HTML
+            from django.http import HttpResponse
+            return HttpResponse(
+                '<h1>403 - Access Denied</h1><p>You do not have permission to access this page.</p><a href="/">Go Home</a>',
+                status=403,
+                content_type='text/html'
+            )

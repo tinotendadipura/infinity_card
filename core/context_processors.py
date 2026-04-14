@@ -8,10 +8,14 @@ def subscription_context(request):
     }
 
     if hasattr(request, 'user') and request.user.is_authenticated:
-        from companies.models import CompanyMembership
-        ctx['is_company_member'] = CompanyMembership.objects.filter(
-            user=request.user, is_active=True
-        ).exists()
-        ctx['profile'] = getattr(request.user, 'profile', None)
+        try:
+            from companies.models import CompanyMembership
+            ctx['is_company_member'] = CompanyMembership.objects.filter(
+                user=request.user, is_active=True
+            ).exists()
+            ctx['profile'] = getattr(request.user, 'profile', None)
+        except Exception:
+            # Fail silently during errors (e.g., database issues during 500)
+            pass
 
     return ctx

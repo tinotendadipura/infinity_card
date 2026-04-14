@@ -1,0 +1,16 @@
+{% extends "errors/base_error.html" %}
+{% block error_title %}500 - Server Error{% endblock %}
+{% block extra_css %}
+<style>.error-code { background: linear-gradient(135deg, #F87171, #DC2626, #FB923C); -webkit-background-clip: text; background-clip: text; }</style>
+{% endblock %}
+{% block content %}
+<div class="error-code">500</div>
+<h1 class="error-title">Server Error</h1>
+<p class="error-message">
+    Something went wrong on our end. We're working to fix it. Please try again in a few moments.
+</p>
+<div class="error-actions">
+    <a href="/" class="btn btn-primary">Go Home</a>
+    <button onclick="window.location.reload()" class="btn btn-secondary">Try Again</button>
+</div>
+{% endblock %}

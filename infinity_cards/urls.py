@@ -3,6 +3,7 @@ from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 from profiles.views import nfc_profile_redirect, preview_profile, public_catalog_preview
+from core.views import error_404, error_500, error_403
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -20,5 +21,16 @@ urlpatterns = [
     path('analytics/', include('analytics.urls')),
 ]
 
+# Custom error handlers
+handler404 = 'core.views.error_404'
+handler500 = 'core.views.error_500'
+handler403 = 'core.views.error_403'
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Test error pages in development
+    urlpatterns += [
+        path('__test404__/', error_404, name='test_404'),
+        path('__test500__/', error_500, name='test_500'),
+        path('__test403__/', error_403, name='test_403'),
+    ]
