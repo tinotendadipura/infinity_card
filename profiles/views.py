@@ -148,6 +148,30 @@ def public_profile(request):
     return render(request, 'profiles/default.html', context)
 
 
+def public_profile_by_code(request, code):
+    """Public profile via subdomain + profile code: username.inftycard.cc/code/"""
+    profile = request.tenant_profile
+    if not profile or not profile.is_published:
+        raise Http404
+
+    # Verify the code matches
+    if profile.profile_code != code:
+        raise Http404
+
+    # Subscription enforcement
+    if not request.subscription_active:
+        info = request.subscription_info or check_user_subscription(request.tenant_user)
+        return render(request, 'profiles/suspended.html', {
+            'profile': profile,
+            'reason': info['reason'],
+            'is_company': info['is_company'],
+            'owner_name': info['owner_name'],
+        })
+
+    context = _build_profile_context(profile, request.subscription_active)
+    return render(request, 'profiles/default.html', context)
+
+
 def preview_profile(request, username):
     """Localhost-friendly profile preview via /p/<username>/."""
     from accounts.models import User

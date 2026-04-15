@@ -2,13 +2,15 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
-from profiles.views import nfc_profile_redirect, preview_profile, public_catalog_preview
+from profiles.views import nfc_profile_redirect, preview_profile, public_catalog_preview, public_profile_by_code
 from core.views import error_404, error_500, error_403
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', include('accounts.urls')),
+    # Public profile via subdomain + code: username.inftycard.cc/code/
+    path('<str:code>/', public_profile_by_code, name='public_profile_by_code'),
     # NFC card URL + public profile preview at root /p/ level
     path('p/<str:username>/catalog/', public_catalog_preview, name='public_catalog_preview'),
     path('p/<str:name_slug>/<str:code>/', nfc_profile_redirect, name='nfc_profile_redirect'),
