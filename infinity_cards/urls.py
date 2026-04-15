@@ -2,13 +2,14 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
-from profiles.views import public_profile, preview_profile, public_catalog_preview, public_catalog
+from profiles.views import public_profile, preview_profile, public_catalog_preview, public_catalog, public_profile_by_code
 from core.views import error_404, error_500, error_403
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', include('accounts.urls')),
+    path('dashboard/', include('profiles.urls')),
     # Public profile via simple URL: /p/<username>/<code>/
     path('p/<str:username>/<str:code>/', public_profile, name='public_profile'),
     # Public catalog via simple URL: /p/<username>/catalog/
@@ -17,7 +18,8 @@ urlpatterns = [
     path('p/<str:username>/', preview_profile, name='preview_profile'),
     # Catalog at root level (for subdomain backward compatibility)
     path('catalog/', public_catalog, name='public_catalog'),
-    path('dashboard/', include('profiles.urls')),
+    # Public profile via subdomain + code: username.inftycard.cc/code/
+    path('<str:code>/', public_profile_by_code, name='public_profile_by_code'),
     path('', include('subscriptions.urls')),
     path('cards/', include('cards.urls')),
     path('company/', include('companies.urls')),
