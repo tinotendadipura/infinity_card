@@ -71,8 +71,17 @@ class SubscriptionMiddleware:
     def __call__(self, request):
         request.subscription_active = False
         request.subscription_info = None
+
+        # Check tenant_user (public profiles) or logged-in user (dashboard/billing)
+        user_to_check = None
         if hasattr(request, 'tenant_user') and request.tenant_user:
-            info = check_user_subscription(request.tenant_user)
+            user_to_check = request.tenant_user
+        elif hasattr(request, 'user') and request.user.is_authenticated:
+            user_to_check = request.user
+
+        if user_to_check:
+            info = check_user_subscription(user_to_check)
             request.subscription_active = info['active']
             request.subscription_info = info
+
         return self.get_response(request)

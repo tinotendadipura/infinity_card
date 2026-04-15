@@ -140,7 +140,7 @@
         </div>
         <span class="app-quick-label">Theme</span>
     </a>
-    {% if not is_company_member %}
+    {% if not is_company_member and subscription_active %}
     <a href="{% url 'subscriptions:plans' %}" class="app-quick-btn">
         <div class="app-quick-icon">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>

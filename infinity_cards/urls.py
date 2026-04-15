@@ -18,13 +18,13 @@ urlpatterns = [
     path('p/<str:username>/', preview_profile, name='preview_profile'),
     # Catalog at root level (for subdomain backward compatibility)
     path('catalog/', public_catalog, name='public_catalog'),
-    # Public profile via subdomain + code: username.inftycard.cc/code/
-    path('<str:code>/', public_profile_by_code, name='public_profile_by_code'),
     path('', include('subscriptions.urls')),
     path('cards/', include('cards.urls')),
     path('company/', include('companies.urls')),
     path('', include('core.urls')),
     path('analytics/', include('analytics.urls')),
+    # Public profile via subdomain + code: username.inftycard.cc/code/
+    path('<str:code>/', public_profile_by_code, name='public_profile_by_code'),
 ]
 
 # Custom error handlers

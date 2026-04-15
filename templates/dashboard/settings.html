@@ -58,7 +58,7 @@
                     {% if t.locked %}<span class="stg-plan-badge-req stg-plan-{{ t.required_plan }}">{{ t.required_plan|title }}</span>{% endif %}
                 </div>
                 <div class="stg-toggle-desc">{{ t.description }}</div>
-                {% if t.locked %}
+                {% if t.locked and subscription_active %}
                 <a href="{% url 'subscriptions:plans' %}" class="stg-upgrade-link">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/></svg>
                     Upgrade to {{ t.required_plan|title }}
@@ -94,7 +94,7 @@
                     {% if t.locked %}<span class="stg-plan-badge-req stg-plan-{{ t.required_plan }}">{{ t.required_plan|title }}</span>{% elif not t.enabled %}<span class="stg-badge-new">New</span>{% endif %}
                 </div>
                 <div class="stg-toggle-desc">{{ t.description }}</div>
-                {% if t.locked %}
+                {% if t.locked and subscription_active %}
                 <a href="{% url 'subscriptions:plans' %}" class="stg-upgrade-link">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/></svg>
                     Upgrade to {{ t.required_plan|title }}
@@ -246,7 +246,7 @@ function showUpgradeToast(plan) {
     toast.className = 'stg-toast';
     toast.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>'
         + '<span>This feature requires the <strong>' + plan.charAt(0).toUpperCase() + plan.slice(1) + '</strong> plan</span>'
-        + '<a href="{% url "subscriptions:plans" %}" class="stg-toast-btn">Upgrade</a>';
+        + '{% if subscription_active %}<a href="{% url "subscriptions:plans" %}" class="stg-toast-btn">Upgrade</a>{% endif %}';
     document.body.appendChild(toast);
     setTimeout(function() { toast.classList.add('stg-toast-show'); }, 10);
     setTimeout(function() { toast.classList.remove('stg-toast-show'); setTimeout(function() { toast.remove(); }, 300); }, 4000);

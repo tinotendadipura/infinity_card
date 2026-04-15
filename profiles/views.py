@@ -15,7 +15,12 @@ from themes.models import Theme
 def public_catalog(request):
     """Public catalog page — WhatsApp Business style full listing."""
     profile = request.tenant_profile
-    if not profile or not profile.is_published:
+    
+    # Permission check: allow owner and staff to see unpublished profiles
+    is_owner = request.user.is_authenticated and profile and request.user == profile.user
+    is_staff = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    
+    if not profile or (not profile.is_published and not (is_owner or is_staff)):
         raise Http404
 
     # Subscription enforcement
@@ -129,32 +134,51 @@ def _build_profile_context(profile, subscription_active=True):
     return context
 
 
-def public_profile(request, username, code):
-    """Public profile via simple URL: /p/<username>/<code>/"""
+def public_profile(request, username=None, code=None):
+    """Public profile via simple URL (/p/<username>/<code>/) or subdomain root."""
     from accounts.models import User
     from django.http import Http404
 
-    try:
-        user = User.objects.select_related(
-            'profile__category', 'profile__theme',
-        ).get(username=username)
-    except User.DoesNotExist:
-        raise Http404(f"User '{username}' not found")
+    if username and code:
+        # Canonical URL: /p/<username>/<code>/
+        try:
+            user = User.objects.select_related(
+                'profile__category', 'profile__theme',
+            ).get(username=username)
+        except User.DoesNotExist:
+            raise Http404(f"User '{username}' not found")
 
-    profile = getattr(user, 'profile', None)
-    if not profile:
-        raise Http404(f"Profile not found for user '{username}'")
+        profile = getattr(user, 'profile', None)
+        if not profile:
+            raise Http404(f"Profile not found for user '{username}'")
 
-    if not profile.is_published:
-        raise Http404(f"Profile for '{username}' is not published")
+        # Permission check: allow owner and staff to see unpublished profiles
+        is_owner = request.user.is_authenticated and request.user == user
+        is_staff = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+        if not profile.is_published and not (is_owner or is_staff):
+            raise Http404(f"Profile for '{username}' is not published")
 
-    # Verify the code matches
-    if profile.profile_code != code:
-        raise Http404(f"Invalid profile code. Expected: {profile.profile_code}, Got: {code}")
+        # Verify the code matches
+        if profile.profile_code != code:
+            raise Http404(f"Invalid profile code. Expected: {profile.profile_code}, Got: {code}")
 
-    # Subscription enforcement
-    info = check_user_subscription(user)
-    if not info['active']:
+        subscription_active = check_user_subscription(user)['active']
+    else:
+        # Subdomain root: username.inftycard.cc/
+        profile = request.tenant_profile
+        user = request.tenant_user
+        
+        is_owner = request.user.is_authenticated and profile and request.user == user
+        is_staff = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+        
+        if not profile or (not profile.is_published and not (is_owner or is_staff)):
+            raise Http404
+            
+        subscription_active = request.subscription_active
+
+    # Subscription enforcement (common)
+    if not subscription_active:
+        info = request.subscription_info or check_user_subscription(user)
         return render(request, 'profiles/suspended.html', {
             'profile': profile,
             'reason': info['reason'],
@@ -162,14 +186,20 @@ def public_profile(request, username, code):
             'owner_name': info['owner_name'],
         })
 
-    context = _build_profile_context(profile, info['active'])
+    context = _build_profile_context(profile, subscription_active)
     return render(request, 'profiles/default.html', context)
 
 
 def public_profile_by_code(request, code):
     """Public profile via subdomain + profile code: username.inftycard.cc/code/"""
     profile = request.tenant_profile
-    if not profile or not profile.is_published:
+    user = request.tenant_user
+    
+    # Permission check: allow owner and staff to see unpublished profiles
+    is_owner = request.user.is_authenticated and profile and request.user == user
+    is_staff = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    
+    if not profile or (not profile.is_published and not (is_owner or is_staff)):
         raise Http404
 
     # Verify the code matches
