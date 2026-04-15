@@ -14,6 +14,7 @@ class OnboardingMiddleware:
         '/signup/',
         '/admin/',
         '/accounts/',       # allauth
+        '/manage/',         # admin dashboard
         '/p/',              # public profiles
         '/cards/store',     # public store
         '/cards/product',   # public product pages
@@ -37,6 +38,10 @@ class OnboardingMiddleware:
     def __call__(self, request):
         # Only check authenticated users
         if not request.user.is_authenticated:
+            return self.get_response(request)
+
+        # Exempt staff and superusers from onboarding requirements
+        if request.user.is_staff or request.user.is_superuser:
             return self.get_response(request)
 
         path = request.path

@@ -16,6 +16,8 @@ class CustomAccountAdapter(DefaultAccountAdapter):
 
     def get_login_redirect_url(self, request):
         user = request.user
+        if user.is_staff or user.is_superuser:
+            return '/manage/'
         if not user.account_type:
             return '/signup/account-type/'
         if user.account_type == 'business':
@@ -45,6 +47,8 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
     def get_login_redirect_url(self, request):
         user = request.user
+        if user.is_staff or user.is_superuser:
+            return '/manage/'
         if not user.account_type:
             return '/signup/account-type/'
         if user.account_type == 'business':

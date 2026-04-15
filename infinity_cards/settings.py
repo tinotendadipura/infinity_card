@@ -212,13 +212,23 @@ SOCIALACCOUNT_PROVIDERS = {
 # Port wildcards (http://127.0.0.1:*) don't work in Django 4+; only subdomain wildcards do.
 # In DEBUG mode we use middleware to trust any localhost origin (ports change every restart).
 CSRF_TRUSTED_ORIGINS = [
-    'https://*.infinitycard.app',
+    'https://*.inftycard.cc',
+    'https://inftycard.cc',
 ]
 
 # Security headers (spec §10)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_HSTS_SECONDS = 31536000 # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # Default primary key type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

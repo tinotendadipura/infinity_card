@@ -7,6 +7,8 @@ from .forms import SignupForm
 
 def signup(request):
     if request.user.is_authenticated:
+        if request.user.is_staff or request.user.is_superuser:
+            return redirect('subscriptions:admin_dashboard')
         if not request.user.account_type:
             return redirect('accounts:choose_account_type')
         return redirect('profiles:dashboard')
@@ -32,6 +34,9 @@ def signup(request):
 def choose_account_type(request):
     """Step 2: User picks Business or Personal account type."""
     user = request.user
+
+    if user.is_staff or user.is_superuser:
+        return redirect('subscriptions:admin_dashboard')
 
     # Already chose — redirect to the right place
     if user.account_type == 'business':
@@ -67,6 +72,8 @@ def choose_category(request):
     from categories.models import Category
 
     user = request.user
+    if user.is_staff or user.is_superuser:
+        return redirect('subscriptions:admin_dashboard')
     if user.account_type != 'personal':
         return redirect('accounts:choose_account_type')
 
@@ -102,7 +109,8 @@ class CustomLoginView(LoginView):
 
     def get_success_url(self):
         # If user hasn't chosen account type yet, send them to onboarding
-        if not self.request.user.account_type:
+        # (Exempt staff and superusers)
+        if not self.request.user.account_type and not (self.request.user.is_staff or self.request.user.is_superuser):
             return '/signup/account-type/'
         if self.request.user.account_type == 'business':
             from companies.views import _get_admin_membership
