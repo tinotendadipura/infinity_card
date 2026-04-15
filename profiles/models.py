@@ -97,8 +97,8 @@ class Profile(models.Model):
     def get_absolute_url(self):
         from django.conf import settings
         if settings.DEBUG:
-            return f'/dashboard/p/{self.user.username}/'
-        return f'https://{self.user.username}.infinitycard.app'
+            return f'/p/{self.user.username}/{self.profile_code}/'
+        return f'https://{self.user.username}.inftycard.cc/{self.profile_code}/'
 
     @property
     def nfc_url(self):
