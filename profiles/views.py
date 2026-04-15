@@ -132,20 +132,25 @@ def _build_profile_context(profile, subscription_active=True):
 def public_profile(request, username, code):
     """Public profile via simple URL: /p/<username>/<code>/"""
     from accounts.models import User
+    from django.http import Http404
+
     try:
         user = User.objects.select_related(
             'profile__category', 'profile__theme',
         ).get(username=username)
     except User.DoesNotExist:
-        raise Http404
+        raise Http404(f"User '{username}' not found")
 
     profile = getattr(user, 'profile', None)
-    if not profile or not profile.is_published:
-        raise Http404
+    if not profile:
+        raise Http404(f"Profile not found for user '{username}'")
+
+    if not profile.is_published:
+        raise Http404(f"Profile for '{username}' is not published")
 
     # Verify the code matches
     if profile.profile_code != code:
-        raise Http404
+        raise Http404(f"Invalid profile code. Expected: {profile.profile_code}, Got: {code}")
 
     # Subscription enforcement
     info = check_user_subscription(user)
