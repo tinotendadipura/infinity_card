@@ -95,35 +95,28 @@ class Profile(models.Model):
         return f'{self.display_name} ({self.user.username})'
 
     def get_absolute_url(self):
-        from django.conf import settings
-        if settings.DEBUG:
-            return f'/p/{self.user.username}/{self.profile_code}/'
-        return f'https://{self.user.username}.inftycard.cc/{self.profile_code}/'
+        """Return public profile URL: /p/<username>/<code>/"""
+        return f'/p/{self.user.username}/{self.profile_code}/'
 
     @property
     def nfc_url(self):
-        """Full NFC card URL: dev uses localhost, prod uses inftycard.cc."""
-        first = (self.user.first_name or 'user').lower().replace(' ', '')
-        last = (self.user.last_name or 'profile').lower().replace(' ', '')
-        if settings.DEBUG:
-            return f'http://localhost:8000/p/{first}.{last}/{self.profile_code}'
-        return f'https://{first}.{last}.inftycard.cc/{self.profile_code}'
+        """Full NFC card URL using username and profile code."""
+        return f'/p/{self.user.username}/{self.profile_code}/'
 
     @property
     def production_nfc_url(self):
-        """Production NFC URL (always uses real domain, even in dev). Used for QR codes."""
-        first = (self.user.first_name or 'user').lower().replace(' ', '')
-        last = (self.user.last_name or 'profile').lower().replace(' ', '')
-        return f'https://{first}.{last}.inftycard.cc/{self.profile_code}'
+        """Production NFC URL. Used for QR codes."""
+        from django.contrib.sites.models import Site
+        try:
+            domain = Site.objects.get_current().domain
+            return f'https://{domain}/p/{self.user.username}/{self.profile_code}/'
+        except Exception:
+            return f'/p/{self.user.username}/{self.profile_code}/'
 
     @property
     def nfc_subdomain(self):
-        """Just the subdomain portion: firstname.lastname.inftycard.cc"""
-        first = (self.user.first_name or 'user').lower().replace(' ', '')
-        last = (self.user.last_name or 'profile').lower().replace(' ', '')
-        if settings.DEBUG:
-            return f'localhost:8000/p/{first}.{last}'
-        return f'{first}.{last}.inftycard.cc'
+        """Deprecated: kept for backward compatibility. Returns path portion."""
+        return f'/p/{self.user.username}/{self.profile_code}/'
 
     def generate_qr_code(self):
         """Generate a QR code PNG pointing to this profile's NFC URL."""

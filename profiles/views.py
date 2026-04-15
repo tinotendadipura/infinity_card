@@ -129,14 +129,27 @@ def _build_profile_context(profile, subscription_active=True):
     return context
 
 
-def public_profile(request):
-    profile = request.tenant_profile
+def public_profile(request, username, code):
+    """Public profile via simple URL: /p/<username>/<code>/"""
+    from accounts.models import User
+    try:
+        user = User.objects.select_related(
+            'profile__category', 'profile__theme',
+        ).get(username=username)
+    except User.DoesNotExist:
+        raise Http404
+
+    profile = getattr(user, 'profile', None)
     if not profile or not profile.is_published:
         raise Http404
 
-    # Subscription enforcement: show suspended page if expired/missing/cancelled
-    if not request.subscription_active:
-        info = request.subscription_info or check_user_subscription(request.tenant_user)
+    # Verify the code matches
+    if profile.profile_code != code:
+        raise Http404
+
+    # Subscription enforcement
+    info = check_user_subscription(user)
+    if not info['active']:
         return render(request, 'profiles/suspended.html', {
             'profile': profile,
             'reason': info['reason'],
@@ -144,7 +157,7 @@ def public_profile(request):
             'owner_name': info['owner_name'],
         })
 
-    context = _build_profile_context(profile, request.subscription_active)
+    context = _build_profile_context(profile, info['active'])
     return render(request, 'profiles/default.html', context)
 
 
@@ -201,7 +214,7 @@ def preview_profile(request, username):
 
 
 def nfc_profile_redirect(request, name_slug, code):
-    """Resolve NFC card URL (firstname.lastname/code) to the correct profile."""
+    """Redirect legacy NFC card URLs to new canonical URL format."""
     try:
         profile = Profile.objects.select_related(
             'user', 'category', 'theme',
@@ -209,20 +222,9 @@ def nfc_profile_redirect(request, name_slug, code):
     except Profile.DoesNotExist:
         raise Http404
 
-    user = profile.user
-
-    # Subscription enforcement
-    info = check_user_subscription(user)
-    if not info['active']:
-        return render(request, 'profiles/suspended.html', {
-            'profile': profile,
-            'reason': info['reason'],
-            'is_company': info['is_company'],
-            'owner_name': info['owner_name'],
-        })
-
-    context = _build_profile_context(profile, subscription_active=True)
-    return render(request, 'profiles/default.html', context)
+    # Redirect to new canonical URL: /p/<username>/<code>/
+    from django.shortcuts import redirect
+    return redirect('public_profile', username=profile.user.username, code=code)
 
 
 FEATURE_TOGGLES = [
