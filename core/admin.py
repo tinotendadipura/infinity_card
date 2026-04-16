@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from .models import ContactMessage, BlogPost
+from .models import ContactMessage, BlogPost, PartnerLogo, VideoTestimonial
 
 
 @admin.register(ContactMessage)
@@ -54,3 +54,21 @@ class BlogPostAdmin(admin.ModelAdmin):
         if obj.status == 'published' and not obj.published_at:
             obj.published_at = timezone.now()
         super().save_model(request, obj, form, change)
+
+
+@admin.register(PartnerLogo)
+class PartnerLogoAdmin(admin.ModelAdmin):
+    list_display = ('name', 'website_url', 'is_active', 'sort_order', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('name',)
+    list_editable = ('is_active', 'sort_order')
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(VideoTestimonial)
+class VideoTestimonialAdmin(admin.ModelAdmin):
+    list_display = ('name', 'rating', 'is_active', 'is_verified', 'sort_order', 'created_at')
+    list_filter = ('is_active', 'is_verified', 'rating', 'created_at')
+    search_fields = ('name', 'review')
+    list_editable = ('is_active', 'sort_order', 'rating')
+    readonly_fields = ('created_at', 'updated_at')

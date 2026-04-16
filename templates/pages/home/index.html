@@ -817,6 +817,7 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
   <!-- Wraper End -->
 
   <!-- Positive Reviews Section Start -->
+  {% if homepage_testimonials %}
   <section class="review_section row_am">
     <div class="container">
       <div class="positive_inner">
@@ -870,31 +871,6 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
                 </div>
                 <p>{{ testimonial.content|linebreaks }}</p>
               </div>
-              {% empty %}
-              <!-- Fallback testimonials if none in database -->
-              <div class="review_block" data-aos="fade-up" data-aos-duration="1500">
-                <div class="coustomer_info">
-                  <div class="avtar">
-                    <img src="{% static './home/images/review1.png' %}" alt="image">
-                    <div class="text">
-                      <h3>Tendai Moyo</h3>
-                      <span>Founder, Kuza Digital</span>
-                    </div>
-                  </div>
-                  <div class="star">
-                    <span><i class="icofont-star"></i></span>
-                    <span><i class="icofont-star"></i></span>
-                    <span><i class="icofont-star"></i></span>
-                    <span><i class="icofont-star"></i></span>
-                    <span><i class="icofont-star"></i></span>
-                  </div>
-                </div>
-                <p>InfinityCard completely changed how our team networks at events.
-                  We ordered 30 cards for the sales team and the response
-                  from prospects has been incredible. People are genuinely impressed
-                  when we tap and share
-                  our profiles instantly. It's a conversation starter on its own.</p>
-              </div>
               {% endfor %}
             </div>
           </div>
@@ -902,12 +878,14 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
       </div>
     </div>
   </section>
+  {% endif %}
   <!-- Positive Reviews Section End -->
 
   <!-- Page Wraper -->
   <div class="page_wrapper">
 
     <!-- Our Client -->
+    {% if partner_logos %}
     <section class="row_am our_client">
       <div class="container">
         <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
@@ -931,51 +909,11 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
               {% endif %}
             </div>
           </li>
-          {% empty %}
-          <li>
-            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
-              <img src="{% static './home/images/paypal.png' %}" alt="image">
-            </div>
-          </li>
-          <li>
-            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
-              <img src="{% static './home/images/spoty.png' %}" alt="image">
-            </div>
-          </li>
-          <li>
-            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
-              <img src="{% static './home/images/shopboat.png' %}" alt="image">
-            </div>
-          </li>
-          <li>
-            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
-              <img src="{% static './home/images/slack.png' %}" alt="image">
-            </div>
-          </li>
-          <li>
-            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
-              <img src="{% static './home/images/envato.png' %}" alt="image">
-            </div>
-          </li>
-          <li>
-            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
-              <img src="{% static './home/images/jquery.png' %}" alt="image">
-            </div>
-          </li>
-          <li>
-            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
-              <img src="{% static './home/images/woocommerce.png' %}" alt="image">
-            </div>
-          </li>
-          <li>
-            <div class="client_logo" data-aos="fade-up" data-aos-duration="1500">
-              <img src="{% static './home/images/themeforest.png' %}" alt="image">
-            </div>
-          </li>
           {% endfor %}
         </ul>
       </div>
     </section>
+    {% endif %}
 
     <!-- Pricing-Section -->
     <section class="row_am pricing_section white_text" data-aos="fade-in" data-aos-duration="1500">
@@ -1404,6 +1342,7 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
     <!-- App-Download-Section-end -->
 
     <!-- Blog Section Start -->
+    {% if blog_posts %}
     <section class="blog_section row_am">
       <div class="container">
         <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
@@ -1433,44 +1372,10 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
               </div>
             </div>
           </div>
-          {% empty %}
-          <div class="blog_post" data-aos="fade-up" data-aos-duration="1500">
-            <a href="#" class="img">
-              <img src="{% static './home/images/blog1.png' %}" alt="image">
-            </a>
-            <div class="text">
-              <ul class="blog_info">
-                <li>Mar 5, 2026</li>
-                <li>Networking</li>
-                <li>12 Comments</li>
-              </ul>
-              <h3><a href="#">Why NFC business cards are replacing paper cards in 2026</a></h3>
-              <div class="tag_more">
-                <span class="tag">NFC Technology</span>
-                <a href="#">Read more <i class="icofont-arrow-right"></i></a>
-              </div>
-            </div>
-          </div>
-          <div class="blog_post" data-aos="fade-up" data-aos-duration="1500">
-            <a href="#" class="img">
-              <img src="{% static './home/images/blog2.png' %}" alt="image">
-            </a>
-            <div class="text">
-              <ul class="blog_info">
-                <li>Feb 20, 2026</li>
-                <li>Business Growth</li>
-                <li>8 Comments</li>
-              </ul>
-              <h3><a href="#">How small businesses use NFC cards to grow their client base by 40%</a></h3>
-              <div class="tag_more">
-                <span class="tag">Business Growth</span>
-                <a href="#">Read more <i class="icofont-arrow-right"></i></a>
-              </div>
-            </div>
-          </div>
           {% endfor %}
         </div>
       </div>
     </section>
+    {% endif %}
     <!-- Blog Section End -->
 {% endblock %}

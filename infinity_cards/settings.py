@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     # Third-party apps
     'django_countries',
+    'storages',
     # Project apps
     'accounts',
     'profiles',
@@ -295,3 +296,63 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# ── Google Cloud Storage ──
+# Path to service account credentials JSON file (in same folder as requirements.txt)
+GS_CREDENTIALS_PATH = BASE_DIR / 'storageaccess.json'
+
+# Set credentials if file exists
+if GS_CREDENTIALS_PATH.exists():
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = str(GS_CREDENTIALS_PATH)
+
+# GCS Bucket name (set via environment variable in production)
+GS_BUCKET_NAME = os.environ.get('GS_BUCKET_NAME', 'infinitycard-media')
+
+# Use GCS for static and media files in production
+USE_GCS = os.environ.get('USE_GCS', 'False').lower() in ('true', '1', 'yes')
+
+if USE_GCS:
+    # GCS settings
+    GS_DEFAULT_ACL = 'publicRead'
+    GS_FILE_OVERWRITE = True
+    GS_OBJECT_PARAMETERS = {
+        'cache_control': 'max-age=86400',
+    }
+    
+    # Static files via GCS
+    STATIC_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/static/'
+    
+    # Media files via GCS
+    MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/media/'
+    
+    # Modern Django 4.2+ STORAGES configuration
+    STORAGES = {
+        'default': {
+            'BACKEND': 'storages.backends.gcloud.GoogleCloudStorage',
+            'OPTIONS': {
+                'bucket_name': GS_BUCKET_NAME,
+                'location': 'media',
+            }
+        },
+        'staticfiles': {
+            'BACKEND': 'storages.backends.gcloud.GoogleCloudStorage',
+            'OPTIONS': {
+                'bucket_name': GS_BUCKET_NAME,
+                'location': 'static',
+            }
+        },
+    }
+else:
+    # Local file storage (development)
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+            'OPTIONS': {
+                'location': MEDIA_ROOT,
+                'base_url': MEDIA_URL,
+            }
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
