@@ -1342,6 +1342,7 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
     <!-- App-Download-Section-end -->
 
     <!-- Blog Section Start -->
+    {% if blog_posts %}
     <section class="blog_section row_am">
       <div class="container">
         <div class="section_title" data-aos="fade-up" data-aos-duration="1500">
@@ -1371,44 +1372,10 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
               </div>
             </div>
           </div>
-          {% empty %}
-          <div class="blog_post" data-aos="fade-up" data-aos-duration="1500">
-            <a href="#" class="img">
-              <img src="{% static './home/images/blog1.png' %}" alt="image">
-            </a>
-            <div class="text">
-              <ul class="blog_info">
-                <li>Mar 5, 2026</li>
-                <li>Networking</li>
-                <li>12 Comments</li>
-              </ul>
-              <h3><a href="#">Why NFC business cards are replacing paper cards in 2026</a></h3>
-              <div class="tag_more">
-                <span class="tag">NFC Technology</span>
-                <a href="#">Read more <i class="icofont-arrow-right"></i></a>
-              </div>
-            </div>
-          </div>
-          <div class="blog_post" data-aos="fade-up" data-aos-duration="1500">
-            <a href="#" class="img">
-              <img src="{% static './home/images/blog2.png' %}" alt="image">
-            </a>
-            <div class="text">
-              <ul class="blog_info">
-                <li>Feb 20, 2026</li>
-                <li>Business Growth</li>
-                <li>8 Comments</li>
-              </ul>
-              <h3><a href="#">How small businesses use NFC cards to grow their client base by 40%</a></h3>
-              <div class="tag_more">
-                <span class="tag">Business Growth</span>
-                <a href="#">Read more <i class="icofont-arrow-right"></i></a>
-              </div>
-            </div>
-          </div>
           {% endfor %}
         </div>
       </div>
     </section>
+    {% endif %}
     <!-- Blog Section End -->
 {% endblock %}
