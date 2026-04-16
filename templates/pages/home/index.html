@@ -1027,6 +1027,7 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
     <!-- Pricing-Section end -->
 
     <!-- Video Testimonials Section start -->
+    {% if video_testimonials %}
     <section class="row_am interface_section">
       <div class="container-fluid">
         <div class="section_title" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="300">
@@ -1037,8 +1038,7 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
         <!-- Spotlight Video Carousel -->
         <div class="vt-spotlight-wrap" data-aos="fade-up" data-aos-duration="1500">
           <div class="vt-spotlight" id="vtSpotlight">
-            {% if testimonials %}
-            {% for t in testimonials %}
+            {% for t in video_testimonials %}
             <div class="vt-slide" data-video="{{ t.video_display_url }}" data-name="{{ t.name }}" data-review="{{ t.review }}" data-date="{{ t.date_label }}">
               <div class="vt-slide-inner">
                 {% if t.thumbnail %}<img src="{{ t.thumbnail.url }}" alt="{{ t.name }}">{% else %}<img src="{% static './home/images/intrscrn1.png' %}" alt="{{ t.name }}">{% endif %}
@@ -1047,43 +1047,6 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
               </div>
             </div>
             {% endfor %}
-            {% else %}
-            <div class="vt-slide" data-video="" data-name="Daniel M." data-review="The NFC card from InfinityCard has completely transformed how I network. I just tap my card and my entire portfolio is shared instantly. People are always impressed!" data-date="02/2026">
-              <div class="vt-slide-inner">
-                <img src="{% static './home/images/intrscrn1.png' %}" alt="Daniel M.">
-                <div class="vt-play-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 20,12 8,19"/></svg></div>
-                <div class="vt-slide-info"><p class="vt-sname">Daniel M. <span class="vt-vbadge">&#10003;</span></p><span class="vt-sstars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
-              </div>
-            </div>
-            <div class="vt-slide" data-video="" data-name="Sarah K." data-review="We ordered 20 cards for our sales team and the results have been phenomenal. Our conversion rate from networking events jumped by 35%. Best investment we've made this year." data-date="01/2026">
-              <div class="vt-slide-inner">
-                <img src="{% static './home/images/intrscrn2.png' %}" alt="Sarah K.">
-                <div class="vt-play-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 20,12 8,19"/></svg></div>
-                <div class="vt-slide-info"><p class="vt-sname">Sarah K. <span class="vt-vbadge">&#10003;</span></p><span class="vt-sstars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
-              </div>
-            </div>
-            <div class="vt-slide" data-video="" data-name="Tendai C." data-review="As a freelance designer, first impressions are everything. My InfinityCard lets me share my full portfolio, socials, and contact info with one tap. I've landed 3 new clients since getting it!" data-date="03/2026">
-              <div class="vt-slide-inner">
-                <img src="{% static './home/images/intrscrn3.png' %}" alt="Tendai C.">
-                <div class="vt-play-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 20,12 8,19"/></svg></div>
-                <div class="vt-slide-info"><p class="vt-sname">Tendai C. <span class="vt-vbadge">&#10003;</span></p><span class="vt-sstars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
-              </div>
-            </div>
-            <div class="vt-slide" data-video="" data-name="Andrea L." data-review="I run a real estate agency and all my agents now carry InfinityCards. Clients love the modern, professional touch. We stand out from every other agent at open houses." data-date="02/2026">
-              <div class="vt-slide-inner">
-                <img src="{% static './home/images/intrscrn4.png' %}" alt="Andrea L.">
-                <div class="vt-play-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 20,12 8,19"/></svg></div>
-                <div class="vt-slide-info"><p class="vt-sname">Andrea L. <span class="vt-vbadge">&#10003;</span></p><span class="vt-sstars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
-              </div>
-            </div>
-            <div class="vt-slide" data-video="" data-name="Chloe B." data-review="Switched from paper cards to InfinityCard and never looked back. It's eco-friendly, always up-to-date, and the tap-to-share feature blows everyone's mind at conferences." data-date="01/2026">
-              <div class="vt-slide-inner">
-                <img src="{% static './home/images/intrscrn5.png' %}" alt="Chloe B.">
-                <div class="vt-play-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 20,12 8,19"/></svg></div>
-                <div class="vt-slide-info"><p class="vt-sname">Chloe B. <span class="vt-vbadge">&#10003;</span></p><span class="vt-sstars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
-              </div>
-            </div>
-            {% endif %}
           </div>
           <button class="vt-nav-btn vt-nav-prev" id="vtPrev" aria-label="Previous">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="14 4 6 10 14 16"/></svg>
@@ -1285,6 +1248,7 @@ footer .download_side .app_btn li a:hover{background:rgba(167,139,250,.2)!import
       document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.classList.contains('active'))closeModal()});
     })();
     </script>
+    {% endif %}
     <!-- Video Testimonials Section end -->
 
     <!-- App-Download-Section-Start -->
