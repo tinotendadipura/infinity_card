@@ -296,7 +296,7 @@ if GS_CREDENTIALS_PATH.exists():
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = str(GS_CREDENTIALS_PATH)
 
 # GCS Bucket name (set via environment variable in production)
-GS_BUCKET_NAME = os.environ.get('GS_BUCKET_NAME', 'infinitycard-media')
+GS_BUCKET_NAME = os.environ.get('GS_BUCKET_NAME', 'infinitycard-bucket')
 
 # Use GCS for static and media files in production
 USE_GCS = os.environ.get('USE_GCS', 'False').lower() in ('true', '1', 'yes')
