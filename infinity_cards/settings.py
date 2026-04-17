@@ -28,12 +28,28 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-a&h!(m1%__%5#%4i(d!=(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
+# Production safety: If USE_GCS is enabled, force DEBUG to False
+# This ensures production deployments always use custom error pages
+if os.environ.get('USE_GCS', '').lower() in ('true', '1', 'yes'):
+    DEBUG = False
+
 # Allow all hosts in development, restrict in production via env var
 _allowed_hosts = os.environ.get('ALLOWED_HOSTS', '')
 if _allowed_hosts:
     ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts.split(',') if h.strip()]
 else:
     ALLOWED_HOSTS = ['*'] if DEBUG else []
+
+# Production security settings
+if not DEBUG:
+    # Ensure custom error handlers are used
+    # These are defined in urls.py as:
+    # handler404 = 'core.views.error_404'
+    # handler500 = 'core.views.error_500'
+    # handler403 = 'core.views.error_403'
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() in ('true', '1', 'yes')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Application definition
