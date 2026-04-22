@@ -1,0 +1,49 @@
+{
+	"folders": [
+		{
+			"path": "../accounts"
+		},
+		{
+			"path": "../analytics"
+		},
+		{
+			"path": "../cards"
+		},
+		{
+			"path": "../categories"
+		},
+		{
+			"path": "../companies"
+		},
+		{
+			"path": "../core"
+		},
+		{
+			"path": "../docs"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../media"
+		},
+		{
+			"path": "../profiles"
+		},
+		{
+			"path": "../static"
+		},
+		{
+			"path": "../subscriptions"
+		},
+		{
+			"path": "../templates"
+		},
+		{
+			"path": "../themes"
+		},
+		{
+			"path": "../venv"
+		}
+	]
+}

@@ -106,12 +106,7 @@ class Profile(models.Model):
     @property
     def production_nfc_url(self):
         """Production NFC URL. Used for QR codes."""
-        from django.contrib.sites.models import Site
-        try:
-            domain = Site.objects.get_current().domain
-            return f'https://{domain}/p/{self.user.username}/{self.profile_code}/'
-        except Exception:
-            return f'/p/{self.user.username}/{self.profile_code}/'
+        return f'https://inftycard.cc/p/{self.user.username}/{self.profile_code}/'
 
     @property
     def nfc_subdomain(self):

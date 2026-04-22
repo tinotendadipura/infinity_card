@@ -48,3 +48,9 @@ Thumbs.db
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Google Cloud credentials
+storageaccess.json
+
+storageaccess.json
+storageaccess.json
