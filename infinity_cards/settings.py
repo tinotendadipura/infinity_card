@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-a&h!(m1%__%5#%4i(d!=(#*yf@s3dg!0r0fxy75tbgo0l5w$aj')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
 # Production safety: If USE_GCS is enabled, force DEBUG to False
 # This ensures production deployments always use custom error pages

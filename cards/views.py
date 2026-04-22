@@ -425,10 +425,10 @@ def tap_redirect(request, card_uid):
         user_agent=request.META.get('HTTP_USER_AGENT', ''),
     )
 
-    username = card.profile.user.username
     if settings.DEBUG:
-        return redirect(f'http://localhost:8000/')
-    return redirect(f'https://{username}.infinitycard.app')
+        # In dev, redirect to the local profile path
+        return redirect(card.profile.get_absolute_url())
+    return redirect(card.profile.production_nfc_url)
 
 
 # ──────────────────────────────────────────────
