@@ -207,13 +207,13 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 # ── Email ──
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.inftycard.cc'
+EMAIL_HOST = 'mail.appnotify.info'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'no-reply@inftycard.cc'
-EMAIL_HOST_PASSWORD = 'pass2026'
-DEFAULT_FROM_EMAIL = 'InfinityCard <no-reply@inftycard.cc>'
-SERVER_EMAIL = 'no-reply@inftycard.cc'
+EMAIL_HOST_USER = 'no-reply-infinitycard@appnotify.info'
+EMAIL_HOST_PASSWORD = '@shinobi97'
+DEFAULT_FROM_EMAIL = 'InfinityCard <no-reply-infinitycard@appnotify.info>'
+SERVER_EMAIL = 'no-reply-infinitycard@appnotify.info'
 
 ACCOUNT_ADAPTER = 'accounts.adapter.CustomAccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'accounts.adapter.CustomSocialAccountAdapter'
